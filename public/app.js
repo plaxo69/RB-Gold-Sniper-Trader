@@ -1,683 +1,277 @@
-// API Base URL
-const API_BASE = '/api';
+const API_BASE = "/api";
 
-// Estado global
 const state = {
-  isRunning: false,
-  mt5Connected: false,
-  priceData: [],
-  trades: [],
-  currentTimeframe: '1m',
-  totalProfit: 0,
-  wins: 0,
-  total: 0,
-  chart: null,
-  chartInstance: null,
-  soundEnabled: true,
-  notificationsEnabled: true
+  running: false,
+  timeframe: "1m",
+  candles: {},
+  lastSignalKey: null,
+  lastRefresh: null,
+  history: JSON.parse(localStorage.getItem("rb_sniper_history") || "[]"),
+  chart: null
 };
 
-// ============= AUDIO NOTIFICATIONS =============
-function playSound(type = 'signal') {
-  if (!state.soundEnabled) return;
-  
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-  
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-  
-  if (type === 'signal') {
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
-  } else if (type === 'profit') {
-    oscillator.frequency.value = 1000;
-    oscillator.type = 'triangle';
-    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.2);
+function $(id) { return document.getElementById(id); }
+
+function notify(message, type = "info") {
+  const n = document.createElement("div");
+  n.textContent = message;
+  n.style.cssText = "position:fixed;right:20px;top:20px;z-index:9999;padding:12px 16px;border-radius:8px;color:#fff;font-weight:700;background:" +
+    (type === "success" ? "#198754" : type === "error" ? "#dc3545" : "#0d6efd");
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 2800);
+}
+
+function sma(a, p) {
+  if (a.length < p) return null;
+  return a.slice(-p).reduce((x,y)=>x+y,0) / p;
+}
+
+function ema(a, p) {
+  if (!a.length) return null;
+  const k = 2 / (p + 1);
+  let e = a[0];
+  for (let i=1;i<a.length;i++) e = a[i]*k + e*(1-k);
+  return e;
+}
+
+function rsi(a, p=14) {
+  if (a.length < p+1) return 50;
+  let gain=0, loss=0;
+  for(let i=a.length-p;i<a.length;i++) {
+    const d=a[i]-a[i-1];
+    if(d>=0) gain+=d; else loss-=d;
   }
+  if(loss===0) return 100;
+  const rs=(gain/p)/(loss/p);
+  return 100-(100/(1+rs));
 }
 
-function requestNotificationPermission() {
-  if (!state.notificationsEnabled || !('Notification' in window)) return;
-  
-  if (Notification.permission === 'granted') return;
-  if (Notification.permission !== 'denied') {
-    Notification.requestPermission();
+function atr(c, p=14) {
+  if(c.length < p+1) return 0;
+  const tr=[];
+  for(let i=1;i<c.length;i++) {
+    tr.push(Math.max(c[i].high-c[i].low, Math.abs(c[i].high-c[i-1].close), Math.abs(c[i].low-c[i-1].close)));
   }
+  return sma(tr,p) || 0;
 }
 
-function sendDesktopNotification(title, options = {}) {
-  if (!state.notificationsEnabled || Notification.permission !== 'granted') return;
-  
-  new Notification(title, {
-    icon: '🎯',
-    badge: '🎯',
-    ...options
-  });
-}
-
-// ============= GRÁFICO AVANÇADO =============
-function initChart() {
-  const ctx = document.getElementById('priceChart').getContext('2d');
-  state.chartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'Preço XAUUSD',
-          data: [],
-          borderColor: '#302b63',
-          backgroundColor: 'rgba(48, 43, 99, 0.1)',
-          borderWidth: 2.5,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 1,
-          pointBackgroundColor: '#302b63',
-          pointBorderColor: '#302b63',
-        },
-        {
-          label: 'MA20',
-          data: [],
-          borderColor: '#ffc107',
-          borderWidth: 1.5,
-          fill: false,
-          tension: 0.4,
-          pointRadius: 0,
-          borderDash: [5, 5]
-        },
-        {
-          label: 'MA50',
-          data: [],
-          borderColor: '#17a2b8',
-          borderWidth: 1.5,
-          fill: false,
-          tension: 0.4,
-          pointRadius: 0,
-          borderDash: [8, 4]
-        },
-        {
-          label: 'Suporte',
-          data: [],
-          borderColor: '#dc3545',
-          borderWidth: 1,
-          fill: false,
-          tension: 0.4,
-          pointRadius: 0,
-          borderDash: [10, 5]
-        },
-        {
-          label: 'Resistência',
-          data: [],
-          borderColor: '#28a745',
-          borderWidth: 1,
-          fill: false,
-          tension: 0.4,
-          pointRadius: 0,
-          borderDash: [10, 5]
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false,
-      },
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: {
-            padding: 15,
-            font: { size: 11 },
-            usePointStyle: true,
-            boxWidth: 8
-          }
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: false,
-          ticks: {
-            callback: function(value) {
-              return value.toFixed(2);
-            }
-          }
-        }
-      }
-    }
-  });
-}
-
-function updateChart(priceData) {
-  if (!state.chartInstance) return;
-
-  const labels = priceData.map((_, i) => i);
-  const prices = priceData.map(d => d.price);
-  const ma20 = calculateMA(prices, 20);
-  const ma50 = calculateMA(prices, 50);
-  const support = Math.min(...prices.slice(-20));
-  const resistance = Math.max(...prices.slice(-20));
-
-  state.chartInstance.data.labels = labels;
-  state.chartInstance.data.datasets[0].data = prices;
-  state.chartInstance.data.datasets[1].data = ma20;
-  state.chartInstance.data.datasets[2].data = ma50;
-  state.chartInstance.data.datasets[3].data = Array(prices.length).fill(support);
-  state.chartInstance.data.datasets[4].data = Array(prices.length).fill(resistance);
-  state.chartInstance.update('none');
-}
-
-// ============= CÁLCULOS TÉCNICOS AVANÇADOS =============
-function calculateMA(prices, period) {
-  return prices.map((_, i) => {
-    if (i < period - 1) return null;
-    const sum = prices.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
-    return sum / period;
-  });
-}
-
-function calculateRSI(prices, period = 14) {
-  if (prices.length < period) return 50;
-
-  let gains = 0, losses = 0;
-  
-  for (let i = 1; i < period; i++) {
-    const diff = prices[i] - prices[i - 1];
-    if (diff > 0) gains += diff;
-    else losses += Math.abs(diff);
-  }
-
-  let avgGain = gains / period;
-  let avgLoss = losses / period;
-
-  for (let i = period; i < prices.length; i++) {
-    const diff = prices[i] - prices[i - 1];
-    if (diff > 0) {
-      avgGain = (avgGain * (period - 1) + diff) / period;
-      avgLoss = (avgLoss * (period - 1)) / period;
-    } else {
-      avgGain = (avgGain * (period - 1)) / period;
-      avgLoss = (avgLoss * (period - 1) + Math.abs(diff)) / period;
-    }
-  }
-
-  const rs = avgGain / avgLoss || 0;
-  const rsi = 100 - (100 / (1 + rs));
-  return rsi;
-}
-
-function calculateMACD(prices) {
-  if (prices.length < 26) return { macd: 0, signal: 0, histogram: 0 };
-  const ema12 = calculateEMA(prices, 12);
-  const ema26 = calculateEMA(prices, 26);
-  const macdLine = ema12[ema12.length - 1] - ema26[ema26.length - 1];
-  
-  // Signal line (EMA 9 do MACD)
-  const macdValues = [];
-  for (let i = 25; i < prices.length; i++) {
-    const e12 = calculateEMA(prices.slice(0, i + 1), 12);
-    const e26 = calculateEMA(prices.slice(0, i + 1), 26);
-    macdValues.push(e12[e12.length - 1] - e26[e26.length - 1]);
-  }
-  const signalLine = calculateEMA(macdValues, 9)[macdValues.length - 1] || macdLine;
-  const histogram = macdLine - signalLine;
-  
-  return { macd: macdLine, signal: signalLine, histogram: histogram };
-}
-
-function calculateEMA(prices, period) {
-  const k = 2 / (period + 1);
-  const ema = [prices[0]];
-  
-  for (let i = 1; i < prices.length; i++) {
-    ema.push(prices[i] * k + ema[i - 1] * (1 - k));
-  }
-  
-  return ema;
-}
-
-function calculateBollingerBands(prices, period = 20, stdDevMultiplier = 2) {
-  if (prices.length < period) return { upper: 0, middle: 0, lower: 0 };
-  
-  const ma = prices.slice(-period).reduce((a, b) => a + b) / period;
-  const variance = prices.slice(-period).reduce((sum, p) => sum + Math.pow(p - ma, 2), 0) / period;
-  const stdDev = Math.sqrt(variance);
-  
+function structure(c) {
+  const recent=c.slice(-20);
   return {
-    upper: ma + (stdDev * stdDevMultiplier),
-    middle: ma,
-    lower: ma - (stdDev * stdDevMultiplier)
+    support: Math.min(...recent.map(x=>x.low)),
+    resistance: Math.max(...recent.map(x=>x.high))
   };
 }
 
-function calculateStochastic(prices, period = 14, smoothK = 3, smoothD = 3) {
-  if (prices.length < period) return { k: 50, d: 50 };
-  
-  const highest = Math.max(...prices.slice(-period));
-  const lowest = Math.min(...prices.slice(-period));
-  const lastPrice = prices[prices.length - 1];
-  
-  const rawK = ((lastPrice - lowest) / (highest - lowest)) * 100;
-  const k = isFinite(rawK) ? rawK : 50;
-  
-  return { k: k, d: 50 };
+function trend(c) {
+  const closes=c.map(x=>x.close);
+  const e20=ema(closes,20), e50=ema(closes,50);
+  const last=closes[closes.length-1];
+  if(last>e20 && e20>e50) return "ALTA";
+  if(last<e20 && e20<e50) return "BAIXA";
+  return "LATERAL";
 }
 
-function calculateATR(prices, period = 14) {
-  if (prices.length < period) return 0;
-  
-  let trSum = 0;
-  for (let i = 1; i < prices.length; i++) {
-    const tr = prices[i] - prices[i - 1];
-    trSum += Math.abs(tr);
-  }
-  
-  return trSum / prices.length;
-}
+function analyze(main, m5, m15, h1) {
+  const c=main;
+  if(c.length<60 || m5.length<30 || m15.length<30 || h1.length<30) return null;
 
-// ============= ALGORITMO SNIPER ULTRA AVANÇADO =============
-function detectSniperSignal() {
-  if (state.priceData.length < 50) return null;
+  const closes=c.map(x=>x.close);
+  const last=closes.at(-1);
+  const r=rsi(closes);
+  const e20=ema(closes,20), e50=ema(closes,50), e200=ema(closes,200);
+  const a=atr(c);
+  const s=structure(c);
+  const t5=trend(m5), t15=trend(m15), t1=trend(h1);
+  const prev=closes.at(-2);
 
-  const prices = state.priceData.map(d => d.price);
-  const lastPrice = prices[prices.length - 1];
-  const previousPrice = prices[prices.length - 2];
-  const priceChange3 = prices[prices.length - 4] || lastPrice;
-  
-  // Indicadores
-  const rsi = calculateRSI(prices);
-  const macdData = calculateMACD(prices);
-  const bb = calculateBollingerBands(prices);
-  const stoch = calculateStochastic(prices);
-  const atr = calculateATR(prices);
-  const ma20 = calculateMA(prices, 20)[prices.length - 1] || lastPrice;
-  const ma50 = calculateMA(prices, 50)[prices.length - 1] || lastPrice;
-  const ma200 = calculateMA(prices, 200)[prices.length - 1] || lastPrice;
+  let buy=0, sell=0;
+  const buyReasons=[], sellReasons=[];
 
-  // Atualizar display de indicadores
-  document.getElementById('rsi-value').textContent = rsi.toFixed(2);
-  document.getElementById('macd-value').textContent = macdData.histogram.toFixed(4);
-  document.getElementById('bb-upper').textContent = bb.upper.toFixed(2);
-  document.getElementById('bb-lower').textContent = bb.lower.toFixed(2);
-  document.getElementById('ma20').textContent = ma20.toFixed(2);
+  if(last>e20) { buy++; buyReasons.push("Preço acima EMA20"); }
+  if(last>e50) { buy++; buyReasons.push("Preço acima EMA50"); }
+  if(e200 && last>e200) { buy++; buyReasons.push("Preço acima EMA200"); }
+  if(t5==="ALTA") { buy++; buyReasons.push("M5 alta"); }
+  if(t15==="ALTA") { buy++; buyReasons.push("M15 alta"); }
+  if(t1==="ALTA") { buy++; buyReasons.push("H1 alta"); }
+  if(r>45 && r<68) { buy++; buyReasons.push("RSI favorável"); }
+  if(last>s.resistance && prev<=s.resistance) { buy+=2; buyReasons.push("Breakout"); }
 
-  // Detectar tendência
-  const trend = lastPrice > ma50 ? 'ALTA' : lastPrice < ma50 ? 'BAIXA' : 'LATERAL';
-  document.getElementById('trend-value').textContent = trend;
+  if(last<e20) { sell++; sellReasons.push("Preço abaixo EMA20"); }
+  if(last<e50) { sell++; sellReasons.push("Preço abaixo EMA50"); }
+  if(e200 && last<e200) { sell++; sellReasons.push("Preço abaixo EMA200"); }
+  if(t5==="BAIXA") { sell++; sellReasons.push("M5 baixa"); }
+  if(t15==="BAIXA") { sell++; sellReasons.push("M15 baixa"); }
+  if(t1==="BAIXA") { sell++; sellReasons.push("H1 baixa"); }
+  if(r>32 && r<55) { sell++; sellReasons.push("RSI favorável"); }
+  if(last<s.support && prev>=s.support) { sell+=2; sellReasons.push("Breakdown"); }
 
-  let signal = null;
+  let type="WAIT", score=Math.max(buy,sell), reasons=[];
+  if(buy>=7 && buy>sell+1) { type="BUY"; reasons=buyReasons; }
+  else if(sell>=7 && sell>buy+1) { type="SELL"; reasons=sellReasons; }
 
-  // ===== SINAL SNIPER: BUY (Compra Agressiva) =====
-  const buyConditions = {
-    rsiSobrevendido: rsi < 30,
-    precoAbaixoMA20: lastPrice < ma20,
-    precoAbaixoSuporteForte: lastPrice <= bb.lower,
-    macdiNegativo: macdData.histogram < -0.0001,
-    quedaRecente: previousPrice > lastPrice,
-    tendenciaRecuperacao: priceChange3 < lastPrice,
-    stochBaixo: stoch.k < 20,
-    bbLowerCross: previousPrice > bb.lower && lastPrice <= bb.lower // Cruzamento BB
-  };
-
-  const buyScore = Object.values(buyConditions).filter(Boolean).length;
-
-  if (buyScore >= 5) {
-    const strength = Math.min(100, 50 + (buyScore * 8));
-    signal = {
-      type: 'BUY',
-      price: lastPrice,
-      reason: `Convergência Bullish (${buyScore}/8)`,
-      rsi,
-      strength: strength,
-      takeProfit: lastPrice * 1.0030,  // +0.30%
-      stopLoss: lastPrice * 0.9970,    // -0.30%
-      scoreBreakdown: buyConditions,
-      confidence: ((buyScore / 8) * 100).toFixed(0)
-    };
-    
-    playSound('signal');
-    sendDesktopNotification('🎯 SINAL BUY DETECTADO', {
-      body: `Preço: $${lastPrice.toFixed(2)} | Força: ${strength.toFixed(0)}%`,
-      tag: 'buy-signal'
-    });
-  }
-
-  // ===== SINAL SNIPER: SELL (Venda Agressiva) =====
-  const sellConditions = {
-    rsiSobrecomprado: rsi > 70,
-    precoAcimaMA20: lastPrice > ma20,
-    precoAcimaResistencia: lastPrice >= bb.upper,
-    macdiPositivo: macdData.histogram > 0.0001,
-    subidaRecente: previousPrice < lastPrice,
-    tendenciaQueda: priceChange3 > lastPrice,
-    stochAlto: stoch.k > 80,
-    bbUpperCross: previousPrice < bb.upper && lastPrice >= bb.upper // Cruzamento BB
-  };
-
-  const sellScore = Object.values(sellConditions).filter(Boolean).length;
-
-  if (sellScore >= 5 && !signal) {
-    const strength = Math.min(100, 50 + (sellScore * 8));
-    signal = {
-      type: 'SELL',
-      price: lastPrice,
-      reason: `Convergência Bearish (${sellScore}/8)`,
-      rsi,
-      strength: strength,
-      takeProfit: lastPrice * 0.9970,  // -0.30%
-      stopLoss: lastPrice * 1.0030,    // +0.30%
-      scoreBreakdown: sellConditions,
-      confidence: ((sellScore / 8) * 100).toFixed(0)
-    };
-    
-    playSound('signal');
-    sendDesktopNotification('🎯 SINAL SELL DETECTADO', {
-      body: `Preço: $${lastPrice.toFixed(2)} | Força: ${strength.toFixed(0)}%`,
-      tag: 'sell-signal'
-    });
-  }
-
-  return signal;
-}
-
-// ============= GERENCIAMENTO DE TRADES =============
-function executeTrade(signal) {
-  const trade = {
-    id: Date.now(),
-    type: signal.type,
-    entryPrice: signal.price,
-    entry: new Date().toLocaleTimeString('pt-PT'),
-    tp: signal.takeProfit,
-    sl: signal.stopLoss,
-    rsi: signal.rsi.toFixed(2),
-    strength: signal.strength.toFixed(0),
-    confidence: signal.confidence,
-    status: 'ABERTO',
-    profit: 0,
-    profitPercent: 0,
-    reason: signal.reason,
-    exitReason: null
-  };
-
-  // Simular fechamento com probabilidade realista
-  const closeTimeout = setTimeout(() => {
-    const random = Math.random();
-    let closePrice;
-    
-    if (signal.type === 'BUY') {
-      if (random < 0.55) {
-        closePrice = signal.takeProfit; // 55% TP
-        trade.exitReason = 'TP Atingido';
-      } else if (random < 0.30) {
-        closePrice = signal.stopLoss; // 30% SL
-        trade.exitReason = 'SL Atingido';
-      } else {
-        closePrice = signal.price + (Math.random() - 0.5) * 10;
-        trade.exitReason = 'Saída Manual';
-      }
+  const confidence = type==="WAIT" ? 0 : Math.min(95, 60 + Math.round((score-7)*8));
+  let sl=null,tp=null,rr=null;
+  if(type!=="WAIT" && a>0) {
+    if(type==="BUY") {
+      sl=Math.min(s.support-a*0.25,last-a*1.25);
+      const risk=last-sl;
+      tp=last+Math.max(risk*2.0,a*2.0);
+      rr=(tp-last)/risk;
     } else {
-      if (random < 0.55) {
-        closePrice = signal.takeProfit; // 55% TP
-        trade.exitReason = 'TP Atingido';
-      } else if (random < 0.30) {
-        closePrice = signal.stopLoss; // 30% SL
-        trade.exitReason = 'SL Atingido';
-      } else {
-        closePrice = signal.price - (Math.random() - 0.5) * 10;
-        trade.exitReason = 'Saída Manual';
-      }
+      sl=Math.max(s.resistance+a*0.25,last+a*1.25);
+      const risk=sl-last;
+      tp=last-Math.max(risk*2.0,a*2.0);
+      rr=(last-tp)/risk;
     }
-
-    trade.exitPrice = closePrice;
-    trade.exit = new Date().toLocaleTimeString('pt-PT');
-    trade.profit = signal.type === 'BUY'
-      ? closePrice - signal.price
-      : signal.price - closePrice;
-    trade.profitPercent = (trade.profit / signal.price * 100).toFixed(4);
-
-    trade.status = trade.profit > 0.5 ? 'LUCRO' : trade.profit < -0.5 ? 'PREJUÍZO' : 'BREAKEVEN';
-
-    if (trade.status === 'LUCRO') {
-      state.wins++;
-      playSound('profit');
-      sendDesktopNotification('💰 LUCRO!', {
-        body: `${trade.type}: +$${trade.profit.toFixed(2)} (+${trade.profitPercent}%)`,
-        tag: 'profit'
-      });
-    }
-    state.total++;
-    state.totalProfit += trade.profit;
-
-    updateTradeCard(trade);
-    updateStats();
-  }, 3000);
-
-  trade.closeTimeout = closeTimeout;
-  state.trades.unshift(trade);
-  addTradeCard(trade);
-  updateStats();
-
-  return trade;
-}
-
-function addTradeCard(trade) {
-  const container = document.getElementById('trades-container');
-  
-  if (container.querySelector('.no-trades')) {
-    container.innerHTML = '';
   }
 
-  const card = document.createElement('div');
-  card.className = `trade-card ${trade.type.toLowerCase()}`;
-  card.id = `trade-${trade.id}`;
-  
-  card.innerHTML = `
+  return {
+    type, score, confidence, price:last, rsi:r, ema20:e20, ema50:e50, ema200:e200,
+    atr:a, support:s.support, resistance:s.resistance, trend5:t5, trend15:t15, trend1:t1,
+    sl,tp,rr,reasons,source:"candles reais"
+  };
+}
+
+async function fetchTF(tf) {
+  const r=await fetch(`${API_BASE}/market?timeframe=${encodeURIComponent(tf)}&t=${Date.now()}`);
+  if(!r.ok) throw new Error((await r.json()).error || `Erro ${r.status}`);
+  const d=await r.json();
+  state.candles[tf]=d;
+  return d;
+}
+
+function updateUI(d) {
+  const c=d.candles, last=c.at(-1);
+  $("current-price").textContent=`$${last.close.toFixed(2)}`;
+  $("current-bid").textContent=`$${last.close.toFixed(2)}`;
+  $("current-ask").textContent=`$${last.close.toFixed(2)}`;
+  $("current-spread").textContent=(last.high-last.low).toFixed(2);
+  $("server-info").textContent=`${d.source} • ${d.timeframe} • ${new Date(d.timestamp).toLocaleTimeString("pt-PT")}`;
+
+  if(state.chart) {
+    state.chart.data.labels=c.map(x=>new Date(x.timestamp).toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"}));
+    state.chart.data.datasets[0].data=c.map(x=>x.close);
+    state.chart.data.datasets[1].data=c.map((_,i)=>i>=19?sma(c.slice(0,i+1).map(x=>x.close),20):null);
+    state.chart.update("none");
+  }
+}
+
+function saveSignal(a) {
+  if(a.type==="WAIT") return;
+  const key=`${a.type}-${a.price.toFixed(2)}-${state.timeframe}-${new Date().toISOString().slice(0,16)}`;
+  if(key===state.lastSignalKey) return;
+  state.lastSignalKey=key;
+
+  const item={...a,id:Date.now(),time:new Date().toISOString(),status:"ALERTA"};
+  state.history.unshift(item);
+  state.history=state.history.slice(0,100);
+  localStorage.setItem("rb_sniper_history",JSON.stringify(state.history));
+  renderHistory();
+  notify(`🎯 ${a.type} ${a.confidence}% — entrada ${a.price.toFixed(2)}`,"success");
+
+  fetch(`${API_BASE}/signals/create`,{
+    method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(item)
+  }).catch(()=>{});
+}
+
+function renderAnalysis(a) {
+  if(!a) return;
+  $("rsi-value").textContent=a.rsi.toFixed(2);
+  $("macd-value").textContent=`ATR ${a.atr.toFixed(2)}`;
+  $("bb-upper").textContent=a.resistance.toFixed(2);
+  $("bb-lower").textContent=a.support.toFixed(2);
+  $("ma20").textContent=a.ema20.toFixed(2);
+  $("trend-value").textContent=`M5 ${a.trend5} / M15 ${a.trend15}`;
+
+  const box=$("trades-container");
+  if(a.type==="WAIT") {
+    box.innerHTML=`<div class="no-trades">⏳ WAIT — sem convergência Sniper suficiente. Última análise: ${a.price.toFixed(2)}</div>`;
+    return;
+  }
+  box.innerHTML=`<div class="trade-card ${a.type.toLowerCase()}">
     <div class="trade-info">
-      <div class="trade-type ${trade.type.toLowerCase()}">
-        ${trade.type === 'BUY' ? '📈 COMPRA' : '📉 VENDA'} - ${trade.strength}% | Confiança: ${trade.confidence}%
-      </div>
+      <div class="trade-type ${a.type.toLowerCase()}">${a.type==="BUY"?"📈 COMPRA":"📉 VENDA"} — ${a.confidence}%</div>
       <div class="trade-details">
-        <span>⏰ ${trade.entry}</span>
-        <span>💰 $${trade.entryPrice.toFixed(2)}</span>
-        <span>📊 RSI: ${trade.rsi}</span>
-        <span>🎯 TP: $${trade.tp.toFixed(2)}</span>
-        <span>🛑 SL: $${trade.sl.toFixed(2)}</span>
+        <span>💰 Entrada: $${a.price.toFixed(2)}</span>
+        <span>🎯 TP: $${a.tp.toFixed(2)}</span>
+        <span>🛑 SL: $${a.sl.toFixed(2)}</span>
+        <span>RR: 1:${a.rr.toFixed(2)}</span>
+        <span>RSI: ${a.rsi.toFixed(1)}</span>
       </div>
-      <div class="trade-reason" style="font-size: 0.7rem; color: #888; margin-top: 4px;">
-        ${trade.reason}
-      </div>
+      <div class="trade-reason">${a.reasons.join(" • ")}</div>
     </div>
-    <div class="trade-profit ${trade.status === 'ABERTO' ? 'neutral' : (trade.profit > 0 ? 'positive' : 'negative')}">
-      ${trade.status === 'ABERTO' ? '⏳ Aberto' : `$${trade.profit.toFixed(4)}`}
-    </div>
-  `;
-
-  container.insertBefore(card, container.firstChild);
+    <div class="trade-profit neutral">ALERTA<br>MANUAL</div>
+  </div>`;
 }
 
-function updateTradeCard(trade) {
-  const card = document.getElementById(`trade-${trade.id}`);
-  if (!card) return;
-
-  const profitDiv = card.querySelector('.trade-profit');
-  profitDiv.className = `trade-profit ${trade.profit > 0 ? 'positive' : 'negative'}`;
-  profitDiv.innerHTML = `
-    <strong>$${trade.profit.toFixed(4)}</strong><br>
-    <small>${trade.profitPercent > 0 ? '+' : ''}${trade.profitPercent}%</small><br>
-    <small>${trade.exitReason}</small>
-  `;
+function renderHistory() {
+  const total=state.history.length;
+  const wins=state.history.filter(x=>x.result==="WIN").length;
+  $("total-trades").textContent=total;
+  $("total-profit").textContent="—";
+  $("win-rate").textContent=total?`${((wins/total)*100).toFixed(1)}%`:"—";
 }
 
-function updateStats() {
-  document.getElementById('total-trades').textContent = state.total;
-  
-  const profitColor = state.totalProfit > 0 ? '#28a745' : state.totalProfit < 0 ? '#dc3545' : '#666';
-  const profitSpan = document.getElementById('total-profit');
-  profitSpan.textContent = state.totalProfit > 0
-    ? `+$${state.totalProfit.toFixed(2)}`
-    : `$${state.totalProfit.toFixed(2)}`;
-  profitSpan.style.color = profitColor;
-  
-  const winRate = state.total > 0
-    ? ((state.wins / state.total) * 100).toFixed(1)
-    : '0';
-  document.getElementById('win-rate').textContent = winRate + '%';
+async function refresh() {
+  try {
+    const [m1,m5,m15,h1]=await Promise.all(["1m","5m","15m","1h"].map(fetchTF));
+    updateUI(state.candles[state.timeframe] || m1);
+    const a=analyze(m1.candles,m5.candles,m15.candles,h1.candles);
+    renderAnalysis(a);
+    saveSignal(a);
+    state.lastRefresh=new Date();
+    $("status").textContent=`🟢 Mercado real • ${state.lastRefresh.toLocaleTimeString("pt-PT")}`;
+    $("status").className="status-indicator online";
+    renderHistory();
+  } catch(e) {
+    $("status").textContent="🔴 Mercado indisponível";
+    $("status").className="status-indicator offline";
+    $("server-info").textContent=e.message;
+  }
 }
 
-function clearTrades() {
-  state.trades.forEach(trade => {
-    if (trade.closeTimeout) clearTimeout(trade.closeTimeout);
+function initChart() {
+  const ctx=$("priceChart").getContext("2d");
+  state.chart=new Chart(ctx,{
+    type:"line",
+    data:{labels:[],datasets:[
+      {label:"XAUUSD/GC=F",data:[],borderWidth:2,pointRadius:0,tension:.2},
+      {label:"EMA20",data:[],borderWidth:1,pointRadius:0,borderDash:[5,5]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:"top"}}}
   });
-  state.trades = [];
-  state.totalProfit = 0;
-  state.wins = 0;
-  state.total = 0;
-  document.getElementById('trades-container').innerHTML = '<div class="no-trades">Aguardando sinais...</div>';
-  updateStats();
-  showNotification('🗑️ Histórico limpo!', 'success');
-}
-
-// ============= GERAÇÃO DE DADOS REALISTA =============
-function generateRealisticPrice() {
-  const lastPrice = state.priceData.length > 0
-    ? state.priceData[state.priceData.length - 1].price
-    : 2000;
-
-  const trend = Math.sin(Date.now() / 15000) * 0.3;
-  const volatility = (Math.random() - 0.5) * 12;
-  const change = volatility + trend;
-  const newPrice = Math.max(1950, Math.min(2050, lastPrice + change));
-  const spread = 2.5;
-
-  return {
-    price: parseFloat(newPrice.toFixed(2)),
-    bid: parseFloat((newPrice - spread / 2).toFixed(2)),
-    ask: parseFloat((newPrice + spread / 2).toFixed(2)),
-    timestamp: new Date()
-  };
-}
-
-function updateMarketData() {
-  const data = generateRealisticPrice();
-  state.priceData.push(data);
-  
-  if (state.priceData.length > 300) {
-    state.priceData.shift();
-  }
-
-  document.getElementById('current-price').textContent = `$${data.price.toFixed(2)}`;
-  document.getElementById('current-bid').textContent = `$${data.bid.toFixed(2)}`;
-  document.getElementById('current-ask').textContent = `$${data.ask.toFixed(2)}`;
-  document.getElementById('current-spread').textContent = `${(data.ask - data.bid).toFixed(2)} pips`;
-
-  updateChart(state.priceData);
-
-  if (state.isRunning && state.priceData.length >= 50) {
-    const signal = detectSniperSignal();
-    if (signal) {
-      executeTrade(signal);
-    }
-  }
-}
-
-// ============= CONTROLES =============
-async function checkStatus() {
-  try {
-    const response = await fetch(`${API_BASE}/health`);
-    const data = await response.json();
-    updateStatus(true, `✅ Online - ${new Date(data.timestamp).toLocaleTimeString('pt-PT')}`);
-  } catch (error) {
-    updateStatus(false, '❌ Offline');
-  }
-}
-
-function updateStatus(online, message) {
-  const statusDiv = document.getElementById('status');
-  statusDiv.textContent = message;
-  statusDiv.className = `status-indicator ${online ? 'online' : 'offline'}`;
-  
-  const info = document.getElementById('server-info');
-  info.textContent = online ? '✅ Pronto' : '❌ Indisponível';
-}
-
-async function connectMT5() {
-  try {
-    const response = await fetch(`${API_BASE}/mt5/connect`, { method: 'POST' });
-    const data = await response.json();
-    state.mt5Connected = true;
-    showNotification('🔗 MT5 Conectado!', 'success');
-  } catch (error) {
-    showNotification('❌ Erro ao conectar MT5', 'error');
-  }
 }
 
 function startSniper() {
-  if (!state.mt5Connected) {
-    showNotification('⚠️ Conecte ao MT5 primeiro!', 'error');
-    return;
-  }
-  
-  requestNotificationPermission();
-  state.isRunning = true;
-  showNotification('🎯 Sniper ATIVADO!', 'success');
+  state.running=true;
+  notify("🎯 Monitor Sniper ativo — execução manual no MT5","success");
+  refresh();
 }
-
 function stopSniper() {
-  state.isRunning = false;
-  showNotification('⏹️ Sniper PARADO', 'error');
+  state.running=false;
+  notify("⏹ Monitor parado","info");
 }
-
+function clearTrades() {
+  state.history=[];
+  localStorage.removeItem("rb_sniper_history");
+  renderHistory();
+  $("trades-container").innerHTML='<div class="no-trades">Histórico local limpo.</div>';
+}
+function connectMT5() {
+  notify("ℹ️ MT5 não é ligado à app. Execute manualmente.","info");
+}
 function changeTimeframe(tf) {
-  state.currentTimeframe = tf;
-  
-  document.querySelectorAll('.timeframe-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
-  event.target.classList.add('active');
-  
-  showNotification(`📊 Timeframe: ${tf}`, 'success');
+  state.timeframe=tf;
+  document.querySelectorAll(".timeframe-btn").forEach(b=>b.classList.toggle("active",b.dataset.tf===tf));
+  if(state.candles[tf]) updateUI(state.candles[tf]);
 }
 
-// ============= NOTIFICAÇÕES =============
-function showNotification(message, type) {
-  const notification = document.createElement('div');
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    border-radius: 8px;
-    color: white;
-    font-weight: bold;
-    z-index: 1000;
-    animation: slideIn 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  `;
-  notification.textContent = message;
-  notification.style.backgroundColor = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8';
-  
-  document.body.appendChild(notification);
-  setTimeout(() => notification.remove(), 3000);
-}
-
-// ============= INICIALIZAÇÃO =============
-window.addEventListener('load', () => {
-  checkStatus();
+window.addEventListener("load",()=>{
   initChart();
-  requestNotificationPermission();
-  
-  setInterval(updateMarketData, 500);
-  setInterval(checkStatus, 30000);
-  
-  showNotification('🚀 RB Gold Sniper Trader INICIADO!', 'success');
+  renderHistory();
+  document.querySelectorAll(".timeframe-btn").forEach(b=>b.addEventListener("click",()=>changeTimeframe(b.dataset.tf)));
+  $("status").textContent="🟡 A obter mercado real…";
+  refresh();
+  setInterval(refresh,60000);
 });
