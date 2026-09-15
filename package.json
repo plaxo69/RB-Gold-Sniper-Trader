@@ -1,7 +1,7 @@
 {
   "name": "rb-gold-sniper-trader",
   "version": "2.0.0",
-  "description": "RB Gold Sniper - análise real de ouro com execução manual no MT5",
+  "description": "RB Gold Sniper - análise de ouro com dados da corretora OANDA",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
