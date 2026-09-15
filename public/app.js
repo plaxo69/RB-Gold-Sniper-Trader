@@ -184,7 +184,7 @@ async function refresh() {
     const a=analyze(m1.candles,m5.candles,m15.candles,h1.candles);
     renderAnalysis(a); if(state.running) saveSignal(a);
     state.lastRefresh=new Date();
-    $("status").textContent=`🟢 Mercado real • ${state.lastRefresh.toLocaleTimeString("pt-PT")}`;
+    $("status").textContent=`🟢 OANDA disponível • ${state.lastRefresh.toLocaleTimeString("pt-PT")}`;
     $("status").className="status-indicator online";
     renderHistory();
   } catch(e) {
@@ -197,7 +197,7 @@ async function refresh() {
 function startSniper() {
   if(state.running) return;
   state.running=true;
-  notify("🎯 Monitor Sniper ativo — execução manual no MT5","success");
+  notify("🎯 Monitor Sniper ativo — apenas alertas, sem execução de ordens","success");
   refresh();
   clearInterval(state.refreshTimer);
   state.refreshTimer=setInterval(()=>{if(state.running) refresh();},60000);
@@ -224,7 +224,7 @@ function changeTimeframe(tf) {
 window.addEventListener("load",()=>{
   renderHistory();
   document.querySelectorAll(".timeframe-btn").forEach(b=>b.addEventListener("click",()=>changeTimeframe(b.dataset.tf)));
-  $("status").textContent="🟡 A obter mercado real…";
+  $("status").textContent="🟡 A ligar à OANDA…";
   initTradingView();
   refresh();
 });

@@ -245,7 +245,7 @@ function initChart() {
 
 function startSniper() {
   state.running=true;
-  notify("🎯 Monitor Sniper ativo — execução manual no MT5","success");
+  notify("🎯 Monitor Sniper ativo — apenas alertas, sem execução de ordens","success");
   refresh();
 }
 function stopSniper() {
@@ -257,9 +257,6 @@ function clearTrades() {
   localStorage.removeItem("rb_sniper_history");
   renderHistory();
   $("trades-container").innerHTML='<div class="no-trades">Histórico local limpo.</div>';
-}
-function connectMT5() {
-  notify("ℹ️ MT5 não é ligado à app. Execute manualmente.","info");
 }
 function changeTimeframe(tf) {
   state.timeframe=tf;
