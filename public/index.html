@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RB Gold Sniper Trader - Vantage</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 RB Gold Sniper Trader</h1>
+            <p>Trading Bot para Vantage - Ouro</p>
+        </header>
+
+        <main>
+            <div class="status-box">
+                <h2>Status da Aplicação</h2>
+                <div id="status" class="status-indicator offline">Desligado</div>
+                <button onclick="checkStatus()">Verificar Status</button>
+            </div>
+
+            <div class="control-box">
+                <h2>Controles</h2>
+                <div class="controls">
+                    <button onclick="connectMT5()" class="btn btn-primary">Conectar MT5</button>
+                    <button onclick="startTrading()" class="btn btn-success">Iniciar Trading</button>
+                    <button onclick="stopTrading()" class="btn btn-danger">Parar Trading</button>
+                    <button onclick="getAnalysis()" class="btn btn-info">Analisar Mercado</button>
+                </div>
+            </div>
+
+            <div class="data-box">
+                <h2>Dados em Tempo Real</h2>
+                <div id="data" class="data-container">
+                    <p>Aguardando dados...</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 RB Gold Sniper Trader. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
