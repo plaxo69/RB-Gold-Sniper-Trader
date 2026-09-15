@@ -45,50 +45,19 @@ function aggregate3m(candles) {
   return out.map(({ bucket, ...c }) => c);
 }
 
-async function yahoo(timeframe) {
-  const cfg = TF[timeframe] || TF["1m"];
-  const r = await axios.get("https://query1.finance.yahoo.com/v8/finance/chart/GC=F", {
-    params: { interval: cfg.interval, range: cfg.range, events: "history" },
-    timeout: 8000,
-    headers: { "User-Agent": "Mozilla/5.0 RB-Gold-Sniper" }
-  });
-  const x = r.data?.chart?.result?.[0];
-  if (!x) throw new Error("Yahoo não devolveu dados");
-
-  const q = x.indicators?.quote?.[0] || {};
-  let candles = (x.timestamp || []).map((t, i) => ({
-    timestamp: new Date(t * 1000).toISOString(),
-    open: Number(q.open?.[i]),
-    high: Number(q.high?.[i]),
-    low: Number(q.low?.[i]),
-    close: Number(q.close?.[i]),
-    volume: Number(q.volume?.[i] || 0)
-  })).filter(c => Number.isFinite(c.close));
-
-  if (timeframe === "3m") candles = aggregate3m(candles);
-  candles = candles.slice(-300);
-  if (!candles.length) throw new Error("Sem candles válidos");
-
-  return {
-    source: "Yahoo Finance GC=F",
-    symbol: "GC=F",
-    timeframe,
-    candles,
-    last: candles[candles.length - 1]
-  };
-}
-
 async function oanda(timeframe) {
   const token = process.env.OANDA_API_TOKEN;
-  if (!token) return null;
+  if (!token) throw new Error("Configure OANDA_API_TOKEN para obter dados da corretora OANDA.");
 
   const instrument = process.env.OANDA_INSTRUMENT || "XAU_USD";
+  const environment = process.env.OANDA_ENVIRONMENT === "live" ? "live" : "practice";
+  const baseUrl = environment === "live" ? "https://api-fxtrade.oanda.com" : "https://api-fxpractice.oanda.com";
   const granularity = { "1m": "M1", "3m": "M1", "5m": "M5", "15m": "M15", "1h": "H1" }[timeframe] || "M1";
 
   const r = await axios.get(
-    `https://api-fxtrade.oanda.com/v3/instruments/${instrument}/candles`,
+    `${baseUrl}/v3/instruments/${instrument}/candles`,
     {
-      params: { granularity, count: 500, price: "M" },
+      params: { granularity, count: 500, price: "MBA" },
       timeout: 8000,
       headers: { Authorization: `Bearer ${token}` }
     }
@@ -102,15 +71,17 @@ async function oanda(timeframe) {
       high: Number(c.mid.h),
       low: Number(c.mid.l),
       close: Number(c.mid.c),
+      bid: Number(c.bid?.c),
+      ask: Number(c.ask?.c),
       volume: Number(c.volume || 0)
-    }));
+    })).filter(c => Number.isFinite(c.open) && Number.isFinite(c.high) && Number.isFinite(c.low) && Number.isFinite(c.close));
 
   if (timeframe === "3m") candles = aggregate3m(candles);
   candles = candles.slice(-300);
   if (!candles.length) throw new Error("OANDA não devolveu candles");
 
   return {
-    source: `OANDA ${instrument}`,
+    source: `OANDA ${instrument} (${environment})`,
     symbol: instrument,
     timeframe,
     candles,
@@ -120,14 +91,7 @@ async function oanda(timeframe) {
 
 async function market(timeframe) {
   if (!TF[timeframe]) throw new Error("Timeframe inválido");
-  if (process.env.OANDA_API_TOKEN) {
-    try {
-      return await oanda(timeframe);
-    } catch (e) {
-      console.error("OANDA falhou:", e.message);
-    }
-  }
-  return yahoo(timeframe);
+  return oanda(timeframe);
 }
 
 app.get("/api/health", async (_req, res) => {
@@ -139,7 +103,7 @@ app.get("/api/health", async (_req, res) => {
       source: m.source,
       symbol: m.symbol,
       aiEnabled: false,
-      mode: "MANUAL",
+      mode: "ALERTAS",
       timestamp: new Date().toISOString()
     });
   } catch (e) {
@@ -147,7 +111,7 @@ app.get("/api/health", async (_req, res) => {
       status: "DEGRADED",
       marketConnected: false,
       aiEnabled: false,
-      mode: "MANUAL",
+      mode: "ALERTAS",
       error: e.message
     });
   }
@@ -158,6 +122,8 @@ app.get("/api/market", async (req, res) => {
   try {
     const m = await market(timeframe);
     const p = m.last.close;
+    const bid = Number.isFinite(m.last.bid) ? m.last.bid : null;
+    const ask = Number.isFinite(m.last.ask) ? m.last.ask : null;
     res.json({
       success: true,
       source: m.source,
@@ -165,9 +131,9 @@ app.get("/api/market", async (req, res) => {
       timeframe,
       candles: m.candles,
       price: p,
-      bid: p,
-      ask: p,
-      spread: m.last.high - m.last.low,
+      bid,
+      ask,
+      spread: bid !== null && ask !== null ? ask - bid : null,
       timestamp: m.last.timestamp
     });
   } catch (e) {
@@ -179,32 +145,13 @@ app.get("/api/market", async (req, res) => {
   }
 });
 
-/* Execução SEMPRE manual no MT5. Não há ordens automáticas. */
-app.get("/api/mt5/status", (_req, res) => {
-  res.json({
-    connected: false,
-    trading: false,
-    mode: "MANUAL",
-    message: "A app analisa. A execução é feita manualmente no MT5."
-  });
-});
-
-app.post("/api/mt5/connect", (_req, res) => {
-  res.json({
-    success: true,
-    connected: false,
-    mode: "MANUAL",
-    message: "Não existe execução automática. Use o MT5 manualmente."
-  });
-});
-
 app.get("/api/settings", (_req, res) => {
   res.json({
     success: true,
     settings: {
-      mode: "MANUAL",
+      mode: "ALERTAS",
       aiEnabled: false,
-      source: process.env.OANDA_API_TOKEN ? "OANDA" : "Yahoo Finance GC=F"
+      source: "OANDA"
     }
   });
 });

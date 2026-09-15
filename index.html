@@ -3,20 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RB Gold Sniper — LIVE</title>
-<link rel="stylesheet" href="styles.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>RB Gold Sniper — OANDA</title>
+<link rel="stylesheet" href="public/styles.css">
+<script src="https://s3.tradingview.com/tv.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
 <header>
 <h1>🎯 RB Gold Sniper Trader</h1>
-<p>Análise REAL do ouro • sem IA • execução manual no MT5</p>
+<p>Análise do ouro com dados da corretora OANDA • sem execução de ordens</p>
 </header>
-
 <div class="chart-section">
 <div class="chart-header">
-<h2>📈 Ouro em tempo real</h2>
+<h2>📈 XAU/USD — gráfico OANDA no TradingView</h2>
 <div class="chart-controls">
 <button class="timeframe-btn active" data-tf="1m">1M</button>
 <button class="timeframe-btn" data-tf="3m">3M</button>
@@ -25,67 +24,19 @@
 <button class="timeframe-btn" data-tf="1h">1H</button>
 </div>
 </div>
-<canvas id="priceChart"></canvas>
+<div id="tradingview-chart" style="width:100%;height:520px;"></div>
 </div>
-
 <div class="data-wrapper">
 <section class="control-section">
-<div class="status-box">
-<h3>⚡ Estado</h3>
-<div id="status" class="status-indicator offline">A iniciar…</div>
-<div id="server-info" class="info-text"></div>
-<button onclick="refresh()" class="btn btn-primary full-width">Atualizar agora</button>
-</div>
-<div class="control-box">
-<h3>🎯 Monitor</h3>
-<div class="controls">
-<button onclick="startSniper()" class="btn btn-success">▶ Iniciar</button>
-<button onclick="stopSniper()" class="btn btn-danger">⏹ Parar</button>
-<button onclick="clearTrades()" class="btn btn-warning">🔄 Limpar histórico</button>
-</div>
-</div>
-<div class="market-box">
-<h3>💹 Preço</h3>
-<div class="price-display">
-<div class="price-value" id="current-price">$—</div>
-<div class="price-details">
-<span>Bid: <strong id="current-bid">—</strong></span>
-<span>Ask: <strong id="current-ask">—</strong></span>
-<span>Range: <strong id="current-spread">—</strong></span>
-</div>
-</div>
-</div>
+<div class="status-box"><h3>⚡ Estado</h3><div id="status" class="status-indicator offline">A iniciar…</div><div id="server-info" class="info-text"></div><button onclick="refresh()" class="btn btn-primary full-width">Atualizar agora</button></div>
+<div class="control-box"><h3>🎯 Monitor</h3><div class="controls"><button onclick="startSniper()" class="btn btn-success">▶ Iniciar</button><button onclick="stopSniper()" class="btn btn-danger">⏹ Parar</button><button onclick="clearTrades()" class="btn btn-warning">🔄 Limpar histórico</button></div></div>
+<div class="market-box"><h3>💹 Preço OANDA</h3><div class="price-display"><div class="price-value" id="current-price">$—</div><div class="price-details"><span>Bid: <strong id="current-bid">—</strong></span><span>Ask: <strong id="current-ask">—</strong></span><span>Spread: <strong id="current-spread">—</strong></span></div></div></div>
 </section>
-
-<section class="indicators-section">
-<h3>📊 Indicadores</h3>
-<div class="indicators-compact">
-<div class="ind-item"><span>RSI:</span><strong id="rsi-value">—</strong></div>
-<div class="ind-item"><span>ATR:</span><strong id="macd-value">—</strong></div>
-<div class="ind-item"><span>Resistência:</span><strong id="bb-upper">—</strong></div>
-<div class="ind-item"><span>Suporte:</span><strong id="bb-lower">—</strong></div>
-<div class="ind-item"><span>EMA20:</span><strong id="ma20">—</strong></div>
-<div class="ind-item"><span>Tendência:</span><strong id="trend-value">—</strong></div>
+<section class="indicators-section"><h3>📊 Indicadores</h3><div class="indicators-compact"><div class="ind-item"><span>RSI:</span><strong id="rsi-value">—</strong></div><div class="ind-item"><span>ATR:</span><strong id="macd-value">—</strong></div><div class="ind-item"><span>Resistência:</span><strong id="bb-upper">—</strong></div><div class="ind-item"><span>Suporte:</span><strong id="bb-lower">—</strong></div><div class="ind-item"><span>EMA20:</span><strong id="ma20">—</strong></div><div class="ind-item"><span>Tendência:</span><strong id="trend-value">—</strong></div></div></section>
+<section class="trades-section"><div class="trades-header-compact"><h3>🎯 Sinal Sniper</h3><div class="trades-stats-compact"><span>Alertas: <strong id="total-trades">0</strong></span><span>Resultado: <strong id="total-profit">—</strong></span><span>Win rate: <strong id="win-rate">—</strong></span></div></div><div id="trades-container" class="trades-container-compact"><div class="no-trades">A obter dados da OANDA…</div></div></section>
 </div>
-</section>
-
-<section class="trades-section">
-<div class="trades-header-compact">
-<h3>🎯 Sinal Sniper</h3>
-<div class="trades-stats-compact">
-<span>Alertas: <strong id="total-trades">0</strong></span>
-<span>Resultado: <strong id="total-profit">—</strong></span>
-<span>Win rate: <strong id="win-rate">—</strong></span>
+<footer><p>RB Gold Sniper • Dados OANDA • Visualização TradingView • Sem execução automática • Sem IA</p></footer>
 </div>
-</div>
-<div id="trades-container" class="trades-container-compact">
-<div class="no-trades">A obter dados reais…</div>
-</div>
-</section>
-</div>
-
-<footer><p>RB Gold Sniper • Dados reais • Sem execução automática • Sem IA</p></footer>
-</div>
-<script src="app.js"></script>
+<script src="public/app.js"></script>
 </body>
 </html>

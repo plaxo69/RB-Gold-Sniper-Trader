@@ -13,6 +13,10 @@ const state = {
 
 function $(id) { return document.getElementById(id); }
 
+function formatPrice(value) {
+  return Number.isFinite(value) ? `$${value.toFixed(2)}` : "—";
+}
+
 function notify(message, type = "info") {
   const n = document.createElement("div");
   n.textContent = message;
@@ -139,10 +143,10 @@ function changeTradingViewInterval(tf) {
 
 function updateUI(d) {
   const c=d.candles,last=c.at(-1);
-  $("current-price").textContent=`$${last.close.toFixed(2)}`;
-  $("current-bid").textContent=`$${last.close.toFixed(2)}`;
-  $("current-ask").textContent=`$${last.close.toFixed(2)}`;
-  $("current-spread").textContent=(last.high-last.low).toFixed(2);
+  $("current-price").textContent=formatPrice(last.close);
+  $("current-bid").textContent=formatPrice(d.bid);
+  $("current-ask").textContent=formatPrice(d.ask);
+  $("current-spread").textContent=Number.isFinite(d.spread) ? d.spread.toFixed(3) : "—";
   $("server-info").textContent=`${d.source} • ${d.timeframe} • ${new Date(d.timestamp).toLocaleTimeString("pt-PT")}`;
 }
 
@@ -184,7 +188,7 @@ async function refresh() {
     const a=analyze(m1.candles,m5.candles,m15.candles,h1.candles);
     renderAnalysis(a); if(state.running) saveSignal(a);
     state.lastRefresh=new Date();
-    $("status").textContent=`🟢 Mercado real • ${state.lastRefresh.toLocaleTimeString("pt-PT")}`;
+    $("status").textContent=`🟢 OANDA disponível • ${state.lastRefresh.toLocaleTimeString("pt-PT")}`;
     $("status").className="status-indicator online";
     renderHistory();
   } catch(e) {
@@ -197,7 +201,7 @@ async function refresh() {
 function startSniper() {
   if(state.running) return;
   state.running=true;
-  notify("🎯 Monitor Sniper ativo — execução manual no MT5","success");
+  notify("🎯 Monitor Sniper ativo — apenas alertas, sem execução de ordens","success");
   refresh();
   clearInterval(state.refreshTimer);
   state.refreshTimer=setInterval(()=>{if(state.running) refresh();},60000);
@@ -224,7 +228,7 @@ function changeTimeframe(tf) {
 window.addEventListener("load",()=>{
   renderHistory();
   document.querySelectorAll(".timeframe-btn").forEach(b=>b.addEventListener("click",()=>changeTimeframe(b.dataset.tf)));
-  $("status").textContent="🟡 A obter mercado real…";
+  $("status").textContent="🟡 A ligar à OANDA…";
   initTradingView();
   refresh();
 });
