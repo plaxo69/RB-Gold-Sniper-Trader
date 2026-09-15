@@ -1,392 +1,225 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const axios = require("axios");
+require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ============= MIDDLEWARE =============
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.static(path.join(__dirname, "public")));
 
-// ============= ESTADO EM MEMÓRIA (Placeholder para DB) =============
-const memoryDB = {
-  trades: [],
-  sessions: [],
-  signals: [],
-  settings: {
-    riskPerTrade: 2,
-    maxDailyLoss: 100,
-    soundEnabled: true,
-    notificationsEnabled: true
-  }
+const TF = {
+  "1m": { interval: "1m", range: "1d" },
+  "3m": { interval: "1m", range: "1d" },
+  "5m": { interval: "5m", range: "5d" },
+  "15m": { interval: "15m", range: "1mo" },
+  "1h": { interval: "60m", range: "3mo" }
 };
 
-// ============= HEALTH CHECK =============
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    timestamp: new Date(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage().heapUsed / 1024 / 1024,
-    trades: memoryDB.trades.length,
-    signals: memoryDB.signals.length
-  });
-});
+function aggregate3m(candles) {
+  const out = [];
+  for (const c of candles) {
+    const bucket = Math.floor(new Date(c.timestamp).getTime() / 180000) * 180000;
+    let g = out[out.length - 1];
+    if (!g || g.bucket !== bucket) {
+      g = {
+        bucket,
+        timestamp: new Date(bucket).toISOString(),
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close,
+        volume: c.volume || 0
+      };
+      out.push(g);
+    } else {
+      g.high = Math.max(g.high, c.high);
+      g.low = Math.min(g.low, c.low);
+      g.close = c.close;
+      g.volume += c.volume || 0;
+    }
+  }
+  return out.map(({ bucket, ...c }) => c);
+}
 
-// ============= SESSÃO =============
-app.post('/api/session/start', (req, res) => {
-  const session = {
-    id: Date.now(),
-    startTime: new Date(),
-    trades: [],
-    profit: 0,
-    status: 'RUNNING'
+async function yahoo(timeframe) {
+  const cfg = TF[timeframe] || TF["1m"];
+  const r = await axios.get("https://query1.finance.yahoo.com/v8/finance/chart/GC=F", {
+    params: { interval: cfg.interval, range: cfg.range, events: "history" },
+    timeout: 8000,
+    headers: { "User-Agent": "Mozilla/5.0 RB-Gold-Sniper" }
+  });
+  const x = r.data?.chart?.result?.[0];
+  if (!x) throw new Error("Yahoo não devolveu dados");
+
+  const q = x.indicators?.quote?.[0] || {};
+  let candles = (x.timestamp || []).map((t, i) => ({
+    timestamp: new Date(t * 1000).toISOString(),
+    open: Number(q.open?.[i]),
+    high: Number(q.high?.[i]),
+    low: Number(q.low?.[i]),
+    close: Number(q.close?.[i]),
+    volume: Number(q.volume?.[i] || 0)
+  })).filter(c => Number.isFinite(c.close));
+
+  if (timeframe === "3m") candles = aggregate3m(candles);
+  candles = candles.slice(-300);
+  if (!candles.length) throw new Error("Sem candles válidos");
+
+  return {
+    source: "Yahoo Finance GC=F",
+    symbol: "GC=F",
+    timeframe,
+    candles,
+    last: candles[candles.length - 1]
   };
-  
-  memoryDB.sessions.push(session);
-  
-  res.json({
-    success: true,
-    sessionId: session.id,
-    message: 'Sessão iniciada'
-  });
-});
+}
 
-app.get('/api/session/:sessionId', (req, res) => {
-  const session = memoryDB.sessions.find(s => s.id === parseInt(req.params.sessionId));
-  
-  if (!session) {
-    return res.status(404).json({ error: 'Sessão não encontrada' });
-  }
-  
-  res.json(session);
-});
+async function oanda(timeframe) {
+  const token = process.env.OANDA_API_TOKEN;
+  if (!token) return null;
 
-// ============= MT5 API =============
-app.post('/api/mt5/connect', (req, res) => {
-  try {
-    // TODO: Implementar integração real com MT5 via WebSocket ou Python bridge
-    // Por enquanto, simular conexão
-    
-    res.json({
-      success: true,
-      message: 'Conectado ao MetaTrader 5',
-      status: 'connected',
-      server: process.env.MT5_SERVER || 'Vantage Demo',
-      timestamp: new Date()
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Erro ao conectar ao MT5',
-      error: error.message
-    });
-  }
-});
+  const instrument = process.env.OANDA_INSTRUMENT || "XAU_USD";
+  const granularity = { "1m": "M1", "3m": "M1", "5m": "M5", "15m": "M15", "1h": "H1" }[timeframe] || "M1";
 
-app.get('/api/mt5/status', (req, res) => {
-  res.json({
-    connected: true,
-    trading: true,
-    server: process.env.MT5_SERVER || 'Vantage Demo',
-    account: process.env.MT5_LOGIN || 'DEMO',
-    balance: 10000,
-    equity: 10000,
-    profit: memoryDB.trades.reduce((sum, t) => sum + (t.profit || 0), 0),
-    timestamp: new Date()
-  });
-});
+  const r = await axios.get(
+    `https://api-fxtrade.oanda.com/v3/instruments/${instrument}/candles`,
+    {
+      params: { granularity, count: 500, price: "M" },
+      timeout: 8000,
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
 
-app.post('/api/mt5/trade', (req, res) => {
-  const { action, symbol, volume, price, type } = req.body;
-  
-  try {
-    const trade = {
-      id: Date.now(),
-      action,
-      symbol: symbol || 'XAUUSD',
-      volume: volume || 1,
-      openPrice: price || 2000,
-      type: type || 'BUY',
-      openTime: new Date(),
-      status: 'OPEN',
-      profit: 0
-    };
-    
-    memoryDB.trades.push(trade);
-    
-    res.json({
-      success: true,
-      message: `Trade ${action} executado`,
-      tradeId: trade.id,
-      trade: trade
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Erro ao executar trade',
-      error: error.message
-    });
-  }
-});
+  let candles = (r.data?.candles || [])
+    .filter(c => c.complete !== false && c.mid)
+    .map(c => ({
+      timestamp: c.time,
+      open: Number(c.mid.o),
+      high: Number(c.mid.h),
+      low: Number(c.mid.l),
+      close: Number(c.mid.c),
+      volume: Number(c.volume || 0)
+    }));
 
-app.post('/api/mt5/close-trade', (req, res) => {
-  const { tradeId, closePrice } = req.body;
-  
-  const trade = memoryDB.trades.find(t => t.id === parseInt(tradeId));
-  
-  if (!trade) {
-    return res.status(404).json({ error: 'Trade não encontrado' });
-  }
-  
-  trade.closePrice = closePrice;
-  trade.closeTime = new Date();
-  trade.status = 'CLOSED';
-  
-  if (trade.type === 'BUY') {
-    trade.profit = closePrice - trade.openPrice;
-  } else {
-    trade.profit = trade.openPrice - closePrice;
-  }
-  
-  res.json({
-    success: true,
-    message: 'Trade fechado',
-    trade: trade,
-    profit: trade.profit.toFixed(2)
-  });
-});
+  if (timeframe === "3m") candles = aggregate3m(candles);
+  candles = candles.slice(-300);
+  if (!candles.length) throw new Error("OANDA não devolveu candles");
 
-// ============= ANÁLISE DE MERCADO =============
-app.get('/api/analyze/market', (req, res) => {
-  try {
-    const marketData = {
-      symbol: 'XAUUSD',
-      price: (2000 + Math.random() * 100).toFixed(2),
-      bid: (1999 + Math.random() * 100).toFixed(2),
-      ask: (2001 + Math.random() * 100).toFixed(2),
-      change24h: (Math.random() * 20 - 10).toFixed(2),
-      changePercent: (Math.random() * 2 - 1).toFixed(2),
-      high24h: (2050 + Math.random() * 50).toFixed(2),
-      low24h: (1950 + Math.random() * 50).toFixed(2),
-      volume: Math.floor(Math.random() * 1000000),
-      timestamp: new Date()
-    };
-    
-    const analysis = {
-      data: marketData,
-      signals: {
-        trend: Math.random() > 0.5 ? 'BULLISH' : 'BEARISH',
-        strength: (Math.random() * 100).toFixed(2) + '%',
-        support: (1950 + Math.random() * 50).toFixed(2),
-        resistance: (2050 + Math.random() * 50).toFixed(2)
-      },
-      recommendation: Math.random() > 0.5 ? 'BUY' : 'SELL',
-      confidence: (Math.random() * 100).toFixed(2) + '%',
-      riskLevel: ['LOW', 'MEDIUM', 'HIGH'][Math.floor(Math.random() * 3)],
-      timestamp: new Date()
-    };
-
-    res.json({
-      success: true,
-      analysis
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Erro ao analisar mercado',
-      error: error.message
-    });
-  }
-});
-
-app.get('/api/analyze/indicators', (req, res) => {
-  try {
-    const indicators = {
-      rsi: (Math.random() * 100).toFixed(2),
-      macd: (Math.random() * 100 - 50).toFixed(2),
-      bollingerBands: {
-        upper: (2050).toFixed(2),
-        middle: (2000).toFixed(2),
-        lower: (1950).toFixed(2)
-      },
-      movingAverage: {
-        ma20: (2000 + Math.random() * 50).toFixed(2),
-        ma50: (1995 + Math.random() * 50).toFixed(2),
-        ma200: (1990 + Math.random() * 50).toFixed(2)
-      },
-      stochastic: {
-        k: (Math.random() * 100).toFixed(2),
-        d: (Math.random() * 100).toFixed(2)
-      },
-      atr: (Math.random() * 50).toFixed(2),
-      timestamp: new Date()
-    };
-
-    res.json({
-      success: true,
-      indicators
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Erro ao obter indicadores',
-      error: error.message
-    });
-  }
-});
-
-// ============= SINAIS SNIPER =============
-app.post('/api/signals/create', (req, res) => {
-  const { type, price, reason, strength, confidence } = req.body;
-  
-  const signal = {
-    id: Date.now(),
-    type,
-    price,
-    reason,
-    strength,
-    confidence,
-    createdAt: new Date(),
-    status: 'PENDING'
+  return {
+    source: `OANDA ${instrument}`,
+    symbol: instrument,
+    timeframe,
+    candles,
+    last: candles[candles.length - 1]
   };
-  
-  memoryDB.signals.push(signal);
-  
-  res.json({
-    success: true,
-    signal: signal
-  });
-});
+}
 
-app.get('/api/signals', (req, res) => {
-  const { limit = 50, status } = req.query;
-  
-  let signals = memoryDB.signals;
-  
-  if (status) {
-    signals = signals.filter(s => s.status === status);
+async function market(timeframe) {
+  if (!TF[timeframe]) throw new Error("Timeframe inválido");
+  if (process.env.OANDA_API_TOKEN) {
+    try {
+      return await oanda(timeframe);
+    } catch (e) {
+      console.error("OANDA falhou:", e.message);
+    }
   }
-  
-  res.json({
-    success: true,
-    count: signals.length,
-    signals: signals.slice(-limit)
-  });
-});
+  return yahoo(timeframe);
+}
 
-app.put('/api/signals/:signalId', (req, res) => {
-  const signal = memoryDB.signals.find(s => s.id === parseInt(req.params.signalId));
-  
-  if (!signal) {
-    return res.status(404).json({ error: 'Sinal não encontrado' });
+app.get("/api/health", async (_req, res) => {
+  try {
+    const m = await market("1m");
+    res.json({
+      status: "OK",
+      marketConnected: true,
+      source: m.source,
+      symbol: m.symbol,
+      aiEnabled: false,
+      mode: "MANUAL",
+      timestamp: new Date().toISOString()
+    });
+  } catch (e) {
+    res.status(503).json({
+      status: "DEGRADED",
+      marketConnected: false,
+      aiEnabled: false,
+      mode: "MANUAL",
+      error: e.message
+    });
   }
-  
-  Object.assign(signal, req.body);
-  
-  res.json({
-    success: true,
-    signal: signal
-  });
 });
 
-// ============= HISTÓRICO DE TRADES =============
-app.get('/api/trades', (req, res) => {
-  const { status, limit = 100 } = req.query;
-  
-  let trades = memoryDB.trades;
-  
-  if (status) {
-    trades = trades.filter(t => t.status === status);
+app.get("/api/market", async (req, res) => {
+  const timeframe = String(req.query.timeframe || "1m");
+  try {
+    const m = await market(timeframe);
+    const p = m.last.close;
+    res.json({
+      success: true,
+      source: m.source,
+      symbol: m.symbol,
+      timeframe,
+      candles: m.candles,
+      price: p,
+      bid: p,
+      ask: p,
+      spread: m.last.high - m.last.low,
+      timestamp: m.last.timestamp
+    });
+  } catch (e) {
+    res.status(502).json({
+      success: false,
+      error: "Não foi possível obter dados reais do ouro.",
+      details: e.message
+    });
   }
-  
+});
+
+/* Execução SEMPRE manual no MT5. Não há ordens automáticas. */
+app.get("/api/mt5/status", (_req, res) => {
   res.json({
-    success: true,
-    count: trades.length,
-    totalProfit: trades.reduce((sum, t) => sum + (t.profit || 0), 0),
-    trades: trades.slice(-limit)
+    connected: false,
+    trading: false,
+    mode: "MANUAL",
+    message: "A app analisa. A execução é feita manualmente no MT5."
   });
 });
 
-app.get('/api/trades/stats', (req, res) => {
-  const closedTrades = memoryDB.trades.filter(t => t.status === 'CLOSED');
-  const winTrades = closedTrades.filter(t => t.profit > 0);
-  const totalProfit = closedTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
-  
+app.post("/api/mt5/connect", (_req, res) => {
   res.json({
     success: true,
-    stats: {
-      totalTrades: memoryDB.trades.length,
-      closedTrades: closedTrades.length,
-      openTrades: memoryDB.trades.filter(t => t.status === 'OPEN').length,
-      winTrades: winTrades.length,
-      lossTrades: closedTrades.length - winTrades.length,
-      winRate: closedTrades.length > 0 ? ((winTrades.length / closedTrades.length) * 100).toFixed(2) : 0,
-      totalProfit: totalProfit.toFixed(2),
-      averageProfit: closedTrades.length > 0 ? (totalProfit / closedTrades.length).toFixed(2) : 0
+    connected: false,
+    mode: "MANUAL",
+    message: "Não existe execução automática. Use o MT5 manualmente."
+  });
+});
+
+app.get("/api/settings", (_req, res) => {
+  res.json({
+    success: true,
+    settings: {
+      mode: "MANUAL",
+      aiEnabled: false,
+      source: process.env.OANDA_API_TOKEN ? "OANDA" : "Yahoo Finance GC=F"
     }
   });
 });
 
-// ============= CONFIGURAÇÕES =============
-app.get('/api/settings', (req, res) => {
-  res.json({
-    success: true,
-    settings: memoryDB.settings
-  });
-});
-
-app.put('/api/settings', (req, res) => {
-  Object.assign(memoryDB.settings, req.body);
-  
-  res.json({
-    success: true,
-    settings: memoryDB.settings
-  });
-});
-
-// ============= ERRO 404 =============
 app.use((req, res) => {
-  res.status(404).json({
-    error: 'Endpoint não encontrado',
-    path: req.path,
-    method: req.method
-  });
+  res.status(404).json({ error: "Endpoint não encontrado", path: req.path });
 });
 
-// ============= ERROR HANDLING =============
-app.use((err, req, res, next) => {
-  console.error('Erro:', err);
-  res.status(500).json({
-    error: 'Erro interno do servidor',
-    message: err.message
-  });
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  res.status(500).json({ error: "Erro interno", message: err.message });
 });
 
-// ============= INICIALIZAR SERVIDOR =============
-app.listen(PORT, () => {
-  console.log(`
-╔══════════════════════════════════════╗
-║  🎯 RB Gold Sniper Trader           ║
-║  Servidor iniciado em:              ║
-║  http://localhost:${PORT}                ║
-╚══════════════════════════════════════╝
-  `);
-  console.log(`
-📊 Endpoints disponíveis:
-  GET  /api/health              - Health check
-  GET  /api/mt5/status          - Status MT5
-  POST /api/mt5/connect         - Conectar MT5
-  POST /api/mt5/trade           - Executar trade
-  GET  /api/analyze/market      - Análise mercado
-  GET  /api/trades              - Histórico trades
-  GET  /api/trades/stats        - Estatísticas
-  GET  /api/signals             - Lista sinais
-  POST /api/signals/create      - Criar sinal
-  `);
-});
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`RB Gold Sniper ativo em ${PORT}`));
+}
 
 module.exports = app;

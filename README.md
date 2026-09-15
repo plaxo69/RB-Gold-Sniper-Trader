@@ -1,124 +1,25 @@
-# 🎯 RB Gold Sniper Trader
+# RB Gold Sniper — LIVE corrigido
 
-Bot de trading automático para Ouro (XAUUSD) na plataforma Vantage.
+- Dados reais: OANDA XAU_USD se `OANDA_API_TOKEN` existir; caso contrário Yahoo Finance `GC=F`.
+- Timeframes: M1, M3 (agregado), M5, M15 e H1.
+- Sem `Math.random()` para preço, indicadores ou resultados.
+- Sem IA/API de IA.
+- Sem execução automática de ordens.
+- Execução das entradas é manual no MT5.
+- Sinais são calculados a partir de candles reais.
+- TP/SL usam estrutura + ATR e RR dinâmico.
+- Histórico de alertas é guardado no navegador via localStorage.
 
-## 📋 Características
+## Vercel
 
-- ✅ Conexão com MetaTrader 5 (MT5)
-- ✅ Análise automática de mercado
-- ✅ Trading automático com sinais
-- ✅ Dashboard em tempo real
-- ✅ Interface web responsiva
-- ✅ API RESTful completa
+Não é necessário manter um processo Node permanentemente ativo. A página consulta `/api/market` a cada 60 segundos.
 
-## 🚀 Instalação
+Para usar OANDA, adicionar em Vercel:
+`OANDA_API_TOKEN`
+`OANDA_INSTRUMENT=XAU_USD`
 
-### Pré-requisitos
+Sem token, o fallback é `GC=F`; isto é ouro futuro, não spot XAU/USD.
 
-- Node.js 14+ instalado
-- npm ou yarn
-- MetaTrader 5 instalado (opcional)
+## Importante
 
-### Passos
-
-1. Clone o repositório
-```bash
-git clone https://github.com/plaxo69/RB-Gold-Sniper-Trader.git
-cd RB-Gold-Sniper-Trader
-```
-
-2. Instale as dependências
-```bash
-npm install
-```
-
-3. Configure as variáveis de ambiente
-```bash
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
-```
-
-4. Inicie a aplicação
-```bash
-npm start
-```
-
-A aplicação estará disponível em `http://localhost:3000`
-
-## 📚 Uso
-
-### Endpoints da API
-
-#### Health Check
-```bash
-GET /api/health
-```
-
-#### MT5
-```bash
-POST /api/mt5/connect        # Conectar ao MT5
-GET  /api/mt5/status         # Status da conexão
-POST /api/mt5/trade          # Iniciar/parar trading
-```
-
-#### Análise
-```bash
-GET /api/analyze/market      # Análise do mercado
-GET /api/analyze/indicators  # Indicadores técnicos
-```
-
-## 🛠️ Desenvolvimento
-
-Para modo desenvolvimento com auto-reload:
-
-```bash
-npm run dev
-```
-
-## 📦 Build para Produção
-
-```bash
-npm start
-```
-
-Para deploy na Vercel:
-
-```bash
-npm i -g vercel
-vercel
-```
-
-## ⚙️ Configuração
-
-Edite `.env` com suas configurações:
-
-```env
-PORT=3000
-NODE_ENV=production
-MT5_SERVER=seu_servidor
-MT5_LOGIN=seu_login
-MT5_PASSWORD=sua_senha
-```
-
-## 🔒 Segurança
-
-- Nunca comita o arquivo `.env` com dados sensíveis
-- Use variáveis de ambiente para credenciais
-- Implementar autenticação e autorização
-- Usar HTTPS em produção
-
-## 📝 Licença
-
-MIT License - veja LICENSE para detalhes
-
-## 👨‍💼 Autor
-
-plaxo69
-
-## ⚠️ Disclaimer
-
-Este bot é fornecido "como está". Trading de ouro envolve risco financeiro. Use por sua conta e risco. Não somos responsáveis por perdas financeiras.
-
----
-
-**Última atualização**: 2024
+A versão antiga simulava preços, MT5 e fechamentos. Esta versão remove essas simulações.
