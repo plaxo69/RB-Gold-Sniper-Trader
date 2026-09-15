@@ -11,13 +11,63 @@ const state = {
   totalProfit: 0,
   wins: 0,
   total: 0,
-  chart: null
+  chart: null,
+  chartInstance: null,
+  soundEnabled: true,
+  notificationsEnabled: true
 };
 
-// ============= GRÁFICO =============
+// ============= AUDIO NOTIFICATIONS =============
+function playSound(type = 'signal') {
+  if (!state.soundEnabled) return;
+  
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  if (type === 'signal') {
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  } else if (type === 'profit') {
+    oscillator.frequency.value = 1000;
+    oscillator.type = 'triangle';
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+  }
+}
+
+function requestNotificationPermission() {
+  if (!state.notificationsEnabled || !('Notification' in window)) return;
+  
+  if (Notification.permission === 'granted') return;
+  if (Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
+}
+
+function sendDesktopNotification(title, options = {}) {
+  if (!state.notificationsEnabled || Notification.permission !== 'granted') return;
+  
+  new Notification(title, {
+    icon: '🎯',
+    badge: '🎯',
+    ...options
+  });
+}
+
+// ============= GRÁFICO AVANÇADO =============
 function initChart() {
   const ctx = document.getElementById('priceChart').getContext('2d');
-  state.chart = new Chart(ctx, {
+  state.chartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels: [],
@@ -27,11 +77,12 @@ function initChart() {
           data: [],
           borderColor: '#302b63',
           backgroundColor: 'rgba(48, 43, 99, 0.1)',
-          borderWidth: 2,
+          borderWidth: 2.5,
           fill: true,
           tension: 0.4,
-          pointRadius: 2,
+          pointRadius: 1,
           pointBackgroundColor: '#302b63',
+          pointBorderColor: '#302b63',
         },
         {
           label: 'MA20',
@@ -42,6 +93,16 @@ function initChart() {
           tension: 0.4,
           pointRadius: 0,
           borderDash: [5, 5]
+        },
+        {
+          label: 'MA50',
+          data: [],
+          borderColor: '#17a2b8',
+          borderWidth: 1.5,
+          fill: false,
+          tension: 0.4,
+          pointRadius: 0,
+          borderDash: [8, 4]
         },
         {
           label: 'Suporte',
@@ -68,13 +129,18 @@ function initChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
       plugins: {
         legend: {
           position: 'top',
           labels: {
             padding: 15,
-            font: { size: 12 },
-            usePointStyle: true
+            font: { size: 11 },
+            usePointStyle: true,
+            boxWidth: 8
           }
         }
       },
@@ -93,23 +159,25 @@ function initChart() {
 }
 
 function updateChart(priceData) {
-  if (!state.chart) return;
+  if (!state.chartInstance) return;
 
   const labels = priceData.map((_, i) => i);
   const prices = priceData.map(d => d.price);
   const ma20 = calculateMA(prices, 20);
+  const ma50 = calculateMA(prices, 50);
   const support = Math.min(...prices.slice(-20));
   const resistance = Math.max(...prices.slice(-20));
 
-  state.chart.data.labels = labels;
-  state.chart.data.datasets[0].data = prices;
-  state.chart.data.datasets[1].data = ma20;
-  state.chart.data.datasets[2].data = Array(prices.length).fill(support);
-  state.chart.data.datasets[3].data = Array(prices.length).fill(resistance);
-  state.chart.update('none');
+  state.chartInstance.data.labels = labels;
+  state.chartInstance.data.datasets[0].data = prices;
+  state.chartInstance.data.datasets[1].data = ma20;
+  state.chartInstance.data.datasets[2].data = ma50;
+  state.chartInstance.data.datasets[3].data = Array(prices.length).fill(support);
+  state.chartInstance.data.datasets[4].data = Array(prices.length).fill(resistance);
+  state.chartInstance.update('none');
 }
 
-// ============= CÁLCULOS TÉCNICOS =============
+// ============= CÁLCULOS TÉCNICOS AVANÇADOS =============
 function calculateMA(prices, period) {
   return prices.map((_, i) => {
     if (i < period - 1) return null;
@@ -149,11 +217,22 @@ function calculateRSI(prices, period = 14) {
 }
 
 function calculateMACD(prices) {
-  if (prices.length < 26) return 0;
+  if (prices.length < 26) return { macd: 0, signal: 0, histogram: 0 };
   const ema12 = calculateEMA(prices, 12);
   const ema26 = calculateEMA(prices, 26);
-  const macd = ema12[ema12.length - 1] - ema26[ema26.length - 1];
-  return macd;
+  const macdLine = ema12[ema12.length - 1] - ema26[ema26.length - 1];
+  
+  // Signal line (EMA 9 do MACD)
+  const macdValues = [];
+  for (let i = 25; i < prices.length; i++) {
+    const e12 = calculateEMA(prices.slice(0, i + 1), 12);
+    const e26 = calculateEMA(prices.slice(0, i + 1), 26);
+    macdValues.push(e12[e12.length - 1] - e26[e26.length - 1]);
+  }
+  const signalLine = calculateEMA(macdValues, 9)[macdValues.length - 1] || macdLine;
+  const histogram = macdLine - signalLine;
+  
+  return { macd: macdLine, signal: signalLine, histogram: histogram };
 }
 
 function calculateEMA(prices, period) {
@@ -167,7 +246,7 @@ function calculateEMA(prices, period) {
   return ema;
 }
 
-function calculateBollingerBands(prices, period = 20) {
+function calculateBollingerBands(prices, period = 20, stdDevMultiplier = 2) {
   if (prices.length < period) return { upper: 0, middle: 0, lower: 0 };
   
   const ma = prices.slice(-period).reduce((a, b) => a + b) / period;
@@ -175,43 +254,59 @@ function calculateBollingerBands(prices, period = 20) {
   const stdDev = Math.sqrt(variance);
   
   return {
-    upper: ma + (stdDev * 2),
+    upper: ma + (stdDev * stdDevMultiplier),
     middle: ma,
-    lower: ma - (stdDev * 2)
+    lower: ma - (stdDev * stdDevMultiplier)
   };
 }
 
-function calculateStochastic(prices, period = 14) {
+function calculateStochastic(prices, period = 14, smoothK = 3, smoothD = 3) {
   if (prices.length < period) return { k: 50, d: 50 };
   
   const highest = Math.max(...prices.slice(-period));
   const lowest = Math.min(...prices.slice(-period));
   const lastPrice = prices[prices.length - 1];
   
-  const k = ((lastPrice - lowest) / (highest - lowest)) * 100;
-  return { k: isFinite(k) ? k : 50, d: 50 };
+  const rawK = ((lastPrice - lowest) / (highest - lowest)) * 100;
+  const k = isFinite(rawK) ? rawK : 50;
+  
+  return { k: k, d: 50 };
 }
 
-// ============= ALGORITMO SNIPER AVANÇADO =============
+function calculateATR(prices, period = 14) {
+  if (prices.length < period) return 0;
+  
+  let trSum = 0;
+  for (let i = 1; i < prices.length; i++) {
+    const tr = prices[i] - prices[i - 1];
+    trSum += Math.abs(tr);
+  }
+  
+  return trSum / prices.length;
+}
+
+// ============= ALGORITMO SNIPER ULTRA AVANÇADO =============
 function detectSniperSignal() {
   if (state.priceData.length < 50) return null;
 
   const prices = state.priceData.map(d => d.price);
   const lastPrice = prices[prices.length - 1];
   const previousPrice = prices[prices.length - 2];
+  const priceChange3 = prices[prices.length - 4] || lastPrice;
   
   // Indicadores
   const rsi = calculateRSI(prices);
-  const macd = calculateMACD(prices);
+  const macdData = calculateMACD(prices);
   const bb = calculateBollingerBands(prices);
   const stoch = calculateStochastic(prices);
+  const atr = calculateATR(prices);
   const ma20 = calculateMA(prices, 20)[prices.length - 1] || lastPrice;
   const ma50 = calculateMA(prices, 50)[prices.length - 1] || lastPrice;
   const ma200 = calculateMA(prices, 200)[prices.length - 1] || lastPrice;
 
   // Atualizar display de indicadores
   document.getElementById('rsi-value').textContent = rsi.toFixed(2);
-  document.getElementById('macd-value').textContent = macd.toFixed(4);
+  document.getElementById('macd-value').textContent = macdData.histogram.toFixed(4);
   document.getElementById('bb-upper').textContent = bb.upper.toFixed(2);
   document.getElementById('bb-lower').textContent = bb.lower.toFixed(2);
   document.getElementById('ma20').textContent = ma20.toFixed(2);
@@ -221,62 +316,75 @@ function detectSniperSignal() {
   document.getElementById('trend-value').textContent = trend;
 
   let signal = null;
-  let strength = 0;
 
   // ===== SINAL SNIPER: BUY (Compra Agressiva) =====
-  // Condições: Preço em sobrevendido, toque suporte, divergência bullish
   const buyConditions = {
-    rsiSobrevendido: rsi < 30,                          // RSI < 30
-    precoAbaixoMA20: lastPrice < ma20,                 // Preço abaixo MA20
-    precoAbaixoSuporteForte: lastPrice <= bb.lower,   // Toque banda inferior
-    macdiNegativo: macd < -0.0001,                      // MACD negativo (antes de cruzar)
-    quedaRecente: previousPrice > lastPrice,           // Candle vermelho
-    tendenciaRecuperacao: prices[prices.length - 3] < lastPrice,  // Recuperação em andamento
-    stochBaixo: stoch.k < 20                            // Estocástico < 20
+    rsiSobrevendido: rsi < 30,
+    precoAbaixoMA20: lastPrice < ma20,
+    precoAbaixoSuporteForte: lastPrice <= bb.lower,
+    macdiNegativo: macdData.histogram < -0.0001,
+    quedaRecente: previousPrice > lastPrice,
+    tendenciaRecuperacao: priceChange3 < lastPrice,
+    stochBaixo: stoch.k < 20,
+    bbLowerCross: previousPrice > bb.lower && lastPrice <= bb.lower // Cruzamento BB
   };
 
   const buyScore = Object.values(buyConditions).filter(Boolean).length;
 
-  if (buyScore >= 4) {
-    strength = Math.min(100, 40 + (buyScore * 10));
+  if (buyScore >= 5) {
+    const strength = Math.min(100, 50 + (buyScore * 8));
     signal = {
       type: 'BUY',
       price: lastPrice,
-      reason: `Sniper BUY Entry (${buyScore}/7 condições)`,
+      reason: `Convergência Bullish (${buyScore}/8)`,
       rsi,
       strength: strength,
-      takeProfit: lastPrice * 1.0025,  // +0.25% (~$5 em $2000)
-      stopLoss: lastPrice * 0.9985,    // -0.15% (~$3 em $2000)
-      scoreBreakdown: buyConditions
+      takeProfit: lastPrice * 1.0030,  // +0.30%
+      stopLoss: lastPrice * 0.9970,    // -0.30%
+      scoreBreakdown: buyConditions,
+      confidence: ((buyScore / 8) * 100).toFixed(0)
     };
+    
+    playSound('signal');
+    sendDesktopNotification('🎯 SINAL BUY DETECTADO', {
+      body: `Preço: $${lastPrice.toFixed(2)} | Força: ${strength.toFixed(0)}%`,
+      tag: 'buy-signal'
+    });
   }
 
   // ===== SINAL SNIPER: SELL (Venda Agressiva) =====
-  // Condições: Preço em sobrecomprado, toque resistência, divergência bearish
   const sellConditions = {
-    rsiSobrecomprado: rsi > 70,                          // RSI > 70
-    precoAcimaMA20: lastPrice > ma20,                  // Preço acima MA20
-    precoAcimaResistencia: lastPrice >= bb.upper,     // Toque banda superior
-    macdiPositivo: macd > 0.0001,                       // MACD positivo (antes de cruzar)
-    subidaRecente: previousPrice < lastPrice,         // Candle verde
-    tendenciaQueda: prices[prices.length - 3] > lastPrice,  // Reversão em andamento
-    stochAlto: stoch.k > 80                             // Estocástico > 80
+    rsiSobrecomprado: rsi > 70,
+    precoAcimaMA20: lastPrice > ma20,
+    precoAcimaResistencia: lastPrice >= bb.upper,
+    macdiPositivo: macdData.histogram > 0.0001,
+    subidaRecente: previousPrice < lastPrice,
+    tendenciaQueda: priceChange3 > lastPrice,
+    stochAlto: stoch.k > 80,
+    bbUpperCross: previousPrice < bb.upper && lastPrice >= bb.upper // Cruzamento BB
   };
 
   const sellScore = Object.values(sellConditions).filter(Boolean).length;
 
-  if (sellScore >= 4 && !signal) {
-    strength = Math.min(100, 40 + (sellScore * 10));
+  if (sellScore >= 5 && !signal) {
+    const strength = Math.min(100, 50 + (sellScore * 8));
     signal = {
       type: 'SELL',
       price: lastPrice,
-      reason: `Sniper SELL Entry (${sellScore}/7 condições)`,
+      reason: `Convergência Bearish (${sellScore}/8)`,
       rsi,
       strength: strength,
-      takeProfit: lastPrice * 0.9975,  // -0.25% (~$5 em $2000)
-      stopLoss: lastPrice * 1.0015,    // +0.15% (~$3 em $2000)
-      scoreBreakdown: sellConditions
+      takeProfit: lastPrice * 0.9970,  // -0.30%
+      stopLoss: lastPrice * 1.0030,    // +0.30%
+      scoreBreakdown: sellConditions,
+      confidence: ((sellScore / 8) * 100).toFixed(0)
     };
+    
+    playSound('signal');
+    sendDesktopNotification('🎯 SINAL SELL DETECTADO', {
+      body: `Preço: $${lastPrice.toFixed(2)} | Força: ${strength.toFixed(0)}%`,
+      tag: 'sell-signal'
+    });
   }
 
   return signal;
@@ -293,25 +401,41 @@ function executeTrade(signal) {
     sl: signal.stopLoss,
     rsi: signal.rsi.toFixed(2),
     strength: signal.strength.toFixed(0),
+    confidence: signal.confidence,
     status: 'ABERTO',
     profit: 0,
     profitPercent: 0,
-    reason: signal.reason
+    reason: signal.reason,
+    exitReason: null
   };
 
-  // Simular fechamento após 3 ciclos (1.5 segundos em tempo real)
+  // Simular fechamento com probabilidade realista
   const closeTimeout = setTimeout(() => {
-    const pricesAtuais = state.priceData.slice(-10).map(d => d.price);
+    const random = Math.random();
     let closePrice;
     
     if (signal.type === 'BUY') {
-      // Para BUY, pode atingir TP ou SL
-      const hitTP = Math.random() < 0.6; // 60% de chance
-      closePrice = hitTP ? signal.takeProfit : signal.stopLoss;
+      if (random < 0.55) {
+        closePrice = signal.takeProfit; // 55% TP
+        trade.exitReason = 'TP Atingido';
+      } else if (random < 0.30) {
+        closePrice = signal.stopLoss; // 30% SL
+        trade.exitReason = 'SL Atingido';
+      } else {
+        closePrice = signal.price + (Math.random() - 0.5) * 10;
+        trade.exitReason = 'Saída Manual';
+      }
     } else {
-      // Para SELL, pode atingir TP ou SL
-      const hitTP = Math.random() < 0.6; // 60% de chance
-      closePrice = hitTP ? signal.takeProfit : signal.stopLoss;
+      if (random < 0.55) {
+        closePrice = signal.takeProfit; // 55% TP
+        trade.exitReason = 'TP Atingido';
+      } else if (random < 0.30) {
+        closePrice = signal.stopLoss; // 30% SL
+        trade.exitReason = 'SL Atingido';
+      } else {
+        closePrice = signal.price - (Math.random() - 0.5) * 10;
+        trade.exitReason = 'Saída Manual';
+      }
     }
 
     trade.exitPrice = closePrice;
@@ -321,9 +445,16 @@ function executeTrade(signal) {
       : signal.price - closePrice;
     trade.profitPercent = (trade.profit / signal.price * 100).toFixed(4);
 
-    trade.status = trade.profit > 0 ? 'LUCRO' : trade.profit < 0 ? 'PREJUÍZO' : 'BREAKEVEN';
+    trade.status = trade.profit > 0.5 ? 'LUCRO' : trade.profit < -0.5 ? 'PREJUÍZO' : 'BREAKEVEN';
 
-    if (trade.status === 'LUCRO') state.wins++;
+    if (trade.status === 'LUCRO') {
+      state.wins++;
+      playSound('profit');
+      sendDesktopNotification('💰 LUCRO!', {
+        body: `${trade.type}: +$${trade.profit.toFixed(2)} (+${trade.profitPercent}%)`,
+        tag: 'profit'
+      });
+    }
     state.total++;
     state.totalProfit += trade.profit;
 
@@ -353,7 +484,7 @@ function addTradeCard(trade) {
   card.innerHTML = `
     <div class="trade-info">
       <div class="trade-type ${trade.type.toLowerCase()}">
-        ${trade.type === 'BUY' ? '📈 COMPRA' : '📉 VENDA'} - ${trade.strength}% Força
+        ${trade.type === 'BUY' ? '📈 COMPRA' : '📉 VENDA'} - ${trade.strength}% | Confiança: ${trade.confidence}%
       </div>
       <div class="trade-details">
         <span>⏰ ${trade.entry}</span>
@@ -362,7 +493,7 @@ function addTradeCard(trade) {
         <span>🎯 TP: $${trade.tp.toFixed(2)}</span>
         <span>🛑 SL: $${trade.sl.toFixed(2)}</span>
       </div>
-      <div class="trade-reason" style="font-size: 0.8rem; color: #666; margin-top: 5px; font-style: italic;">
+      <div class="trade-reason" style="font-size: 0.7rem; color: #888; margin-top: 4px;">
         ${trade.reason}
       </div>
     </div>
@@ -381,13 +512,10 @@ function updateTradeCard(trade) {
   const profitDiv = card.querySelector('.trade-profit');
   profitDiv.className = `trade-profit ${trade.profit > 0 ? 'positive' : 'negative'}`;
   profitDiv.innerHTML = `
-    <strong>$${trade.profit.toFixed(4)}</strong>
-    <small>${trade.profitPercent > 0 ? '+' : ''}${trade.profitPercent}%</small>
+    <strong>$${trade.profit.toFixed(4)}</strong><br>
+    <small>${trade.profitPercent > 0 ? '+' : ''}${trade.profitPercent}%</small><br>
+    <small>${trade.exitReason}</small>
   `;
-
-  const tradeInfo = card.querySelector('.trade-info');
-  const details = tradeInfo.querySelector('.trade-details');
-  details.innerHTML += `<span>📍 ${trade.exit}</span>`;
 }
 
 function updateStats() {
@@ -425,11 +553,10 @@ function generateRealisticPrice() {
     ? state.priceData[state.priceData.length - 1].price
     : 2000;
 
-  // Movimento mais realista com tendências
-  const trend = Math.sin(Date.now() / 10000) * 0.5; // Onda lenta
-  const randomWalk = (Math.random() - 0.5) * 10;
-  const change = randomWalk + trend;
-  const newPrice = Math.max(1900, Math.min(2100, lastPrice + change));
+  const trend = Math.sin(Date.now() / 15000) * 0.3;
+  const volatility = (Math.random() - 0.5) * 12;
+  const change = volatility + trend;
+  const newPrice = Math.max(1950, Math.min(2050, lastPrice + change));
   const spread = 2.5;
 
   return {
@@ -444,28 +571,21 @@ function updateMarketData() {
   const data = generateRealisticPrice();
   state.priceData.push(data);
   
-  if (state.priceData.length > 250) {
+  if (state.priceData.length > 300) {
     state.priceData.shift();
   }
 
-  // Atualizar display
   document.getElementById('current-price').textContent = `$${data.price.toFixed(2)}`;
   document.getElementById('current-bid').textContent = `$${data.bid.toFixed(2)}`;
   document.getElementById('current-ask').textContent = `$${data.ask.toFixed(2)}`;
   document.getElementById('current-spread').textContent = `${(data.ask - data.bid).toFixed(2)} pips`;
 
-  // Atualizar gráfico
   updateChart(state.priceData);
 
-  // Detectar sinais
   if (state.isRunning && state.priceData.length >= 50) {
     const signal = detectSniperSignal();
     if (signal) {
       executeTrade(signal);
-      showNotification(
-        `🎯 ${signal.type === 'BUY' ? '📈' : '📉'} ${signal.type} - Força: ${signal.strength.toFixed(0)}%`,
-        'success'
-      );
     }
   }
 }
@@ -475,10 +595,9 @@ async function checkStatus() {
   try {
     const response = await fetch(`${API_BASE}/health`);
     const data = await response.json();
-    updateStatus(true, `✅ Servidor Online - ${new Date(data.timestamp).toLocaleTimeString('pt-PT')}`);
+    updateStatus(true, `✅ Online - ${new Date(data.timestamp).toLocaleTimeString('pt-PT')}`);
   } catch (error) {
-    updateStatus(false, '❌ Servidor Offline');
-    console.error('Erro ao verificar status:', error);
+    updateStatus(false, '❌ Offline');
   }
 }
 
@@ -488,7 +607,7 @@ function updateStatus(online, message) {
   statusDiv.className = `status-indicator ${online ? 'online' : 'offline'}`;
   
   const info = document.getElementById('server-info');
-  info.textContent = online ? '✅ Sistema Pronto' : '❌ Sistema Indisponível';
+  info.textContent = online ? '✅ Pronto' : '❌ Indisponível';
 }
 
 async function connectMT5() {
@@ -496,10 +615,9 @@ async function connectMT5() {
     const response = await fetch(`${API_BASE}/mt5/connect`, { method: 'POST' });
     const data = await response.json();
     state.mt5Connected = true;
-    showNotification('🔗 MT5 Conectado com Sucesso!', 'success');
+    showNotification('🔗 MT5 Conectado!', 'success');
   } catch (error) {
     showNotification('❌ Erro ao conectar MT5', 'error');
-    console.error('Erro:', error);
   }
 }
 
@@ -509,8 +627,9 @@ function startSniper() {
     return;
   }
   
+  requestNotificationPermission();
   state.isRunning = true;
-  showNotification('🎯 Sniper ATIVADO! Procurando sinais...', 'success');
+  showNotification('🎯 Sniper ATIVADO!', 'success');
 }
 
 function stopSniper() {
@@ -555,11 +674,9 @@ function showNotification(message, type) {
 window.addEventListener('load', () => {
   checkStatus();
   initChart();
+  requestNotificationPermission();
   
-  // Gerar preços a cada 500ms (simula tempo real)
   setInterval(updateMarketData, 500);
-  
-  // Atualizar status a cada 30 segundos
   setInterval(checkStatus, 30000);
   
   showNotification('🚀 RB Gold Sniper Trader INICIADO!', 'success');
