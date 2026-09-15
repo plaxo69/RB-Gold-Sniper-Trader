@@ -1,0 +1,277 @@
+const API_BASE = "/api";
+
+const state = {
+  running: false,
+  timeframe: "1m",
+  candles: {},
+  lastSignalKey: null,
+  lastRefresh: null,
+  history: JSON.parse(localStorage.getItem("rb_sniper_history") || "[]"),
+  chart: null
+};
+
+function $(id) { return document.getElementById(id); }
+
+function notify(message, type = "info") {
+  const n = document.createElement("div");
+  n.textContent = message;
+  n.style.cssText = "position:fixed;right:20px;top:20px;z-index:9999;padding:12px 16px;border-radius:8px;color:#fff;font-weight:700;background:" +
+    (type === "success" ? "#198754" : type === "error" ? "#dc3545" : "#0d6efd");
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 2800);
+}
+
+function sma(a, p) {
+  if (a.length < p) return null;
+  return a.slice(-p).reduce((x,y)=>x+y,0) / p;
+}
+
+function ema(a, p) {
+  if (!a.length) return null;
+  const k = 2 / (p + 1);
+  let e = a[0];
+  for (let i=1;i<a.length;i++) e = a[i]*k + e*(1-k);
+  return e;
+}
+
+function rsi(a, p=14) {
+  if (a.length < p+1) return 50;
+  let gain=0, loss=0;
+  for(let i=a.length-p;i<a.length;i++) {
+    const d=a[i]-a[i-1];
+    if(d>=0) gain+=d; else loss-=d;
+  }
+  if(loss===0) return 100;
+  const rs=(gain/p)/(loss/p);
+  return 100-(100/(1+rs));
+}
+
+function atr(c, p=14) {
+  if(c.length < p+1) return 0;
+  const tr=[];
+  for(let i=1;i<c.length;i++) {
+    tr.push(Math.max(c[i].high-c[i].low, Math.abs(c[i].high-c[i-1].close), Math.abs(c[i].low-c[i-1].close)));
+  }
+  return sma(tr,p) || 0;
+}
+
+function structure(c) {
+  const recent=c.slice(-20);
+  return {
+    support: Math.min(...recent.map(x=>x.low)),
+    resistance: Math.max(...recent.map(x=>x.high))
+  };
+}
+
+function trend(c) {
+  const closes=c.map(x=>x.close);
+  const e20=ema(closes,20), e50=ema(closes,50);
+  const last=closes[closes.length-1];
+  if(last>e20 && e20>e50) return "ALTA";
+  if(last<e20 && e20<e50) return "BAIXA";
+  return "LATERAL";
+}
+
+function analyze(main, m5, m15, h1) {
+  const c=main;
+  if(c.length<60 || m5.length<30 || m15.length<30 || h1.length<30) return null;
+
+  const closes=c.map(x=>x.close);
+  const last=closes.at(-1);
+  const r=rsi(closes);
+  const e20=ema(closes,20), e50=ema(closes,50), e200=ema(closes,200);
+  const a=atr(c);
+  const s=structure(c);
+  const t5=trend(m5), t15=trend(m15), t1=trend(h1);
+  const prev=closes.at(-2);
+
+  let buy=0, sell=0;
+  const buyReasons=[], sellReasons=[];
+
+  if(last>e20) { buy++; buyReasons.push("Preço acima EMA20"); }
+  if(last>e50) { buy++; buyReasons.push("Preço acima EMA50"); }
+  if(e200 && last>e200) { buy++; buyReasons.push("Preço acima EMA200"); }
+  if(t5==="ALTA") { buy++; buyReasons.push("M5 alta"); }
+  if(t15==="ALTA") { buy++; buyReasons.push("M15 alta"); }
+  if(t1==="ALTA") { buy++; buyReasons.push("H1 alta"); }
+  if(r>45 && r<68) { buy++; buyReasons.push("RSI favorável"); }
+  if(last>s.resistance && prev<=s.resistance) { buy+=2; buyReasons.push("Breakout"); }
+
+  if(last<e20) { sell++; sellReasons.push("Preço abaixo EMA20"); }
+  if(last<e50) { sell++; sellReasons.push("Preço abaixo EMA50"); }
+  if(e200 && last<e200) { sell++; sellReasons.push("Preço abaixo EMA200"); }
+  if(t5==="BAIXA") { sell++; sellReasons.push("M5 baixa"); }
+  if(t15==="BAIXA") { sell++; sellReasons.push("M15 baixa"); }
+  if(t1==="BAIXA") { sell++; sellReasons.push("H1 baixa"); }
+  if(r>32 && r<55) { sell++; sellReasons.push("RSI favorável"); }
+  if(last<s.support && prev>=s.support) { sell+=2; sellReasons.push("Breakdown"); }
+
+  let type="WAIT", score=Math.max(buy,sell), reasons=[];
+  if(buy>=7 && buy>sell+1) { type="BUY"; reasons=buyReasons; }
+  else if(sell>=7 && sell>buy+1) { type="SELL"; reasons=sellReasons; }
+
+  const confidence = type==="WAIT" ? 0 : Math.min(95, 60 + Math.round((score-7)*8));
+  let sl=null,tp=null,rr=null;
+  if(type!=="WAIT" && a>0) {
+    if(type==="BUY") {
+      sl=Math.min(s.support-a*0.25,last-a*1.25);
+      const risk=last-sl;
+      tp=last+Math.max(risk*2.0,a*2.0);
+      rr=(tp-last)/risk;
+    } else {
+      sl=Math.max(s.resistance+a*0.25,last+a*1.25);
+      const risk=sl-last;
+      tp=last-Math.max(risk*2.0,a*2.0);
+      rr=(last-tp)/risk;
+    }
+  }
+
+  return {
+    type, score, confidence, price:last, rsi:r, ema20:e20, ema50:e50, ema200:e200,
+    atr:a, support:s.support, resistance:s.resistance, trend5:t5, trend15:t15, trend1:t1,
+    sl,tp,rr,reasons,source:"candles reais"
+  };
+}
+
+async function fetchTF(tf) {
+  const r=await fetch(`${API_BASE}/market?timeframe=${encodeURIComponent(tf)}&t=${Date.now()}`);
+  if(!r.ok) throw new Error((await r.json()).error || `Erro ${r.status}`);
+  const d=await r.json();
+  state.candles[tf]=d;
+  return d;
+}
+
+function updateUI(d) {
+  const c=d.candles, last=c.at(-1);
+  $("current-price").textContent=`$${last.close.toFixed(2)}`;
+  $("current-bid").textContent=`$${last.close.toFixed(2)}`;
+  $("current-ask").textContent=`$${last.close.toFixed(2)}`;
+  $("current-spread").textContent=(last.high-last.low).toFixed(2);
+  $("server-info").textContent=`${d.source} • ${d.timeframe} • ${new Date(d.timestamp).toLocaleTimeString("pt-PT")}`;
+
+  if(state.chart) {
+    state.chart.data.labels=c.map(x=>new Date(x.timestamp).toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"}));
+    state.chart.data.datasets[0].data=c.map(x=>x.close);
+    state.chart.data.datasets[1].data=c.map((_,i)=>i>=19?sma(c.slice(0,i+1).map(x=>x.close),20):null);
+    state.chart.update("none");
+  }
+}
+
+function saveSignal(a) {
+  if(a.type==="WAIT") return;
+  const key=`${a.type}-${a.price.toFixed(2)}-${state.timeframe}-${new Date().toISOString().slice(0,16)}`;
+  if(key===state.lastSignalKey) return;
+  state.lastSignalKey=key;
+
+  const item={...a,id:Date.now(),time:new Date().toISOString(),status:"ALERTA"};
+  state.history.unshift(item);
+  state.history=state.history.slice(0,100);
+  localStorage.setItem("rb_sniper_history",JSON.stringify(state.history));
+  renderHistory();
+  notify(`🎯 ${a.type} ${a.confidence}% — entrada ${a.price.toFixed(2)}`,"success");
+
+  fetch(`${API_BASE}/signals/create`,{
+    method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(item)
+  }).catch(()=>{});
+}
+
+function renderAnalysis(a) {
+  if(!a) return;
+  $("rsi-value").textContent=a.rsi.toFixed(2);
+  $("macd-value").textContent=`ATR ${a.atr.toFixed(2)}`;
+  $("bb-upper").textContent=a.resistance.toFixed(2);
+  $("bb-lower").textContent=a.support.toFixed(2);
+  $("ma20").textContent=a.ema20.toFixed(2);
+  $("trend-value").textContent=`M5 ${a.trend5} / M15 ${a.trend15}`;
+
+  const box=$("trades-container");
+  if(a.type==="WAIT") {
+    box.innerHTML=`<div class="no-trades">⏳ WAIT — sem convergência Sniper suficiente. Última análise: ${a.price.toFixed(2)}</div>`;
+    return;
+  }
+  box.innerHTML=`<div class="trade-card ${a.type.toLowerCase()}">
+    <div class="trade-info">
+      <div class="trade-type ${a.type.toLowerCase()}">${a.type==="BUY"?"📈 COMPRA":"📉 VENDA"} — ${a.confidence}%</div>
+      <div class="trade-details">
+        <span>💰 Entrada: $${a.price.toFixed(2)}</span>
+        <span>🎯 TP: $${a.tp.toFixed(2)}</span>
+        <span>🛑 SL: $${a.sl.toFixed(2)}</span>
+        <span>RR: 1:${a.rr.toFixed(2)}</span>
+        <span>RSI: ${a.rsi.toFixed(1)}</span>
+      </div>
+      <div class="trade-reason">${a.reasons.join(" • ")}</div>
+    </div>
+    <div class="trade-profit neutral">ALERTA<br>MANUAL</div>
+  </div>`;
+}
+
+function renderHistory() {
+  const total=state.history.length;
+  const wins=state.history.filter(x=>x.result==="WIN").length;
+  $("total-trades").textContent=total;
+  $("total-profit").textContent="—";
+  $("win-rate").textContent=total?`${((wins/total)*100).toFixed(1)}%`:"—";
+}
+
+async function refresh() {
+  try {
+    const [m1,m5,m15,h1]=await Promise.all(["1m","5m","15m","1h"].map(fetchTF));
+    updateUI(state.candles[state.timeframe] || m1);
+    const a=analyze(m1.candles,m5.candles,m15.candles,h1.candles);
+    renderAnalysis(a);
+    saveSignal(a);
+    state.lastRefresh=new Date();
+    $("status").textContent=`🟢 Mercado real • ${state.lastRefresh.toLocaleTimeString("pt-PT")}`;
+    $("status").className="status-indicator online";
+    renderHistory();
+  } catch(e) {
+    $("status").textContent="🔴 Mercado indisponível";
+    $("status").className="status-indicator offline";
+    $("server-info").textContent=e.message;
+  }
+}
+
+function initChart() {
+  const ctx=$("priceChart").getContext("2d");
+  state.chart=new Chart(ctx,{
+    type:"line",
+    data:{labels:[],datasets:[
+      {label:"XAUUSD/GC=F",data:[],borderWidth:2,pointRadius:0,tension:.2},
+      {label:"EMA20",data:[],borderWidth:1,pointRadius:0,borderDash:[5,5]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:"top"}}}
+  });
+}
+
+function startSniper() {
+  state.running=true;
+  notify("🎯 Monitor Sniper ativo — execução manual no MT5","success");
+  refresh();
+}
+function stopSniper() {
+  state.running=false;
+  notify("⏹ Monitor parado","info");
+}
+function clearTrades() {
+  state.history=[];
+  localStorage.removeItem("rb_sniper_history");
+  renderHistory();
+  $("trades-container").innerHTML='<div class="no-trades">Histórico local limpo.</div>';
+}
+function connectMT5() {
+  notify("ℹ️ MT5 não é ligado à app. Execute manualmente.","info");
+}
+function changeTimeframe(tf) {
+  state.timeframe=tf;
+  document.querySelectorAll(".timeframe-btn").forEach(b=>b.classList.toggle("active",b.dataset.tf===tf));
+  if(state.candles[tf]) updateUI(state.candles[tf]);
+}
+
+window.addEventListener("load",()=>{
+  initChart();
+  renderHistory();
+  document.querySelectorAll(".timeframe-btn").forEach(b=>b.addEventListener("click",()=>changeTimeframe(b.dataset.tf)));
+  $("status").textContent="🟡 A obter mercado real…";
+  refresh();
+  setInterval(refresh,60000);
+});
