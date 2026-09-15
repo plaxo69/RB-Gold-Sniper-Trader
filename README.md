@@ -16,6 +16,7 @@ Não é necessário manter um processo Node permanentemente ativo. A página con
 Para usar OANDA, adicionar em Vercel:
 `OANDA_API_TOKEN`
 `OANDA_INSTRUMENT=XAU_USD`
+`OANDA_ENVIRONMENT=practice` (ou `live` para uma credencial de conta real)
 
 Sem token, a API informa que a credencial da OANDA é necessária. Não existe fallback para outro ativo, para evitar apresentar ouro futuro como se fosse XAU/USD spot.
 

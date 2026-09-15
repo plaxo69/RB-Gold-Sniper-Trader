@@ -50,12 +50,14 @@ async function oanda(timeframe) {
   if (!token) throw new Error("Configure OANDA_API_TOKEN para obter dados da corretora OANDA.");
 
   const instrument = process.env.OANDA_INSTRUMENT || "XAU_USD";
+  const environment = process.env.OANDA_ENVIRONMENT === "live" ? "live" : "practice";
+  const baseUrl = environment === "live" ? "https://api-fxtrade.oanda.com" : "https://api-fxpractice.oanda.com";
   const granularity = { "1m": "M1", "3m": "M1", "5m": "M5", "15m": "M15", "1h": "H1" }[timeframe] || "M1";
 
   const r = await axios.get(
-    `https://api-fxtrade.oanda.com/v3/instruments/${instrument}/candles`,
+    `${baseUrl}/v3/instruments/${instrument}/candles`,
     {
-      params: { granularity, count: 500, price: "M" },
+      params: { granularity, count: 500, price: "MBA" },
       timeout: 8000,
       headers: { Authorization: `Bearer ${token}` }
     }
@@ -69,15 +71,17 @@ async function oanda(timeframe) {
       high: Number(c.mid.h),
       low: Number(c.mid.l),
       close: Number(c.mid.c),
+      bid: Number(c.bid?.c),
+      ask: Number(c.ask?.c),
       volume: Number(c.volume || 0)
-    }));
+    })).filter(c => Number.isFinite(c.open) && Number.isFinite(c.high) && Number.isFinite(c.low) && Number.isFinite(c.close));
 
   if (timeframe === "3m") candles = aggregate3m(candles);
   candles = candles.slice(-300);
   if (!candles.length) throw new Error("OANDA não devolveu candles");
 
   return {
-    source: `OANDA ${instrument}`,
+    source: `OANDA ${instrument} (${environment})`,
     symbol: instrument,
     timeframe,
     candles,
@@ -118,6 +122,8 @@ app.get("/api/market", async (req, res) => {
   try {
     const m = await market(timeframe);
     const p = m.last.close;
+    const bid = Number.isFinite(m.last.bid) ? m.last.bid : null;
+    const ask = Number.isFinite(m.last.ask) ? m.last.ask : null;
     res.json({
       success: true,
       source: m.source,
@@ -125,9 +131,9 @@ app.get("/api/market", async (req, res) => {
       timeframe,
       candles: m.candles,
       price: p,
-      bid: p,
-      ask: p,
-      spread: m.last.high - m.last.low,
+      bid,
+      ask,
+      spread: bid !== null && ask !== null ? ask - bid : null,
       timestamp: m.last.timestamp
     });
   } catch (e) {

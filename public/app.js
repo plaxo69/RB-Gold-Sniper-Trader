@@ -13,6 +13,10 @@ const state = {
 
 function $(id) { return document.getElementById(id); }
 
+function formatPrice(value) {
+  return Number.isFinite(value) ? `$${value.toFixed(2)}` : "—";
+}
+
 function notify(message, type = "info") {
   const n = document.createElement("div");
   n.textContent = message;
@@ -64,10 +68,10 @@ function changeTradingViewInterval(tf) {
 
 function updateUI(d) {
   const c=d.candles,last=c.at(-1);
-  $("current-price").textContent=`$${last.close.toFixed(2)}`;
-  $("current-bid").textContent=`$${last.close.toFixed(2)}`;
-  $("current-ask").textContent=`$${last.close.toFixed(2)}`;
-  $("current-spread").textContent=(last.high-last.low).toFixed(2);
+  $("current-price").textContent=formatPrice(last.close);
+  $("current-bid").textContent=formatPrice(d.bid);
+  $("current-ask").textContent=formatPrice(d.ask);
+  $("current-spread").textContent=Number.isFinite(d.spread) ? d.spread.toFixed(3) : "—";
   $("server-info").textContent=`${d.source} • ${d.timeframe} • ${new Date(d.timestamp).toLocaleTimeString("pt-PT")}`;
 }
 
