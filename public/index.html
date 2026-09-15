@@ -8,16 +8,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
+    <div class="app-wrapper">
         <header>
             <h1>🎯 RB Gold Sniper Trader</h1>
             <p>Trading Bot para Vantage - Ouro em Tempo Real</p>
         </header>
 
-        <!-- GRÁFICO NO TOPO -->
+        <!-- GRÁFICO GRANDE NO TOPO -->
         <div class="chart-section">
             <div class="chart-header">
-                <h2>📈 Gráfico de Preços - XAUUSD</h2>
+                <h2>📈 Gráfico XAUUSD</h2>
                 <div class="chart-controls">
                     <button onclick="changeTimeframe('1m')" class="timeframe-btn active">1M</button>
                     <button onclick="changeTimeframe('5m')" class="timeframe-btn">5M</button>
@@ -25,101 +25,94 @@
                     <button onclick="changeTimeframe('1h')" class="timeframe-btn">1H</button>
                 </div>
             </div>
-            <canvas id="priceChart" height="300"></canvas>
+            <canvas id="priceChart"></canvas>
         </div>
 
-        <!-- CONTROLES E STATUS -->
-        <main>
-            <div class="status-box">
-                <h2>⚡ Status da Aplicação</h2>
-                <div id="status" class="status-indicator offline">Desligado</div>
-                <div id="server-info" class="info-text"></div>
-                <button onclick="checkStatus()" class="btn btn-primary full-width">Verificar Status</button>
-            </div>
-
-            <div class="control-box">
-                <h2>🎮 Controles</h2>
-                <div class="controls">
-                    <button onclick="connectMT5()" class="btn btn-primary">Conectar MT5</button>
-                    <button onclick="startSniper()" class="btn btn-success">▶ Iniciar Sniper</button>
-                    <button onclick="stopSniper()" class="btn btn-danger">⏹ Parar Sniper</button>
-                    <button onclick="clearTrades()" class="btn btn-warning">🔄 Limpar</button>
+        <!-- CONTAINER COM SCROLL PARA RESTO DOS DADOS -->
+        <div class="data-wrapper">
+            
+            <!-- STATUS E CONTROLES -->
+            <section class="control-section">
+                <div class="status-box">
+                    <h3>⚡ Status</h3>
+                    <div id="status" class="status-indicator offline">Desligado</div>
+                    <div id="server-info" class="info-text"></div>
+                    <button onclick="checkStatus()" class="btn btn-primary full-width">Verificar</button>
                 </div>
-            </div>
 
-            <div class="market-box">
-                <h2>💹 Dados Atuais - XAUUSD</h2>
-                <div id="market-data" class="market-data">
-                    <div class="data-row">
-                        <span>Preço:</span>
-                        <span id="current-price" class="price-highlight">-</span>
-                    </div>
-                    <div class="data-row">
-                        <span>Bid:</span>
-                        <span id="current-bid">-</span>
-                    </div>
-                    <div class="data-row">
-                        <span>Ask:</span>
-                        <span id="current-ask">-</span>
-                    </div>
-                    <div class="data-row">
-                        <span>Spread:</span>
-                        <span id="current-spread">-</span>
+                <div class="control-box">
+                    <h3>🎮 Controles</h3>
+                    <div class="controls">
+                        <button onclick="connectMT5()" class="btn btn-primary">🔗 Conectar MT5</button>
+                        <button onclick="startSniper()" class="btn btn-success">▶ Iniciar</button>
+                        <button onclick="stopSniper()" class="btn btn-danger">⏹ Parar</button>
+                        <button onclick="clearTrades()" class="btn btn-warning">🔄 Limpar</button>
                     </div>
                 </div>
-            </div>
-        </main>
 
-        <!-- INDICADORES TÉCNICOS -->
-        <div class="indicators-section">
-            <h2>📊 Indicadores Técnicos</h2>
-            <div class="indicators-grid">
-                <div class="indicator-card">
-                    <span class="indicator-label">RSI (14)</span>
-                    <span id="rsi-value" class="indicator-value">-</span>
-                    <div id="rsi-bar" class="indicator-bar"></div>
+                <div class="market-box">
+                    <h3>💹 Preço</h3>
+                    <div class="price-display">
+                        <div class="price-value" id="current-price">$-</div>
+                        <div class="price-details">
+                            <span>Bid: <strong id="current-bid">-</strong></span>
+                            <span>Ask: <strong id="current-ask">-</strong></span>
+                            <span>Spread: <strong id="current-spread">-</strong></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="indicator-card">
-                    <span class="indicator-label">MACD</span>
-                    <span id="macd-value" class="indicator-value">-</span>
-                </div>
-                <div class="indicator-card">
-                    <span class="indicator-label">Banda Superior</span>
-                    <span id="bb-upper" class="indicator-value">-</span>
-                </div>
-                <div class="indicator-card">
-                    <span class="indicator-label">Banda Inferior</span>
-                    <span id="bb-lower" class="indicator-value">-</span>
-                </div>
-                <div class="indicator-card">
-                    <span class="indicator-label">MA20</span>
-                    <span id="ma20" class="indicator-value">-</span>
-                </div>
-                <div class="indicator-card">
-                    <span class="indicator-label">Tendência</span>
-                    <span id="trend-value" class="indicator-value">-</span>
-                </div>
-            </div>
-        </div>
+            </section>
 
-        <!-- TRADES EM TEMPO REAL -->
-        <div class="trades-section">
-            <div class="trades-header">
-                <h2>🎯 Sinais Sniper em Tempo Real</h2>
-                <div class="trades-stats">
-                    <span>Total: <strong id="total-trades">0</strong></span>
-                    <span>Lucro: <span id="total-profit" class="profit">$0.00</span></span>
-                    <span>Taxa Acerto: <strong id="win-rate">0%</strong></span>
+            <!-- INDICADORES -->
+            <section class="indicators-section">
+                <h3>📊 Indicadores</h3>
+                <div class="indicators-compact">
+                    <div class="ind-item">
+                        <span>RSI:</span>
+                        <strong id="rsi-value">-</strong>
+                    </div>
+                    <div class="ind-item">
+                        <span>MACD:</span>
+                        <strong id="macd-value">-</strong>
+                    </div>
+                    <div class="ind-item">
+                        <span>BB Upper:</span>
+                        <strong id="bb-upper">-</strong>
+                    </div>
+                    <div class="ind-item">
+                        <span>BB Lower:</span>
+                        <strong id="bb-lower">-</strong>
+                    </div>
+                    <div class="ind-item">
+                        <span>MA20:</span>
+                        <strong id="ma20">-</strong>
+                    </div>
+                    <div class="ind-item">
+                        <span>Tendência:</span>
+                        <strong id="trend-value">-</strong>
+                    </div>
                 </div>
-            </div>
-            <div id="trades-container" class="trades-container">
-                <div class="no-trades">Aguardando sinais...</div>
-            </div>
+            </section>
+
+            <!-- TRADES -->
+            <section class="trades-section">
+                <div class="trades-header-compact">
+                    <h3>🎯 Sinais Sniper</h3>
+                    <div class="trades-stats-compact">
+                        <span>Total: <strong id="total-trades">0</strong></span>
+                        <span>Lucro: <strong id="total-profit" class="profit">$0</strong></span>
+                        <span>Taxa: <strong id="win-rate">0%</strong></span>
+                    </div>
+                </div>
+                <div id="trades-container" class="trades-container-compact">
+                    <div class="no-trades">Aguardando sinais...</div>
+                </div>
+            </section>
+
         </div>
 
         <footer>
-            <p>&copy; 2024 RB Gold Sniper Trader. Todos os direitos reservados.</p>
-            <p><strong>⚠️ Aviso:</strong> Trading envolve risco. Use por sua conta e risco.</p>
+            <p>&copy; 2024 RB Gold Sniper Trader | ⚠️ Trading envolve risco</p>
         </footer>
     </div>
 
