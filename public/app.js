@@ -8,14 +8,12 @@ function playAlertSound(kind="trade"){if(!state.alertsEnabled||!state.audioConte
 function sendBrowserAlert(title,body){if(!state.alertsEnabled||!("Notification"in window)||Notification.permission!=="granted")return;try{new Notification(title,{body,tag:"rb-gold-sniper"})}catch{}}
 function marketSessionStatus(data){const now=new Date(),day=now.getDay(),m=now.getHours()*60+now.getMinutes();let sessionOpen=true,label="Mercado aberto";
   if(day===0||day===6){sessionOpen=false;label="Mercado fechado — fim de semana"}
-  // Gold futures daily maintenance break: approximately 22:15–23:00 in mainland Portugal during DST.
-  // Outside that window, a stale Yahoo candle means the FEED is delayed, not that the market is closed.
   else if(m>=1335&&m<1380){sessionOpen=false;label="Mercado em pausa diária"}
   const lastTs=Number(data?.timestamp||data?.candles?.at?.(-1)?.timestamp||0);
   const age=lastTs?Math.max(0,Date.now()-new Date(lastTs).getTime()):Infinity;
   const stale=age>4*60*1000;
-  if(stale&&sessionOpen)label="Mercado aberto — dados atrasados";
-  return{open:sessionOpen,label,stale,age,key:`${day}-${sessionOpen?"open":"closed"}-${stale?"stale":"live"}`}}
+  if(stale&&sessionOpen)label="Mercado aberto — feed Yahoo atrasado";
+  return{open:sessionOpen,label,stale,age,key:`${day}-${sessionOpen?"open":"closed"}-${stale?"stale":"live"`}}
 function updateSessionStatus(data){const s=marketSessionStatus(data),el=$("session-status");if(el){el.textContent=(s.open?"🟢 ":"🔴 ")+s.label;el.className=`session-status ${s.open?"session-open":"session-closed"}`}if(state.lastSessionKey!==s.key){state.lastSessionKey=s.key;if(!s.open){notify("🔴 "+s.label,"error");playAlertSound("session");sendBrowserAlert("RB Gold Sniper — mercado fechado/pausado",s.label+". O monitor continua ativo e volta a sinalizar quando os dados forem retomados.")}}return s}
 async function fetchTF(tf){const r=await fetch(`${API_BASE}/market?timeframe=${encodeURIComponent(tf)}&t=${Date.now()}`,{cache:"no-store"});let d;try{d=await r.json()}catch{throw new Error(`Resposta inválida (${r.status})`)}if(!r.ok||!d.success)throw new Error(d?.details||d?.error||`Erro ${r.status}`);state.candles[tf]=d;return d}
 function tvInterval(tf){return({"1m":"1","3m":"3","5m":"5","15m":"15","1h":"60"})[tf]||"1"}
