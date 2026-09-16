@@ -1,9 +1,11 @@
 {
   "version": 2,
   "builds": [
-    { "src": "server.js", "use": "@vercel/node" }
+    { "src": "server.js", "use": "@vercel/node" },
+    { "src": "api/oanda-reference.js", "use": "@vercel/node" }
   ],
   "routes": [
+    { "src": "/api/oanda-reference", "dest": "/api/oanda-reference.js" },
     { "src": "/(.*)", "dest": "server.js" }
   ]
 }
