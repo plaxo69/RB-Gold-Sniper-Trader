@@ -7,10 +7,10 @@
     structurePeriod: 20,
     minHistory: 205,
     minRiskReward: 2,
-    minAtrPercent: 0.00008,
-    maxAtrPercent: 0.004,
-    minBodyAtr: 0.35,
-    maxEntryExtensionAtr: 1.35
+    minAtrPercent: 0.00005,
+    maxAtrPercent: 0.006,
+    minBodyAtr: 0.25,
+    maxEntryExtensionAtr: 1.60
   });
 
   function sma(values, period) {
@@ -58,8 +58,8 @@
     if (fast === null || slow === null) return "LATERAL";
     const previousFast = ema(closes.slice(0, -3), 20);
     const last = closes.at(-1);
-    if (last > fast && fast > slow && previousFast !== null && fast > previousFast) return "ALTA";
-    if (last < fast && fast < slow && previousFast !== null && fast < previousFast) return "BAIXA";
+    if (last > fast && fast > slow && previousFast !== null && fast >= previousFast) return "ALTA";
+    if (last < fast && fast < slow && previousFast !== null && fast <= previousFast) return "BAIXA";
     return "LATERAL";
   }
 
@@ -74,10 +74,9 @@
 
   function rounded(value) { return Number(value.toFixed(2)); }
 
-  function analyze(main, m5, m15, h1) {
-    if (![main, m5, m15, h1].every(Array.isArray) || main.length < CONFIG.minHistory || m5.length < 55 || m15.length < 55 || h1.length < 55) return null;
+  function analyze(main, m3, m5, m15, h1) {
+    if (![main, m3, m5, m15, h1].every(Array.isArray) || main.length < CONFIG.minHistory || m3.length < 55 || m5.length < 55 || m15.length < 55 || h1.length < 55) return null;
 
-    // Only closed M1 candles create an alert. The final candle is kept as the live quote.
     const closed = main.slice(0, -1);
     const signal = closed.at(-1);
     const previous = closed.at(-2);
@@ -91,19 +90,28 @@
     const levels = priorStructure(closed);
     if ([fast, slow, anchor, momentum, volatility].some(value => value === null) || !levels) return null;
 
-    const trends = { m5: trend(m5.slice(0, -1)), m15: trend(m15.slice(0, -1)), h1: trend(h1.slice(0, -1)) };
+    const trends = {
+      m3: trend(m3.slice(0, -1)),
+      m5: trend(m5.slice(0, -1)),
+      m15: trend(m15.slice(0, -1)),
+      h1: trend(h1.slice(0, -1))
+    };
+
     const atrPercent = volatility / signal.close;
     const body = Math.abs(signal.close - signal.open);
     const bodyIsDecisive = body >= volatility * CONFIG.minBodyAtr;
     const marketIsTradable = atrPercent >= CONFIG.minAtrPercent && atrPercent <= CONFIG.maxAtrPercent;
-    const buyTrend = trends.m5 === "ALTA" && trends.m15 === "ALTA" && trends.h1 === "ALTA" && signal.close > fast && fast > slow && slow > anchor;
-    const sellTrend = trends.m5 === "BAIXA" && trends.m15 === "BAIXA" && trends.h1 === "BAIXA" && signal.close < fast && fast < slow && slow < anchor;
+
+    // M15 defines the main direction. M5 must agree and M3 is the trigger confirmation.
+    // H1 is a safety filter: it cannot be opposite to the intended trade.
+    const buyTrend = trends.m15 === "ALTA" && trends.m5 === "ALTA" && trends.m3 === "ALTA" && trends.h1 !== "BAIXA" && signal.close > fast && fast > slow && slow > anchor;
+    const sellTrend = trends.m15 === "BAIXA" && trends.m5 === "BAIXA" && trends.m3 === "BAIXA" && trends.h1 !== "ALTA" && signal.close < fast && fast < slow && slow < anchor;
+
     const buyBreakout = signal.close > levels.resistance && previous.close <= levels.resistance;
     const sellBreakdown = signal.close < levels.support && previous.close >= levels.support;
-    // A confirmed breakout can legitimately push RSI above the usual 70 threshold;
-    // reject only an already exhausted move rather than rejecting all momentum.
-    const buyMomentum = momentum >= 52 && momentum <= 75;
-    const sellMomentum = momentum >= 25 && momentum <= 48;
+
+    const buyMomentum = momentum >= 50 && momentum <= 78;
+    const sellMomentum = momentum >= 22 && momentum <= 50;
     const buyExtension = (signal.close - fast) / volatility;
     const sellExtension = (fast - signal.close) / volatility;
     const buyEntryIsControlled = buyExtension <= CONFIG.maxEntryExtensionAtr;
@@ -112,15 +120,17 @@
     const buyPasses = marketIsTradable && buyTrend && buyBreakout && bodyIsDecisive && buyMomentum && buyEntryIsControlled;
     const sellPasses = marketIsTradable && sellTrend && sellBreakdown && bodyIsDecisive && sellMomentum && sellEntryIsControlled;
     const type = buyPasses ? "BUY" : sellPasses ? "SELL" : "WAIT";
+
     const reasons = type === "BUY"
-      ? ["Tendência alinhada M5/M15/H1", "EMA20 > EMA50 > EMA200", "Breakout fechado", "RSI com momentum", "Volatilidade e extensão aprovadas"]
+      ? ["Tendência M3/M5/M15 alinhada", "H1 não contrário", "EMA20 > EMA50 > EMA200", "Breakout fechado", "RSI com momentum", "Volatilidade e extensão aprovadas"]
       : type === "SELL"
-        ? ["Tendência alinhada M5/M15/H1", "EMA20 < EMA50 < EMA200", "Breakdown fechado", "RSI com momentum", "Volatilidade e extensão aprovadas"]
+        ? ["Tendência M3/M5/M15 alinhada", "H1 não contrário", "EMA20 < EMA50 < EMA200", "Breakdown fechado", "RSI com momentum", "Volatilidade e extensão aprovadas"]
         : [];
+
     const rejectionReasons = type === "WAIT" ? [
       !marketIsTradable && "volatilidade fora da faixa",
       !bodyIsDecisive && "candle de confirmação fraco",
-      !buyTrend && !sellTrend && "tendências M5/M15/H1 não alinhadas",
+      !buyTrend && !sellTrend && "M3/M5/M15 sem alinhamento ou H1 contrário",
       !buyBreakout && !sellBreakdown && "sem breakout/breakdown fechado",
       !buyMomentum && !sellMomentum && "RSI sem momentum válido",
       !buyEntryIsControlled && !sellEntryIsControlled && "entrada demasiado estendida"
@@ -132,20 +142,44 @@
     if (type === "BUY") {
       sl = Math.min(levels.resistance - volatility * 0.35, signal.low - volatility * 0.2);
       const risk = price - sl;
-      tp = price + Math.max(risk * CONFIG.minRiskReward, volatility * 2.5);
-      rr = (tp - price) / risk;
+      if (risk > 0) {
+        tp = price + Math.max(risk * CONFIG.minRiskReward, volatility * 2.5);
+        rr = (tp - price) / risk;
+      }
     } else if (type === "SELL") {
       sl = Math.max(levels.support + volatility * 0.35, signal.high + volatility * 0.2);
       const risk = sl - price;
-      tp = price - Math.max(risk * CONFIG.minRiskReward, volatility * 2.5);
-      rr = (price - tp) / risk;
+      if (risk > 0) {
+        tp = price - Math.max(risk * CONFIG.minRiskReward, volatility * 2.5);
+        rr = (price - tp) / risk;
+      }
     }
 
     const passed = [marketIsTradable, bodyIsDecisive, buyTrend || sellTrend, buyBreakout || sellBreakdown, buyMomentum || sellMomentum, buyEntryIsControlled || sellEntryIsControlled].filter(Boolean).length;
+    const confidence = type === "WAIT" ? 0 : Math.min(95, 76 + passed * 3);
+
     return {
-      type, score: passed, confidence: type === "WAIT" ? 0 : Math.min(95, 78 + passed * 3), price, rsi: momentum, ema20: fast, ema50: slow, ema200: anchor,
-      atr: volatility, support: levels.support, resistance: levels.resistance, trend5: trends.m5, trend15: trends.m15, trend1: trends.h1,
-      sl: sl === null ? null : rounded(sl), tp: tp === null ? null : rounded(tp), rr, reasons, rejectionReasons, source: "candles reais fechados",
+      type,
+      score: passed,
+      confidence,
+      price,
+      rsi: momentum,
+      ema20: fast,
+      ema50: slow,
+      ema200: anchor,
+      atr: volatility,
+      support: levels.support,
+      resistance: levels.resistance,
+      trend3: trends.m3,
+      trend5: trends.m5,
+      trend15: trends.m15,
+      trend1: trends.h1,
+      sl: sl === null || !Number.isFinite(sl) ? null : rounded(sl),
+      tp: tp === null || !Number.isFinite(tp) ? null : rounded(tp),
+      rr: rr === null || !Number.isFinite(rr) ? null : rr,
+      reasons,
+      rejectionReasons,
+      source: "candles reais fechados",
       filters: { marketIsTradable, bodyIsDecisive, buyTrend, sellTrend, buyBreakout, sellBreakdown, buyMomentum, sellMomentum, buyEntryIsControlled, sellEntryIsControlled }
     };
   }
