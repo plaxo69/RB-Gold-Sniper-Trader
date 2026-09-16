@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#050812"/><stop offset="0.5" stop-color="#111827"/><stop offset="1" stop-color="#050812"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7a5a12"/><stop offset=".45" stop-color="#e5b93f"/><stop offset="1" stop-color="#6f4e0d"/></linearGradient>
+  <filter id="blur"><feGaussianBlur stdDeviation="9"/></filter>
+</defs>
+<rect width="1600" height="1000" fill="url(#bg)"/>
+<g opacity=".11" stroke="#d7a928" stroke-width="2" fill="none">
+ <path d="M0 720 C180 650 260 700 390 590 S650 430 790 520 S1030 610 1160 430 S1400 310 1600 390"/>
+ <path d="M0 790 C200 700 310 760 470 650 S720 540 860 610 S1090 670 1230 500 S1440 390 1600 450"/>
+</g>
+<g opacity=".16" stroke="#e4b93f" stroke-width="5">
+ <path d="M120 760V650 M120 690H120"/><path d="M220 690V560 M220 620H220"/>
+ <path d="M320 620V470 M320 535H320"/><path d="M420 560V390 M420 455H420"/>
+ <path d="M520 490V330 M520 405H520"/><path d="M620 430V270 M620 350H620"/>
+ <path d="M720 510V350 M720 430H720"/><path d="M820 560V400 M820 480H820"/>
+ <path d="M920 500V320 M920 410H920"/><path d="M1020 430V250 M1020 340H1020"/>
+ <path d="M1120 380V210 M1120 290H1120"/><path d="M1220 330V160 M1220 245H1220"/>
+</g>
+<g opacity=".055" transform="translate(1040 650) rotate(-10)">
+ <rect x="0" y="0" width="390" height="150" rx="18" fill="url(#gold)"/>
+ <rect x="35" y="25" width="320" height="100" rx="10" fill="none" stroke="#ffe28a" stroke-width="3"/>
+ <text x="195" y="82" text-anchor="middle" fill="#fff0b0" font-family="Arial,sans-serif" font-size="30" font-weight="700">FINE GOLD</text>
+ <text x="195" y="112" text-anchor="middle" fill="#fff0b0" font-family="Arial,sans-serif" font-size="17">999.9</text>
+</g>
+<rect width="1600" height="1000" fill="#050812" opacity=".52"/>
+</svg>
