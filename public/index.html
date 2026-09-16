@@ -11,13 +11,12 @@
 <div class="app-wrapper">
 <header>
 <h1>🎯 RB Gold Sniper Trader</h1>
-<p>Análise do ouro com dados da corretora OANDA • sem execução de ordens</p>
+<p>Análise XAU/USD em tempo real • Yahoo Finance + TradingView • sem execução de ordens</p>
 </header>
 
-<!-- GRÁFICO PRIMEIRO -->
 <section class="chart-section">
   <div class="chart-header">
-    <h2>📈 XAU/USD — gráfico OANDA no TradingView</h2>
+    <h2>📈 XAU/USD — TradingView</h2>
     <div class="chart-controls">
       <button class="timeframe-btn active" data-tf="1m">1M</button>
       <button class="timeframe-btn" data-tf="3m">3M</button>
@@ -29,18 +28,17 @@
   <div id="tradingview-chart" style="width:100%;height:520px;"></div>
 </section>
 
-<!-- TODOS OS DADOS POR BAIXO DO GRÁFICO -->
 <div class="data-wrapper">
   <section class="control-section">
     <div class="status-box">
-      <h3>⚡ Estado</h3>
+      <h3>⚡ Estado do mercado</h3>
       <div id="status" class="status-indicator offline">A iniciar…</div>
       <div id="server-info" class="info-text"></div>
       <button onclick="refresh()" class="btn btn-primary full-width">Atualizar agora</button>
     </div>
 
     <div class="control-box">
-      <h3>🎯 Monitor</h3>
+      <h3>🎯 Monitor Sniper</h3>
       <div class="controls">
         <button onclick="startSniper()" class="btn btn-success">▶ Iniciar</button>
         <button onclick="stopSniper()" class="btn btn-danger">⏹ Parar</button>
@@ -49,13 +47,12 @@
     </div>
 
     <div class="market-box">
-      <h3>💹 Preço OANDA</h3>
+      <h3>💹 XAU/USD</h3>
       <div class="price-display">
         <div class="price-value" id="current-price">$—</div>
         <div class="price-details">
-          <span>Bid: <strong id="current-bid">—</strong></span>
-          <span>Ask: <strong id="current-ask">—</strong></span>
-          <span>Spread: <strong id="current-spread">—</strong></span>
+          <span>Fonte: <strong>Yahoo Finance</strong></span>
+          <span>Última atualização: <strong id="market-time">—</strong></span>
         </div>
       </div>
     </div>
@@ -73,6 +70,18 @@
     </div>
   </section>
 
+  <section class="filter-section">
+    <h3>🔎 Filtro Sniper — confirmação multi-timeframe</h3>
+    <div id="filter-status" class="filter-grid">
+      <div class="filter-item wait"><span>M1 gatilho</span><strong>—</strong></div>
+      <div class="filter-item wait"><span>M3 confirmação</span><strong>—</strong></div>
+      <div class="filter-item wait"><span>M5 tendência</span><strong>—</strong></div>
+      <div class="filter-item wait"><span>M15 tendência</span><strong>—</strong></div>
+      <div class="filter-item wait"><span>H1 contexto</span><strong>—</strong></div>
+      <div class="filter-item wait"><span>EMA / RSI / ATR</span><strong>—</strong></div>
+    </div>
+  </section>
+
   <section class="trades-section">
     <div class="trades-header-compact">
       <h3>🎯 Sinal Sniper</h3>
@@ -83,13 +92,13 @@
       </div>
     </div>
     <div id="trades-container" class="trades-container-compact">
-      <div class="no-trades">A obter dados da OANDA…</div>
+      <div class="no-trades">A obter dados do mercado…</div>
     </div>
   </section>
 </div>
 
 <footer>
-  <p>RB Gold Sniper • Dados OANDA • Visualização TradingView • Sem execução automática • Sem IA</p>
+  <p>RB Gold Sniper • Yahoo Finance • TradingView • Alertas manuais • Sem IA • Sem execução automática</p>
 </footer>
 </div>
 
