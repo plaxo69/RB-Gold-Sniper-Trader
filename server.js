@@ -6,24 +6,32 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const PUBLIC_DIR = path.join(__dirname, "public");
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(PUBLIC_DIR, { index: "index.html" }));
+
+// Garante que a página principal abre corretamente também no Vercel/Express.
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "index.html"));
+});
 
 const TF = {
-  "1m": { interval: "1m", range: "1d" },
-  "3m": { interval: "1m", range: "1d" },
-  "5m": { interval: "5m", range: "5d" },
-  "15m": { interval: "15m", range: "1mo" },
-  "1h": { interval: "60m", range: "3mo" }
+  "1m": { granularity: "M1" },
+  "3m": { granularity: "M1" },
+  "5m": { granularity: "M5" },
+  "15m": { granularity: "M15" },
+  "1h": { granularity: "H1" }
 };
 
 function aggregate3m(candles) {
   const out = [];
+
   for (const c of candles) {
     const bucket = Math.floor(new Date(c.timestamp).getTime() / 180000) * 180000;
     let g = out[out.length - 1];
+
     if (!g || g.bucket !== bucket) {
       g = {
         bucket,
@@ -32,6 +40,8 @@ function aggregate3m(candles) {
         high: c.high,
         low: c.low,
         close: c.close,
+        bid: c.bid,
+        ask: c.ask,
         volume: c.volume || 0
       };
       out.push(g);
@@ -39,31 +49,44 @@ function aggregate3m(candles) {
       g.high = Math.max(g.high, c.high);
       g.low = Math.min(g.low, c.low);
       g.close = c.close;
+      if (Number.isFinite(c.bid)) g.bid = c.bid;
+      if (Number.isFinite(c.ask)) g.ask = c.ask;
       g.volume += c.volume || 0;
     }
   }
+
   return out.map(({ bucket, ...c }) => c);
 }
 
 async function oanda(timeframe) {
   const token = process.env.OANDA_API_TOKEN;
-  if (!token) throw new Error("Configure OANDA_API_TOKEN para obter dados da corretora OANDA.");
+  if (!token) {
+    throw new Error("Configure OANDA_API_TOKEN para obter dados da corretora OANDA.");
+  }
 
   const instrument = process.env.OANDA_INSTRUMENT || "XAU_USD";
   const environment = process.env.OANDA_ENVIRONMENT === "live" ? "live" : "practice";
-  const baseUrl = environment === "live" ? "https://api-fxtrade.oanda.com" : "https://api-fxpractice.oanda.com";
-  const granularity = { "1m": "M1", "3m": "M1", "5m": "M5", "15m": "M15", "1h": "H1" }[timeframe] || "M1";
+  const baseUrl = environment === "live"
+    ? "https://api-fxtrade.oanda.com"
+    : "https://api-fxpractice.oanda.com";
+  const granularity = TF[timeframe].granularity;
 
-  const r = await axios.get(
+  const response = await axios.get(
     `${baseUrl}/v3/instruments/${instrument}/candles`,
     {
-      params: { granularity, count: 500, price: "MBA" },
+      params: {
+        granularity,
+        count: 500,
+        price: "MBA"
+      },
       timeout: 8000,
-      headers: { Authorization: `Bearer ${token}` }
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
   );
 
-  let candles = (r.data?.candles || [])
+  let candles = (response.data?.candles || [])
     .filter(c => c.complete !== false && c.mid)
     .map(c => ({
       timestamp: c.time,
@@ -74,11 +97,23 @@ async function oanda(timeframe) {
       bid: Number(c.bid?.c),
       ask: Number(c.ask?.c),
       volume: Number(c.volume || 0)
-    })).filter(c => Number.isFinite(c.open) && Number.isFinite(c.high) && Number.isFinite(c.low) && Number.isFinite(c.close));
+    }))
+    .filter(c =>
+      Number.isFinite(c.open) &&
+      Number.isFinite(c.high) &&
+      Number.isFinite(c.low) &&
+      Number.isFinite(c.close)
+    );
 
-  if (timeframe === "3m") candles = aggregate3m(candles);
+  if (timeframe === "3m") {
+    candles = aggregate3m(candles);
+  }
+
   candles = candles.slice(-300);
-  if (!candles.length) throw new Error("OANDA não devolveu candles");
+
+  if (!candles.length) {
+    throw new Error("OANDA não devolveu candles");
+  }
 
   return {
     source: `OANDA ${instrument} (${environment})`,
@@ -90,7 +125,9 @@ async function oanda(timeframe) {
 }
 
 async function market(timeframe) {
-  if (!TF[timeframe]) throw new Error("Timeframe inválido");
+  if (!TF[timeframe]) {
+    throw new Error("Timeframe inválido");
+  }
   return oanda(timeframe);
 }
 
@@ -119,11 +156,13 @@ app.get("/api/health", async (_req, res) => {
 
 app.get("/api/market", async (req, res) => {
   const timeframe = String(req.query.timeframe || "1m");
+
   try {
     const m = await market(timeframe);
     const p = m.last.close;
     const bid = Number.isFinite(m.last.bid) ? m.last.bid : null;
     const ask = Number.isFinite(m.last.ask) ? m.last.ask : null;
+
     res.json({
       success: true,
       source: m.source,
@@ -151,18 +190,25 @@ app.get("/api/settings", (_req, res) => {
     settings: {
       mode: "ALERTAS",
       aiEnabled: false,
-      source: "OANDA"
+      source: "OANDA",
+      symbol: process.env.OANDA_INSTRUMENT || "XAU_USD"
     }
   });
 });
 
 app.use((req, res) => {
-  res.status(404).json({ error: "Endpoint não encontrado", path: req.path });
+  res.status(404).json({
+    error: "Endpoint não encontrado",
+    path: req.path
+  });
 });
 
 app.use((err, _req, res, _next) => {
   console.error(err);
-  res.status(500).json({ error: "Erro interno", message: err.message });
+  res.status(500).json({
+    error: "Erro interno",
+    message: err.message
+  });
 });
 
 if (require.main === module) {
