@@ -1,0 +1,1 @@
+(function(){const original=window.TradingView&&window.TradingView.widget;if(!original)return;window.TradingView.widget=function(options){options=Object.assign({},options,{theme:'light'});return original.call(this,options)}})();
