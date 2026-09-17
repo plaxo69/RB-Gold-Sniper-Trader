@@ -31,21 +31,22 @@ function analyze(main,m3,m5,m15,h1){
  const structureBuy=bosBuyConfirm||chochBuyConfirm,structureSell=bosSellConfirm||chochSellConfirm;
  const body=Math.abs(sig.close-sig.open),bodyOK=body>=A*C.minBodyAtr,atrOK=A/Math.max(sig.close,1)>=0.00002&&A/Math.max(sig.close,1)<=0.012;
  const buyMom=R>=32&&R<=80,sellMom=R>=20&&R<=68,extBuy=(sig.close-e20)/A,extSell=(e20-sig.close)/A;
- const buySetup=(buyTrend&&buyMom&&extBuy<=C.maxExtAtr&&(buyBreak||buyNear||structureBuy))||momentumBuy||reversalBuy;
- const sellSetup=(sellTrend&&sellMom&&extSell<=C.maxExtAtr&&(sellBreak||sellNear||structureSell))||momentumSell||reversalSell;
+ // A confirmed trade now requires an actual structure/entry event. Momentum alone only arms the monitor.
+ const buySetup=buyTrend&&buyMom&&extBuy<=C.maxExtAtr&&(buyBreak||buyNear||structureBuy||reversalBuy);
+ const sellSetup=sellTrend&&sellMom&&extSell<=C.maxExtAtr&&(sellBreak||sellNear||structureSell||reversalSell);
  const type=bodyOK&&atrOK&&buySetup?'BUY':bodyOK&&atrOK&&sellSetup?'SELL':'WAIT';
  let sl=null,tp=null,rr=null;
  if(type==='BUY'){sl=Math.min(sig.low-A*.25,S.support-A*.15);const risk=price-sl;if(risk>0){tp=price+Math.max(risk*C.minRR,A*2);rr=(tp-price)/risk}}
  if(type==='SELL'){sl=Math.max(sig.high+A*.25,S.resistance+A*.15);const risk=sl-price;if(risk>0){tp=price-Math.max(risk*C.minRR,A*2);rr=(price-tp)/risk}}
  const validRisk=Number.isFinite(rr)&&rr>=C.minRR&&Number.isFinite(tp)&&Number.isFinite(sl),finalType=validRisk?type:'WAIT';
- const setupPass=buyBreak||sellBreak||buyNear||sellNear||supportBounce||resistanceReject||ms.bosBuy||ms.bosSell||ms.chochBuy||ms.chochSell||momentumBuy||momentumSell;
- const passed=[atrOK,bodyOK,buyTrend||sellTrend||momentumBuy||momentumSell||reversalBuy||reversalSell,setupPass,buyMom||sellMom,(type==='BUY'?extBuy:extSell)<=C.maxExtAtr].filter(Boolean).length;
+ const setupPass=buyBreak||sellBreak||buyNear||sellNear||supportBounce||resistanceReject||ms.bosBuy||ms.bosSell||ms.chochBuy||ms.chochSell;
+ const passed=[atrOK,bodyOK,buyTrend||sellTrend||momentumBuy||momentumSell||reversalBuy||reversalSell,setupPass,buyMom||sellMom,(finalType==='BUY'?extBuy:finalType==='SELL'?extSell:Math.min(extBuy,extSell))<=C.maxExtAtr].filter(Boolean).length;
  const rejReasons=[];if(!atrOK)rejReasons.push('volatilidade fora da faixa');if(!bodyOK)rejReasons.push('candle fraco');if(!buyTrend&&!sellTrend&&!momentumBuy&&!momentumSell&&!reversalBuy&&!reversalSell)rejReasons.push('sem direção confirmada');if(!setupPass)rejReasons.push('sem breakout/pullback/BOS/CHOCH/rejeição');if(!buyMom&&!sellMom)rejReasons.push('RSI sem momentum');
  const formingR=rsi(main.map(x=>x.close));
- const armedBuy=forming.close>S.resistance||forming.high>S.resistance||(forming.low<=e20+A*.45&&forming.close>e20&&forming.close>forming.open);
- const armedSell=forming.close<S.support||forming.low<S.support||(forming.high>=e20-A*.45&&forming.close<e20&&forming.close<forming.open);
+ const armedBuy=(forming.close>S.resistance||forming.high>S.resistance||buyNear||momentumBuy)&&!sellBreak;
+ const armedSell=(forming.close<S.support||forming.low<S.support||sellNear||momentumSell)&&!buyBreak;
  const armed=armedBuy&&!armedSell?'BUY':armedSell&&!armedBuy?'SELL':null;
- const reasons=finalType==='BUY'?["M1 confirmou movimento comprador",ms.bosBuy?'BOS comprador':ms.chochBuy?'CHOCH comprador':buyBreak?'breakout fechado':buyNear?'pullback EMA20':reversalBuy?'rejeição de suporte + RSI a recuperar':'momentum comprador',"RSI + estrutura confirmados","H1 não contrário","gestão RR 1:2+"]:finalType==='SELL'?["M1 confirmou movimento vendedor",ms.bosSell?'BOS vendedor':ms.chochSell?'CHOCH vendedor':sellBreak?'breakdown fechado':sellNear?'pullback EMA20':reversalSell?'rejeição de resistência + RSI a perder força':'momentum vendedor',"RSI + estrutura confirmados","H1 não contrário","gestão RR 1:2+"]:[];
+ const reasons=finalType==='BUY'?["M1 confirmou movimento comprador",ms.bosBuy?'BOS comprador':ms.chochBuy?'CHOCH comprador':buyBreak?'breakout fechado':buyNear?'pullback EMA20':reversalBuy?'rejeição de suporte + RSI a recuperar':'estrutura compradora',"M3/M5/M15 alinhados","H1 não contrário","gestão RR 1:2+"]:finalType==='SELL'?["M1 confirmou movimento vendedor",ms.bosSell?'BOS vendedor':ms.chochSell?'CHOCH vendedor':sellBreak?'breakdown fechado':sellNear?'pullback EMA20':reversalSell?'rejeição de resistência + RSI a perder força':'estrutura vendedora',"M3/M5/M15 alinhados","H1 não contrário","gestão RR 1:2+"]:[];
  return{type:finalType,score:passed,confidence:finalType==='WAIT'?0:Math.min(95,72+passed*4),price,signalTimestamp:sig.timestamp||null,rsi:R,ema20:e20,ema50:e50,ema200:e200,atr:A,support:S.support,resistance:S.resistance,trend3:t3,trend5:t5,trend15:t15,trend1:t1,sl:sl==null?null:round(sl),tp:tp==null?null:round(tp),rr:rr==null?null:rr,reasons,rejectionReasons:rejReasons,setupState:armed?'ARMADO':'SEM SETUP',armedDirection:armed,formingPrice:forming.close,formingRsi:Number.isFinite(formingR)?formingR:null,source:'candles reais fechados',filters:{marketIsTradable:atrOK,bodyIsDecisive:bodyOK,buyTrend,sellTrend,buyBreakout:buyBreak,sellBreakdown:sellBreak,buyMomentum:buyMom,sellMomentum:sellMom,buyEntryIsControlled:extBuy<=C.maxExtAtr,sellEntryIsControlled:extSell<=C.maxExtAtr,reversalBuy,reversalSell,supportBounce,resistanceReject,momentumBuy,momentumSell,bosBuy:ms.bosBuy,bosSell:ms.bosSell,chochBuy:ms.chochBuy,chochSell:ms.chochSell,bosConfirmed:finalType==='BUY'?bosBuyConfirm:finalType==='SELL'?bosSellConfirm:false,chochConfirmed:finalType==='BUY'?chochBuyConfirm:finalType==='SELL'?chochSellConfirm:false,technicalPass:atrOK&&bodyOK,m3Buy:t3==='ALTA',m3Sell:t3==='BAIXA'}};
 }
 root.RBGoldSniper=Object.assign(root.RBGoldSniper||{},{CONFIG:C,sma,ema,rsi,atr,trend,priorStructure:structure,structureSignal,analyze});
