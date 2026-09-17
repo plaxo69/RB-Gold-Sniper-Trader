@@ -4,12 +4,14 @@
     { "src": "server.js", "use": "@vercel/node" },
     { "src": "api/market.js", "use": "@vercel/node" },
     { "src": "api/health.js", "use": "@vercel/node" },
-    { "src": "api/oanda-reference.js", "use": "@vercel/node" }
+    { "src": "api/oanda-reference.js", "use": "@vercel/node" },
+    { "src": "api/tradingview.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api/market", "dest": "/api/market.js" },
     { "src": "/api/health", "dest": "/api/health.js" },
     { "src": "/api/oanda-reference", "dest": "/api/oanda-reference.js" },
+    { "src": "/api/tradingview", "dest": "/api/tradingview.js" },
     { "src": "/(.*)", "dest": "server.js" }
   ]
 }
