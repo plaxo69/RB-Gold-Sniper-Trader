@@ -1,0 +1,90 @@
+//@version=6
+indicator("RB Gold Sniper — OANDA XAUUSD", overlay=true, max_labels_count=500)
+
+// Use this script on OANDA:XAUUSD, preferably M1.
+// The app receives only TradingView values through alert() — no Yahoo, GC=F or external gold feed.
+
+ema20 = ta.ema(close, 20)
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+rsi = ta.rsi(close, 14)
+atr = ta.atr(14)
+res = ta.highest(high[1], 20)
+sup = ta.lowest(low[1], 20)
+
+trend(tf) =>
+    c = request.security(syminfo.tickerid, tf, close, barmerge.gaps_off, barmerge.lookahead_off)
+    e20 = request.security(syminfo.tickerid, tf, ta.ema(close,20), barmerge.gaps_off, barmerge.lookahead_off)
+    e50 = request.security(syminfo.tickerid, tf, ta.ema(close,50), barmerge.gaps_off, barmerge.lookahead_off)
+    c > e20 and e20 >= e50 ? "ALTA" : c < e20 and e20 <= e50 ? "BAIXA" : "LATERAL"
+
+t3 = trend("3")
+t5 = trend("5")
+t15 = trend("15")
+t1 = trend("60")
+
+body = math.abs(close-open)
+range = math.max(high-low, syminfo.mintick)
+lowerWick = math.min(open,close)-low
+upperWick = high-math.max(open,close)
+bullReject = close>open and lowerWick>=math.max(body*1.05,range*.25) and close>=low+range*.55
+bearReject = close<open and upperWick>=math.max(body*1.05,range*.25) and close<=high-range*.55
+
+buyBreak = close>res and close[1]<=res
+sellBreak = close<sup and close[1]>=sup
+buyPull = low<=ema20+atr*.45 and close>ema20 and close>open
+sellPull = high>=ema20-atr*.45 and close<ema20 and close<open
+
+bull = (t3=="ALTA"?1:0)+(t5=="ALTA"?1:0)+(t15=="ALTA"?1:0)
+bear = (t3=="BAIXA"?1:0)+(t5=="BAIXA"?1:0)+(t15=="BAIXA"?1:0)
+
+buyTrend = bull>=2 and t1!="BAIXA" and close>ema20 and ema20>=ema50 and ema50>=ema200
+sellTrend = bear>=2 and t1!="ALTA" and close<ema20 and ema20<=ema50 and ema50<=ema200
+
+buyEntry = buyBreak or buyPull or bullReject
+sellEntry = sellBreak or sellPull or bearReject
+buyOK = buyTrend and rsi>=32 and rsi<=78 and buyEntry and body>=atr*.10
+sellOK = sellTrend and rsi>=22 and rsi<=68 and sellEntry and body>=atr*.10
+
+var int lastSignalBar = na
+cooldown = na(lastSignalBar) or bar_index-lastSignalBar>=5
+buy = barstate.isconfirmed and cooldown and buyOK
+sell = barstate.isconfirmed and cooldown and sellOK
+
+slBuy = math.min(low-atr*.25, sup-atr*.15)
+riskBuy = close-slBuy
+tpBuy = close+math.max(riskBuy*2.0,atr*2.0)
+rrBuy = riskBuy>0 ? (tpBuy-close)/riskBuy : na
+
+slSell = math.max(high+atr*.25, res+atr*.15)
+riskSell = slSell-close
+tpSell = close-math.max(riskSell*2.0,atr*2.0)
+rrSell = riskSell>0 ? (close-tpSell)/riskSell : na
+
+validBuy = buy and rrBuy>=2
+validSell = sell and rrSell>=2
+
+confidence = validBuy ? math.min(95,72+bull*5+(buyBreak?5:0)+(bullReject?4:0)) : validSell ? math.min(95,72+bear*5+(sellBreak?5:0)+(bearReject?4:0)) : 0
+
+type = validBuy ? "BUY" : validSell ? "SELL" : "WAIT"
+tp = validBuy ? tpBuy : validSell ? tpSell : na
+sl = validBuy ? slBuy : validSell ? slSell : na
+rr = validBuy ? rrBuy : validSell ? rrSell : na
+
+payload = '{"type":"'+type+'","symbol":"OANDA:XAUUSD","timeframe":"1m","price":'+str.tostring(close)+',"tp":'+str.tostring(tp)+',"sl":'+str.tostring(sl)+',"rr":'+str.tostring(rr)+',"rsi":'+str.tostring(rsi)+',"atr":'+str.tostring(atr)+',"ema20":'+str.tostring(ema20)+',"support":'+str.tostring(sup)+',"resistance":'+str.tostring(res)+',"trend3":"'+t3+'","trend5":"'+t5+'","trend15":"'+t15+'","trend1":"'+t1+'","confidence":'+str.tostring(confidence)+',"signalTimestamp":"'+str.tostring(time, format="yyyy-MM-dd'T'HH:mm:ss'Z'")+'"}'
+
+if barstate.isconfirmed
+    alert(payload, alert.freq_once_per_bar_close)
+
+if validBuy
+    lastSignalBar := bar_index
+    label.new(bar_index, low, "COMPRA\nRR 1:"+str.tostring(rrBuy,"#.##"), style=label.style_label_up, textcolor=color.white)
+if validSell
+    lastSignalBar := bar_index
+    label.new(bar_index, high, "VENDA\nRR 1:"+str.tostring(rrSell,"#.##"), style=label.style_label_down, textcolor=color.white)
+
+plot(ema20, "EMA20")
+plot(ema50, "EMA50")
+plot(ema200, "EMA200")
+plot(res, "Resistência")
+plot(sup, "Suporte")
