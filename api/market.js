@@ -1,8 +1,6 @@
 const axios = require("axios");
 
-// Binance returns HTTP 451 from Vercel's execution region. Use Coinbase's
-// public PAXG/USD market instead. PAXG represents one troy ounce of gold;
-// this is still a proxy for broker XAU/USD, while TradingView remains OANDA:XAUUSD.
+// Coinbase PAXG/USD: proxy de ouro spot. O gráfico visual continua OANDA:XAUUSD.
 const BASE = "https://api.exchange.coinbase.com";
 const PRODUCT = "PAXG-USD";
 const TF = {
@@ -19,36 +17,25 @@ const CACHE_MS = 8000;
 
 function valid(c) {
   return [c.open, c.high, c.low, c.close].every(Number.isFinite) &&
-    c.open > 0 &&
-    c.high >= Math.max(c.open, c.close) &&
-    c.low <= Math.min(c.open, c.close) &&
-    c.high >= c.low;
+    c.open > 0 && c.high >= Math.max(c.open, c.close) &&
+    c.low <= Math.min(c.open, c.close) && c.high >= c.low;
 }
 
 function clean(a) {
-  return a
-    .filter(valid)
+  return a.filter(valid)
     .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
     .filter((c, i, s) => i === 0 || c.timestamp !== s[i - 1].timestamp);
 }
 
 function aggregate(a, minutes) {
-  const size = minutes * 60000;
-  const out = [];
+  const size = minutes * 60000, out = [];
   for (const c of a) {
     const bucket = Math.floor(Date.parse(c.timestamp) / size) * size;
     let g = out[out.length - 1];
     if (!g || g.bucket !== bucket) {
-      g = {
-        bucket,
-        timestamp: new Date(bucket).toISOString(),
-        open: c.open,
-        high: c.high,
-        low: c.low,
-        close: c.close,
-        volume: c.volume || 0,
-        complete: c.complete !== false
-      };
+      g = { bucket, timestamp: new Date(bucket).toISOString(), open: c.open,
+        high: c.high, low: c.low, close: c.close, volume: c.volume || 0,
+        complete: c.complete !== false };
       out.push(g);
     } else {
       g.high = Math.max(g.high, c.high);
@@ -61,21 +48,15 @@ function aggregate(a, minutes) {
   return out.map(({ bucket, ...c }) => c).filter(valid);
 }
 
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function request(url, params) {
   let last;
   for (let i = 0; i < 3; i++) {
     try {
       return await axios.get(url, {
-        params,
-        timeout: 10000,
-        headers: {
-          Accept: "application/json",
-          "User-Agent": "RB-Gold-Sniper/1.0"
-        }
+        params, timeout: 10000,
+        headers: { Accept: "application/json", "User-Agent": "RB-Gold-Sniper/1.0" }
       });
     } catch (e) {
       last = e;
@@ -87,44 +68,38 @@ async function request(url, params) {
 
 async function fetchCandles(timeframe) {
   const cfg = TF[timeframe];
-  const r = await request(`${BASE}/products/${PRODUCT}/candles`, {
-    granularity: cfg.granularity
-  });
+  const [candleResponse, tickerResponse] = await Promise.all([
+    request(`${BASE}/products/${PRODUCT}/candles`, { granularity: cfg.granularity }),
+    request(`${BASE}/products/${PRODUCT}/ticker`)
+  ]);
 
-  if (!Array.isArray(r.data) || !r.data.length) {
+  if (!Array.isArray(candleResponse.data) || !candleResponse.data.length) {
     throw new Error("Coinbase não devolveu candles PAXG/USD");
   }
 
-  let candles = clean(r.data.map(x => {
+  let candles = clean(candleResponse.data.map(x => {
     const ts = Number(x[0]) * 1000;
     const intervalMs = cfg.granularity * 1000;
     return {
       timestamp: new Date(ts).toISOString(),
-      open: Number(x[3]),
-      high: Number(x[2]),
-      low: Number(x[1]),
-      close: Number(x[4]),
-      volume: Number(x[5] || 0),
-      complete: ts + intervalMs <= Date.now()
+      open: Number(x[3]), high: Number(x[2]), low: Number(x[1]), close: Number(x[4]),
+      volume: Number(x[5] || 0), complete: ts + intervalMs <= Date.now()
     };
   }));
 
   if (cfg.aggregate) candles = aggregate(candles, cfg.aggregate);
   candles = clean(candles).slice(-300);
+  if (candles.length < 50) throw new Error(`Coinbase devolveu poucos candles (${candles.length})`);
 
-  if (candles.length < 50) {
-    throw new Error(`Coinbase devolveu poucos candles (${candles.length})`);
-  }
+  const lastCandle = candles[candles.length - 1];
+  const candleAge = Math.max(0, Date.now() - Date.parse(lastCandle.timestamp) - cfg.granularity * 1000);
 
-  const last = candles[candles.length - 1];
-  const age = Math.max(0, Date.now() - Date.parse(last.timestamp));
-  const staleLimit = {
-    "1m": 150,
-    "3m": 360,
-    "5m": 660,
-    "15m": 1860,
-    "1h": 7260
-  }[timeframe] || 150;
+  const ticker = tickerResponse.data || {};
+  const livePrice = Number(ticker.price);
+  const tickerTs = Date.parse(ticker.time || "");
+  const quoteTimestamp = Number.isFinite(tickerTs) ? new Date(tickerTs).toISOString() : new Date().toISOString();
+  const quoteAge = Math.max(0, Date.now() - (Number.isFinite(tickerTs) ? tickerTs : Date.now()));
+  const stale = quoteAge > 45000;
 
   return {
     success: true,
@@ -133,15 +108,16 @@ async function fetchCandles(timeframe) {
     displaySymbol: "OANDA:XAUUSD",
     timeframe,
     candles,
-    last,
-    price: last.close,
-    delayedBy: Math.round(age / 1000),
-    candleTimestamp: last.timestamp,
-    quoteTimestamp: last.timestamp,
-    candleAgeSec: Math.round(age / 1000),
-    stale: age > staleLimit * 1000,
+    last: lastCandle,
+    price: Number.isFinite(livePrice) ? livePrice : lastCandle.close,
+    delayedBy: Math.round(quoteAge / 1000),
+    candleTimestamp: lastCandle.timestamp,
+    quoteTimestamp,
+    candleAgeSec: Math.round(candleAge / 1000),
+    quoteAgeSec: Math.round(quoteAge / 1000),
+    stale,
     oandaLive: false,
-    feedNotice: "Análise automática por PAXG/USD; TradingView mostra OANDA:XAUUSD"
+    feedNotice: "Preço ao vivo PAXG/USD + candles Coinbase; TradingView mostra OANDA:XAUUSD"
   };
 }
 
@@ -151,18 +127,11 @@ async function getMarket(timeframe) {
   const hit = cache.get(key);
   if (hit && Date.now() - hit.t < CACHE_MS) return hit.v;
   if (inflight.has(key)) return inflight.get(key);
-
-  const p = fetchCandles(timeframe)
-    .then(v => {
-      cache.set(key, { t: Date.now(), v });
-      inflight.delete(key);
-      return v;
-    })
-    .catch(e => {
-      inflight.delete(key);
-      throw e;
-    });
-
+  const p = fetchCandles(timeframe).then(v => {
+    cache.set(key, { t: Date.now(), v });
+    inflight.delete(key);
+    return v;
+  }).catch(e => { inflight.delete(key); throw e; });
   inflight.set(key, p);
   return p;
 }
@@ -175,12 +144,7 @@ async function handler(req, res) {
     res.status(200).json(m);
   } catch (e) {
     console.error("MARKET ERROR", e.message);
-    res.status(502).json({
-      success: false,
-      error: "Falha no feed de ouro",
-      details: e.message,
-      source: "Coinbase PAXG/USD"
-    });
+    res.status(502).json({ success: false, error: "Falha no feed de ouro", details: e.message, source: "Coinbase PAXG/USD" });
   }
 }
 
