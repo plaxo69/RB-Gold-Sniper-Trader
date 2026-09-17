@@ -9,19 +9,18 @@
 </head>
 <body>
 <div class="app-wrapper">
-<header>
-<h1>🎯 RB Gold Sniper Trader</h1>
-<p>Análise XAU/USD em tempo real • Yahoo Finance + TradingView • alertas automáticos • sem execução de ordens</p>
-</header>
+<header><h1>🎯 RB Gold Sniper Trader</h1><p>Análise XAU/USD em tempo real • OANDA/spot quando disponível • TradingView • alertas automáticos • sem execução de ordens</p></header>
 <section class="chart-section"><div class="chart-header"><h2>📈 XAU/USD — TradingView</h2><div class="chart-controls"><button class="timeframe-btn active" data-tf="1m">1M</button><button class="timeframe-btn" data-tf="3m">3M</button><button class="timeframe-btn" data-tf="5m">5M</button><button class="timeframe-btn" data-tf="15m">15M</button><button class="timeframe-btn" data-tf="1h">1H</button></div></div><div id="tradingview-chart" style="width:100%;height:520px;"></div></section>
 <div class="data-wrapper">
 <section class="control-section">
 <div class="status-box compact-box"><div class="compact-title">⚡ Mercado</div><div id="status" class="status-indicator offline">A iniciar…</div><div id="server-info" class="info-text"></div><div id="session-status" class="session-status">A verificar sessão…</div></div>
 <div class="control-box compact-box"><div class="compact-title">🎯 Sniper automático</div><div class="monitor-state" id="monitor-state">● A preparar monitor</div><div class="alert-row"><span id="alert-status" class="info-text">🔕 Alertas desativados</span><button id="enable-alerts" class="mini-btn" type="button">🔔 Ativar alertas</button></div></div>
-<div class="market-box compact-box"><div class="compact-title">💹 XAU/USD <button id="refresh-btn" class="mini-btn refresh-btn" type="button">↻ Atualizar</button></div><div class="price-value" id="current-price">$—</div><div class="price-details"><span>Spot ajustado • <strong id="market-time">—</strong></span></div></div>
+<div class="market-box compact-box"><div class="compact-title">💹 XAU/USD <button id="refresh-btn" class="mini-btn refresh-btn" type="button">↻ Atualizar</button></div><div class="price-value" id="current-price">$—</div><div class="price-details"><span>Spot • <strong id="market-time">—</strong></span></div></div>
 </section>
 <section class="indicators-section"><h3>📊 Indicadores</h3><div class="indicators-compact"><div class="ind-item"><span>RSI</span><strong id="rsi-value">—</strong></div><div class="ind-item"><span>ATR</span><strong id="macd-value">—</strong></div><div class="ind-item"><span>Resistência</span><strong id="bb-upper">—</strong></div><div class="ind-item"><span>Suporte</span><strong id="bb-lower">—</strong></div><div class="ind-item"><span>EMA20</span><strong id="ma20">—</strong></div></div></section>
-<section class="filter-section"><h3>🔎 Filtro Sniper — confirmação multi-timeframe</h3><div id="ai-confidence" class="ai-confidence" aria-live="polite">🧠 Confiança IA: —</div><div id="filter-status" class="filter-grid"></div></section>
+<section class="filter-section"><h3>🔎 Filtro Sniper — confirmação multi-timeframe</h3><div id="ai-confidence" class="ai-confidence" aria-live="polite">🧠 IA: —</div><div id="filter-status" class="filter-grid"></div></section>
 <section class="trades-section"><div class="trades-header-compact"><h3>🎯 Sinal Sniper</h3><div class="trades-stats-compact"><span>Alertas: <strong id="total-trades">0</strong></span><span>Resultado: <strong id="total-profit">—</strong></span><span>Win rate: <strong id="win-rate">—</strong></span></div></div><div id="trades-container" class="trades-container-compact"><div class="no-trades">A obter dados do mercado…</div></div></section>
-</div><footer><p>RB Gold Sniper • Yahoo Finance • TradingView • Alertas sonoros/notificações • IA apenas como parecer independente • Sem execução automática</p></footer>
-</div><script src="price-adjust.js?v=3"></script><script src="history-v2.js?v=2"></script><script src="sniper-v2.js?v=6"></script><script src="app-v2.js?v=6"></script><script src="ai.js?v=3"></script></body></html>
+</div><footer><p>RB Gold Sniper • XAUUSD • TradingView • Alertas sonoros • IA como segunda validação • Sem execução automática</p></footer>
+</div>
+<script src="history-v2.js?v=3"></script><script src="sniper-v2.js?v=6"></script><script src="app-v2.js?v=7"></script><script src="ai.js?v=4"></script>
+</body></html>
