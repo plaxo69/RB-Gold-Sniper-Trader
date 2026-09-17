@@ -5,82 +5,12 @@ const GOLD_SPOT = "https://api.gold-api.com/price/XAU";
 const OANDA_BASE = process.env.OANDA_ENVIRONMENT === "live" ? "https://api-fxtrade.oanda.com" : "https://api-fxpractice.oanda.com";
 const OANDA_TOKEN = process.env.OANDA_API_TOKEN;
 const INSTRUMENT = process.env.OANDA_INSTRUMENT || "XAU_USD";
-
-const TF = {
-  "1m": { oanda: "M1", yahooInterval: "1m", yahooRange: "7d", count: 300 },
-  "3m": { oanda: "M1", yahooInterval: "1m", yahooRange: "7d", count: 900 },
-  "5m": { oanda: "M5", yahooInterval: "5m", yahooRange: "1mo", count: 300 },
-  "15m": { oanda: "M15", yahooInterval: "15m", yahooRange: "1mo", count: 300 },
-  "1h": { oanda: "H1", yahooInterval: "60m", yahooRange: "3mo", count: 300 }
-};
-
-function aggregate(candles, minutes) {
-  const size = minutes * 60000, out = [];
-  for (const c of candles) {
-    const bucket = Math.floor(Date.parse(c.timestamp) / size) * size;
-    let g = out[out.length - 1];
-    if (!g || g.bucket !== bucket) {
-      g = { bucket, timestamp: new Date(bucket).toISOString(), open: c.open, high: c.high, low: c.low, close: c.close, volume: c.volume || 0 };
-      out.push(g);
-    } else {
-      g.high = Math.max(g.high, c.high); g.low = Math.min(g.low, c.low); g.close = c.close; g.volume += c.volume || 0;
-    }
-  }
-  return out.map(({ bucket, ...c }) => c);
-}
-
-async function oanda(timeframe) {
-  if (!OANDA_TOKEN) throw new Error("OANDA_API_TOKEN não configurado");
-  const cfg = TF[timeframe];
-  const granularity = cfg.oanda;
-  const count = timeframe === "3m" ? 1000 : cfg.count;
-  const r = await axios.get(`${OANDA_BASE}/v3/instruments/${INSTRUMENT}/candles`, {
-    params: { granularity, count, price: "M", includeFirst: true },
-    headers: { Authorization: `Bearer ${OANDA_TOKEN}` }, timeout: 12000
-  });
-  const raw = r.data?.candles || [];
-  let candles = raw.map(c => ({ timestamp: new Date(c.time).toISOString(), open: Number(c.mid?.o), high: Number(c.mid?.h), low: Number(c.mid?.l), close: Number(c.mid?.c), volume: Number(c.volume || 0), complete: c.complete !== false })).filter(c => [c.open,c.high,c.low,c.close].every(Number.isFinite));
-  if (timeframe === "3m") candles = aggregate(candles, 3);
-  candles = candles.slice(-300);
-  if (candles.length < 50) throw new Error("OANDA devolveu poucos candles");
-  const last = candles[candles.length - 1];
-  return { source: `OANDA ${INSTRUMENT} — candles ${timeframe}`, symbol: `OANDA:${INSTRUMENT}`, timeframe, candles, last, delayedBy: 0, quoteTimestamp: last.timestamp };
-}
-
-async function yahoo(timeframe) {
-  const cfg = TF[timeframe], symbol = "GC=F";
-  const r = await axios.get(`${YAHOO}${encodeURIComponent(symbol)}`, { params: { interval: cfg.yahooInterval, range: cfg.yahooRange, includePrePost: true }, timeout: 12000, headers: { "User-Agent": "Mozilla/5.0 RB-Gold-Sniper/4.0" } });
-  const result = r.data?.chart?.result?.[0]; if (!result) throw new Error("Yahoo não devolveu GC=F");
-  const q = result.indicators?.quote?.[0] || {};
-  let candles = (result.timestamp || []).map((ts,i) => ({ timestamp:new Date(ts*1000).toISOString(), open:Number(q.open?.[i]), high:Number(q.high?.[i]), low:Number(q.low?.[i]), close:Number(q.close?.[i]), volume:Number(q.volume?.[i]||0) })).filter(c=>[c.open,c.high,c.low,c.close].every(Number.isFinite));
-  if (timeframe === "3m") candles = aggregate(candles,3);
-  candles = candles.slice(-300); if (!candles.length) throw new Error("Sem candles GC=F");
-  return { candles, symbol, timeframe, meta: result.meta || {} };
-}
-
-async function liveSpot() {
-  try {
-    const r = await axios.get(GOLD_SPOT, { timeout: 6000, headers: { "User-Agent": "RB-Gold-Sniper/4.0" } });
-    const price = Number(r.data?.price), ts = Number(r.data?.timestamp || 0);
-    if (Number.isFinite(price)) return { price, timestamp: ts ? new Date(ts*1000).toISOString() : new Date().toISOString(), source: "Gold API — XAU spot" };
-  } catch (_) {}
-  throw new Error("Feed spot XAU indisponível");
-}
-
-async function handler(req,res){
-  res.setHeader("Cache-Control","no-store, max-age=0");
-  try {
-    const timeframe = String(req.query.timeframe || "1m"); if (!TF[timeframe]) throw new Error("Timeframe inválido");
-    if (OANDA_TOKEN) {
-      try { const m = await oanda(timeframe); return res.json({ success:true, ...m, price:m.last.close, quoteTimestamp:m.quoteTimestamp }); } catch (e) { console.warn("OANDA fallback:", e.message); }
-    }
-    const [yf, spot] = await Promise.all([yahoo(timeframe), liveSpot()]);
-    const yfLast = yf.candles[yf.candles.length-1]?.close;
-    if (!Number.isFinite(yfLast)) throw new Error("Preço GC=F inválido");
-    const offset = spot.price - yfLast;
-    const candles = yf.candles.map(c => ({ ...c, open:c.open+offset, high:c.high+offset, low:c.low+offset, close:c.close+offset }));
-    const last = candles[candles.length-1];
-    return res.json({ success:true, source:"GC=F structure + live XAU spot calibration", symbol:"XAUUSD", timeframe, candles, price:spot.price, timestamp:spot.timestamp, quoteTimestamp:spot.timestamp, delayedBy:0, calibration:{offset:Number(offset.toFixed(4)), spot:spot.price, futures:yfLast} });
-  } catch(e) { return res.status(502).json({success:false,error:"Não foi possível obter dados XAUUSD",details:e.message}); }
-}
-module.exports = handler;
+const TF = {"1m":{oanda:"M1",yahooInterval:"1m",yahooRange:"7d",count:300},"3m":{oanda:"M1",yahooInterval:"1m",yahooRange:"7d",count:900},"5m":{oanda:"M5",yahooInterval:"5m",yahooRange:"1mo",count:300},"15m":{oanda:"M15",yahooInterval:"15m",yahooRange:"1mo",count:300},"1h":{oanda:"H1",yahooInterval:"60m",yahooRange:"3mo",count:300}};
+function aggregate(candles,minutes){const size=minutes*60000,out=[];for(const c of candles){const bucket=Math.floor(Date.parse(c.timestamp)/size)*size;let g=out[out.length-1];if(!g||g.bucket!==bucket){g={bucket,timestamp:new Date(bucket).toISOString(),open:c.open,high:c.high,low:c.low,close:c.close,volume:c.volume||0,complete:c.complete!==false};out.push(g)}else{g.high=Math.max(g.high,c.high);g.low=Math.min(g.low,c.low);g.close=c.close;g.volume+=c.volume||0;g.complete=c.complete&&g.complete}}return out.map(({bucket,...c})=>c)}
+async function oanda(timeframe){if(!OANDA_TOKEN)throw new Error("OANDA_API_TOKEN não configurado");const cfg=TF[timeframe],count=timeframe==="3m"?1000:cfg.count;const r=await axios.get(`${OANDA_BASE}/v3/instruments/${INSTRUMENT}/candles`,{params:{granularity:cfg.oanda,count,price:"M",includeFirst:true},headers:{Authorization:`Bearer ${OANDA_TOKEN}`},timeout:12000});let candles=(r.data?.candles||[]).map(c=>({timestamp:new Date(c.time).toISOString(),open:Number(c.mid?.o),high:Number(c.mid?.h),low:Number(c.mid?.l),close:Number(c.mid?.c),volume:Number(c.volume||0),complete:c.complete!==false})).filter(c=>[c.open,c.high,c.low,c.close].every(Number.isFinite));if(timeframe==="3m")candles=aggregate(candles,3);candles=candles.slice(-300);if(candles.length<50)throw new Error("OANDA devolveu poucos candles");const last=candles[candles.length-1];return{source:`OANDA ${INSTRUMENT} — candles ${timeframe}`,symbol:`OANDA:${INSTRUMENT}`,timeframe,candles,last,delayedBy:0,quoteTimestamp:last.timestamp}}
+async function yahoo(timeframe){const cfg=TF[timeframe],r=await axios.get(`${YAHOO}${encodeURIComponent("GC=F")}`,{params:{interval:cfg.yahooInterval,range:cfg.yahooRange,includePrePost:true},timeout:12000,headers:{"User-Agent":"Mozilla/5.0 RB-Gold-Sniper/4.0"}});const result=r.data?.chart?.result?.[0];if(!result)throw new Error("Yahoo não devolveu GC=F");const q=result.indicators?.quote?.[0]||{};let candles=(result.timestamp||[]).map((ts,i)=>({timestamp:new Date(ts*1000).toISOString(),open:Number(q.open?.[i]),high:Number(q.high?.[i]),low:Number(q.low?.[i]),close:Number(q.close?.[i]),volume:Number(q.volume?.[i]||0),complete:true})).filter(c=>[c.open,c.high,c.low,c.close].every(Number.isFinite));if(timeframe==="3m")candles=aggregate(candles,3);candles=candles.slice(-300);if(!candles.length)throw new Error("Sem candles GC=F");return{candles,symbol:"GC=F",timeframe,meta:result.meta||{}}}
+async function liveSpot(){const r=await axios.get(GOLD_SPOT,{timeout:6000,headers:{"User-Agent":"RB-Gold-Sniper/4.0"}});const price=Number(r.data?.price),ts=Number(r.data?.timestamp||0);if(!Number.isFinite(price))throw new Error("Feed spot XAU indisponível");return{price,timestamp:ts?new Date(ts*1000).toISOString():new Date().toISOString(),source:"Gold API — XAU spot"}}
+async function getMarket(timeframe){if(!TF[timeframe])throw new Error("Timeframe inválido");if(OANDA_TOKEN){try{return await oanda(timeframe)}catch(e){console.warn("OANDA fallback:",e.message)}}const [yf,spot]=await Promise.all([yahoo(timeframe),liveSpot()]);const yfLast=yf.candles.at(-1)?.close;if(!Number.isFinite(yfLast))throw new Error("Preço GC=F inválido");const offset=spot.price-yfLast;const candles=yf.candles.map(c=>({...c,open:c.open+offset,high:c.high+offset,low:c.low+offset,close:c.close+offset}));return{success:true,source:"GC=F structure + live XAU spot calibration",symbol:"XAUUSD",timeframe,candles,price:spot.price,last:candles.at(-1),timestamp:spot.timestamp,quoteTimestamp:spot.timestamp,delayedBy:0,calibration:{offset:Number(offset.toFixed(4)),spot:spot.price,futures:yfLast}}}
+async function handler(req,res){res.setHeader("Cache-Control","no-store, max-age=0");try{const timeframe=String(req.query.timeframe||"1m"),m=await getMarket(timeframe);res.json({success:true,...m,price:m.price??m.last.close,quoteTimestamp:m.quoteTimestamp??m.last.timestamp})}catch(e){res.status(502).json({success:false,error:"Não foi possível obter dados XAUUSD",details:e.message})}}
+handler.getMarket=getMarket;
+module.exports=handler;
