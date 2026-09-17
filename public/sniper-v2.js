@@ -14,33 +14,32 @@ function tactical(c,dir,S,A,sig,prev){const rej=rejection(sig),tol=A*C.zoneAtr;c
 function analyze(main,m3,m5,m15,h1){
  if(![main,m3,m5,m15,h1].every(Array.isArray)||main.length<C.minHistory||m3.length<55||m5.length<55||m15.length<55||h1.length<55)return null;
  const closed=main.slice(0,-1),sig=closed.at(-1),prev=closed.at(-2),forming=main.at(-1),cl=closed.map(x=>x.close),price=main.at(-1).close;
- const e20=ema(cl,20),e50=ema(cl,50),e200=ema(cl,200),R=rsi(cl),prevR=rsi(cl.slice(0,-1)),A=atr(closed),S=structure(closed);if([e20,e50,e200,R,A].some(x=>x==null)||!S)return null;
+ const e20=ema(cl,20),e50=ema(cl,50),e200=ema(cl,200),R=rsi(cl),A=atr(closed),S=structure(closed);if([e20,e50,e200,R,A].some(x=>x==null)||!S)return null;
  const t3=trend(m3.slice(0,-1)),t5=trend(m5.slice(0,-1)),t15=trend(m15.slice(0,-1)),t1=trend(h1.slice(0,-1));
- const ms=structureSignal(closed),rej=rejection(sig),tb=tactical(closed,'BUY',S,A,sig,prev),ts=tactical(closed,'SELL',S,A,sig,prev);
+ const ms=structureSignal(closed),tb=tactical(closed,'BUY',S,A,sig,prev),ts=tactical(closed,'SELL',S,A,sig,prev);
  const bull=[t3==='ALTA',t5==='ALTA',t15==='ALTA'].filter(Boolean).length,bear=[t3==='BAIXA',t5==='BAIXA',t15==='BAIXA'].filter(Boolean).length;
  const buyTF=bull>=C.minTFAligned&&t1!=='BAIXA',sellTF=bear>=C.minTFAligned&&t1!=='ALTA';
  const body=Math.abs(sig.close-sig.open),bodyOK=body>=A*C.minBodyAtr,atrOK=A/Math.max(sig.close,1)>=0.000015&&A/Math.max(sig.close,1)<=0.012;
  const buyRSI=R>=25&&R<=82,sellRSI=R>=18&&R<=75;
- const buyStructure=tb.direct||tb.near||tb.retest||tb.continuation||ms.bosBuy||ms.chochBuy;
- const sellStructure=ts.direct||ts.near||ts.retest||ts.continuation||ms.bosSell||ms.chochSell;
- // O filtro é menos rigoroso, mas a entrada NUNCA nasce apenas de momentum: tem de existir um evento táctico de preço.
- const buySetup=buyTF&&buyRSI&&atrOK&&buyStructure;
- const sellSetup=sellTF&&sellRSI&&atrOK&&sellStructure;
+ // BOS/CHOCH são confirmação estrutural; nunca criam uma entrada isoladamente.
+ const tacticalBuy=tb.direct?'BREAKOUT FECHADO':tb.retest?'PULLBACK/RETESTE + REJEIÇÃO':tb.continuation?'BREAKOUT + CONTINUAÇÃO':tb.near?'REJEIÇÃO/DEFESA DA RESISTÊNCIA':null;
+ const tacticalSell=ts.direct?'BREAKDOWN FECHADO':ts.retest?'RETESTE + REJEIÇÃO':ts.continuation?'BREAKDOWN + CONTINUAÇÃO':ts.near?'REJEIÇÃO/DEFESA DO SUPORTE':null;
+ const bosBuyConfirm=ms.bosBuy||ms.chochBuy,bosSellConfirm=ms.bosSell||ms.chochSell;
+ const buyStructure=!!tacticalBuy,sellStructure=!!tacticalSell;
+ const buySetup=buyTF&&buyRSI&&atrOK&&buyStructure,sellSetup=sellTF&&sellRSI&&atrOK&&sellStructure;
  const type=bodyOK&&buySetup?'BUY':bodyOK&&sellSetup?'SELL':'WAIT';
  let sl=null,tp=null,rr=null;
  if(type==='BUY'){const tacticalLow=Math.min(sig.low,S.support);sl=Math.min(tacticalLow-A*.20,e20-A*.15);const risk=price-sl;if(risk>0){tp=price+Math.max(risk*C.minRR,A*2);rr=(tp-price)/risk}}
  if(type==='SELL'){const tacticalHigh=Math.max(sig.high,S.resistance);sl=Math.max(tacticalHigh+A*.20,e20+A*.15);const risk=sl-price;if(risk>0){tp=price-Math.max(risk*C.minRR,A*2);rr=(price-tp)/risk}}
  const validRisk=Number.isFinite(rr)&&rr>=C.minRR&&Number.isFinite(tp)&&Number.isFinite(sl),finalType=validRisk?type:'WAIT';
- const tacticalBuy=tb.direct?'BREAKOUT FECHADO':tb.retest?'PULLBACK/RETESTE + REJEIÇÃO':tb.continuation?'BREAKOUT + CONTINUAÇÃO':tb.near?'REJEIÇÃO/DEFESA DA RESISTÊNCIA':ms.bosBuy?'BOS COMPRADOR':ms.chochBuy?'CHOCH COMPRADOR':null;
- const tacticalSell=ts.direct?'BREAKDOWN FECHADO':ts.retest?'RETESTE + REJEIÇÃO':ts.continuation?'BREAKDOWN + CONTINUAÇÃO':ts.near?'REJEIÇÃO DA RESISTÊNCIA':ms.bosSell?'BOS VENDEDOR':ms.chochSell?'CHOCH VENDEDOR':null;
  const setupPass=!!(tacticalBuy||tacticalSell),passed=[atrOK,bodyOK,buyTF||sellTF,buyRSI||sellRSI,setupPass].filter(Boolean).length;
  const rejReasons=[];if(!atrOK)rejReasons.push('volatilidade fora da faixa');if(!bodyOK)rejReasons.push('candle de confirmação demasiado fraca');if(!buyTF&&!sellTF)rejReasons.push('M3/M5/M15 sem alinhamento suficiente');if(!buyRSI&&!sellRSI)rejReasons.push('RSI fora da faixa');if(!setupPass)rejReasons.push('sem sequência táctica de preço');
  const formingR=rsi(main.map(x=>x.close));
- const armedBuy=tb.direct||tb.near||tb.retest||tb.continuation||forming.close>S.resistance||forming.low<=S.resistance+A*C.zoneAtr;
- const armedSell=ts.direct||ts.near||ts.retest||ts.continuation||forming.close<S.support||forming.high>=S.support-A*C.zoneAtr;
+ const armedBuy=!!tacticalBuy||forming.close>S.resistance||forming.low<=S.resistance+A*C.zoneAtr;
+ const armedSell=!!tacticalSell||forming.close<S.support||forming.high>=S.support-A*C.zoneAtr;
  const armed=armedBuy&&!armedSell?'BUY':armedSell&&!armedBuy?'SELL':null;
- const reasons=finalType==='BUY'?[tacticalBuy||'estrutura compradora',bull>=2?'M3/M5/M15 maioritariamente compradores':'confirmação multi-timeframe mínima','H1 não contrário','RSI dentro da zona operacional','RR 1:2+']:finalType==='SELL'?[tacticalSell||'estrutura vendedora',bear>=2?'M3/M5/M15 maioritariamente vendedores':'confirmação multi-timeframe mínima','H1 não contrário','RSI dentro da zona operacional','RR 1:2+']:[];
- return{type:finalType,score:passed,confidence:finalType==='WAIT'?0:68+passed*5,price,signalTimestamp:sig.timestamp||null,rsi:R,ema20:e20,ema50:e50,ema200:e200,atr:A,support:S.support,resistance:S.resistance,trend3:t3,trend5:t5,trend15:t15,trend1:t1,sl:sl==null?null:round(sl),tp:tp==null?null:round(tp),rr:rr==null?null:rr,reasons,rejectionReasons:rejReasons,setupState:armed?'ARMADO':'SEM SETUP',armedDirection:armed,formingPrice:forming.close,formingRsi:Number.isFinite(formingR)?formingR:null,tactical:{buy:tacticalBuy,sell:tacticalSell,buyLevel:tb.level,sellLevel:ts.level,buyEvent:tb.event,sellEvent:ts.event},source:'candles reais fechados',filters:{marketIsTradable:atrOK,bodyIsDecisive:bodyOK,buyTrend:buyTF,sellTrend:sellTF,buyBreakout:tb.direct,sellBreakdown:ts.direct,buyPullback:tb.retest,sellRetest:ts.retest,buyContinuation:tb.continuation,sellContinuation:ts.continuation,reversalBuy:tb.near,reversalSell:ts.near,bosBuy:ms.bosBuy,bosSell:ms.bosSell,chochBuy:ms.chochBuy,chochSell:ms.chochSell,bosConfirmed:finalType==='BUY'?ms.bosBuy:finalType==='SELL'?ms.bosSell:false,chochConfirmed:finalType==='BUY'?ms.chochBuy:finalType==='SELL'?ms.chochSell:false,technicalPass:atrOK&&bodyOK,m3Buy:t3==='ALTA',m3Sell:t3==='BAIXA'}};
+ const reasons=finalType==='BUY'?[tacticalBuy,'confirmação multi-timeframe mínima',t1!=='BAIXA'?'H1 não contrário':'H1 filtro','RSI dentro da zona operacional','RR 1:2+']:finalType==='SELL'?[tacticalSell,'confirmação multi-timeframe mínima',t1!=='ALTA'?'H1 não contrário':'H1 filtro','RSI dentro da zona operacional','RR 1:2+']:[];
+ return{type:finalType,score:passed,confidence:finalType==='WAIT'?0:68+passed*5,price,signalTimestamp:sig.timestamp||null,rsi:R,ema20:e20,ema50:e50,ema200:e200,atr:A,support:S.support,resistance:S.resistance,trend3:t3,trend5:t5,trend15:t15,trend1:t1,sl:sl==null?null:round(sl),tp:tp==null?null:round(tp),rr:rr==null?null:rr,reasons,rejectionReasons:rejReasons,setupState:armed?'ARMADO':'SEM SETUP',armedDirection:armed,formingPrice:forming.close,formingRsi:Number.isFinite(formingR)?formingR:null,tactical:{buy:tacticalBuy,sell:tacticalSell,buyLevel:tb.level,sellLevel:ts.level,buyEvent:tb.event,sellEvent:ts.event,bosBuy:ms.bosBuy,chochBuy:ms.chochBuy,bosSell:ms.bosSell,chochSell:ms.chochSell},source:'candles reais fechados',filters:{marketIsTradable:atrOK,bodyIsDecisive:bodyOK,buyTrend:buyTF,sellTrend:sellTF,buyBreakout:tb.direct,sellBreakdown:ts.direct,buyPullback:tb.retest,sellRetest:ts.retest,buyContinuation:tb.continuation,sellContinuation:ts.continuation,reversalBuy:tb.near,reversalSell:ts.near,bosBuy:ms.bosBuy,bosSell:ms.bosSell,chochBuy:ms.chochBuy,chochSell:ms.chochSell,bosConfirmed:type==='BUY'?bosBuyConfirm:type==='SELL'?bosSellConfirm:false,chochConfirmed:type==='BUY'?ms.chochBuy:type==='SELL'?ms.chochSell:false,technicalPass:atrOK&&bodyOK,m3Buy:t3==='ALTA',m3Sell:t3==='BAIXA'}};
 }
 root.RBGoldSniper=Object.assign(root.RBGoldSniper||{},{CONFIG:C,sma,ema,rsi,atr,trend,priorStructure:structure,structureSignal,analyze});
 })(globalThis);
