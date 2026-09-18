@@ -1,8 +1,8 @@
 const axios = require("axios");
 
 // XAUUSD market feed.
-// Biquote exposes XAUUSD candles and live MT5-based ticks without an API key.
-// TradingView remains OANDA:XAUUSD visually; analysis uses the same XAUUSD feed.
+// Biquote supplies the XAUUSD candles plus a live MT5-based quote.
+// TradingView remains OANDA:XAUUSD visually. The sniper logic stays unchanged.
 const BASE = "https://biquote.io/api";
 const SYMBOL = "XAUUSD";
 const TF = {
@@ -29,68 +29,98 @@ function clean(a) {
 }
 async function request(path, params={}) {
   return axios.get(`${BASE}/${path}`, {
-    params, timeout: 9000,
-    headers: { Accept:"application/json", "User-Agent":"RB-Gold-Sniper/5.0" }
+    params, timeout:9000,
+    headers:{Accept:"application/json","User-Agent":"RB-Gold-Sniper/5.1"}
   });
 }
+
 async function fetchCandles(timeframe) {
   const cfg=TF[timeframe];
   if(!cfg) throw new Error("Timeframe inválido");
 
   const [br,tr]=await Promise.all([
-    request(`${SYMBOL}/ohlc`, { interval:cfg.interval, limit:LIMIT }),
-    request(SYMBOL, { allowStale:false })
+    request(`${SYMBOL}/ohlc`,{interval:cfg.interval,limit:LIMIT}),
+    request(SYMBOL,{allowStale:false})
   ]);
   const bars=Array.isArray(br.data?.bars)?br.data.bars:[];
   if(!bars.length) throw new Error("Biquote não devolveu candles XAUUSD");
 
-  const candles=clean(bars.map(b=>({
+  let candles=clean(bars.map(b=>({
     timestamp:new Date(b.openTime).toISOString(),
-    open:Number(b.open), high:Number(b.high), low:Number(b.low), close:Number(b.close),
-    volume:Number(b.volume||0),
-    complete:b.isOpen!==true
+    open:Number(b.open),high:Number(b.high),low:Number(b.low),close:Number(b.close),
+    volume:Number(b.volume||0),complete:b.isOpen!==true
   }))).slice(-LIMIT);
   if(candles.length<50) throw new Error(`Biquote devolveu poucos candles (${candles.length})`);
 
   const now=Date.now();
-  const last=candles[candles.length-1];
-  const candleTs=Date.parse(last.timestamp);
-  const age=Math.max(0,Math.round((now-candleTs)/1000));
   const tick=tr.data||{};
   const livePrice=Number(tick.mid);
-  const price=Number.isFinite(livePrice)?livePrice:last.close;
   const quoteAge=Number(tick.quoteAgeSeconds||0);
   const marketState=tick.marketState||"unknown";
+  const last=candles[candles.length-1];
+  const lastTs=Date.parse(last.timestamp);
+  const age=Math.max(0,Math.round((now-lastTs)/1000));
+
+  // If the provider has not published the current M1 bar yet but the live
+  // XAUUSD tick is fresh, extend the current M1 candle from the last known
+  // close. This is ONLY for the live trigger; historical OHLC is untouched.
+  // We never fabricate missing M5/M15/H1 history and stale higher TFs still
+  // remain protected by their normal stale limits.
+  let effectiveAge=age;
+  if(timeframe==="1m" && Number.isFinite(livePrice) && quoteAge<=15 && age>60 && age<=300){
+    const minuteStart=Math.floor(now/60000)*60000;
+    if(minuteStart>lastTs){
+      const base=Number(last.close);
+      candles=[...candles.slice(0,-1),{
+        timestamp:new Date(minuteStart).toISOString(),
+        open:base,
+        high:Math.max(base,livePrice),
+        low:Math.min(base,livePrice),
+        close:livePrice,
+        volume:Number(last.volume||0),
+        complete:false,
+        liveSynthetic:true
+      }];
+      effectiveAge=0;
+    }
+  }
+
+  const effectiveLast=candles[candles.length-1];
+  const price=Number.isFinite(livePrice)?livePrice:effectiveLast.close;
+  const stale=quoteAge>300 || (timeframe!=="1m" && effectiveAge>cfg.stale) ||
+    (timeframe==="1m" && effectiveAge>cfg.stale);
 
   return {
     success:true,
     source:"Biquote XAUUSD — feed MT5",
     symbol:SYMBOL,
     displaySymbol:"OANDA:XAUUSD",
-    timeframe,candles,last,
-    price:Number.isFinite(price)?price:last.close,
-    delayedBy:age,
-    candleTimestamp:last.timestamp,
+    timeframe,candles,last:effectiveLast,
+    price:Number.isFinite(price)?price:effectiveLast.close,
+    delayedBy:effectiveAge,
+    candleTimestamp:effectiveLast.timestamp,
     quoteTimestamp:tick.timestamp||new Date().toISOString(),
-    candleAgeSec:age,
-    candleStartAgeSec:age,
+    candleAgeSec:effectiveAge,
+    candleStartAgeSec:effectiveAge,
     quoteAgeSec:Number.isFinite(quoteAge)?quoteAge:0,
-    stale:age>cfg.stale || quoteAge>300,
+    stale,
     marketState,
+    liveM1:Boolean(timeframe==="1m"&&effectiveLast.liveSynthetic),
     oandaLive:false,
-    feedNotice:"Preço e candles XAUUSD pelo feed Biquote/MT5; TradingView mostra OANDA:XAUUSD"
+    feedNotice:"XAUUSD/MT5 com preço ao vivo; M1 pode ser atualizado pelo tick enquanto o candle oficial não chega; TradingView mostra OANDA:XAUUSD"
   };
 }
+
 async function getMarket(timeframe) {
   if(!TF[timeframe]) throw new Error("Timeframe inválido");
   const key=`biquote:${SYMBOL}:${timeframe}`;
   const hit=cache.get(key);
-  if(hit&&Date.now()-hit.t<CACHE_MS) return hit.v;
-  if(inflight.has(key)) return inflight.get(key);
+  if(hit&&Date.now()-hit.t<CACHE_MS)return hit.v;
+  if(inflight.has(key))return inflight.get(key);
   const p=fetchCandles(timeframe).then(v=>{
-    cache.set(key,{t:Date.now(),v}); inflight.delete(key); return v;
+    cache.set(key,{t:Date.now(),v});inflight.delete(key);return v;
   }).catch(e=>{inflight.delete(key);throw e;});
-  inflight.set(key,p); return p;
+  inflight.set(key,p);return p;
 }
 async function handler(req,res){
   res.setHeader("Cache-Control","no-store, max-age=0");
