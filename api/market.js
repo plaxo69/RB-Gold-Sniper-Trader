@@ -1,39 +1,179 @@
 const axios = require("axios");
-const BASE = "https://api.exchange.coinbase.com";
-const PRODUCT = "PAXG-USD";
-const TF = {"1m":{granularity:60,aggregate:null},"3m":{granularity:60,aggregate:3},"5m":{granularity:300,aggregate:null},"15m":{granularity:900,aggregate:null},"1h":{granularity:3600,aggregate:null}};
-const cache=new Map(),inflight=new Map(),CACHE_MS=8000;
-function valid(c){return [c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.open>0&&c.high>=Math.max(c.open,c.close)&&c.low<=Math.min(c.open,c.close)&&c.high>=c.low}
-function clean(a){return a.filter(valid).sort((a,b)=>Date.parse(a.timestamp)-Date.parse(b.timestamp)).filter((c,i,s)=>i===0||c.timestamp!==s[i-1].timestamp)}
-function aggregate(a,minutes){const size=minutes*60000,out=[];for(const c of a){const bucket=Math.floor(Date.parse(c.timestamp)/size)*size;let g=out[out.length-1];if(!g||g.bucket!==bucket){g={bucket,timestamp:new Date(bucket).toISOString(),open:c.open,high:c.high,low:c.low,close:c.close,volume:c.volume||0,complete:c.complete!==false}}else{g.high=Math.max(g.high,c.high);g.low=Math.min(g.low,c.low);g.close=c.close;g.volume+=c.volume||0;g.complete=g.complete&&c.complete!==false}}return out.map(({bucket,...c})=>c).filter(valid)}
-function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
-async function request(url,params){let last;for(let i=0;i<3;i++){try{return await axios.get(url,{params,timeout:10000,headers:{Accept:"application/json","User-Agent":"RB-Gold-Sniper/1.0"}})}catch(e){last=e;if(i<2)await sleep(400*(i+1))}}throw last}
-async function fetchCandles(timeframe){
-  const cfg=TF[timeframe];
-  // 3m is built from the same cached 1m feed. This avoids a second Coinbase
-  // 1m request when the app asks for all timeframes in parallel and prevents
-  // the 3m panel from failing independently because of feed/rate limits.
-  if(timeframe==="3m"){
-    const base=await getMarket("1m");
-    const candles=clean(aggregate(base.candles,3)).slice(-300);
-    if(candles.length<50)throw new Error(`Coinbase devolveu poucos candles 3m (${candles.length})`);
-    const lastCandle=candles[candles.length-1];
-    const candleStartAge=Math.max(0,Date.now()-Date.parse(lastCandle.timestamp));
-    return{success:true,source:base.source,symbol:base.symbol,displaySymbol:base.displaySymbol,timeframe,candles,last:lastCandle,price:base.price,delayedBy:base.delayedBy,candleTimestamp:lastCandle.timestamp,quoteTimestamp:base.quoteTimestamp,candleAgeSec:Math.round(candleStartAge/1000),candleStartAgeSec:Math.round(candleStartAge/1000),quoteAgeSec:base.quoteAgeSec,stale:candleStartAge>180000||Number(base.quoteAgeSec||0)>45,oandaLive:false,feedNotice:base.feedNotice};
-  }
-  const [cr,tr]=await Promise.all([request(`${BASE}/products/${PRODUCT}/candles`,{granularity:cfg.granularity}),request(`${BASE}/products/${PRODUCT}/ticker`)]);
-  if(!Array.isArray(cr.data)||!cr.data.length)throw new Error("Coinbase não devolveu candles PAXG/USD");
-  let candles=clean(cr.data.map(x=>{const ts=Number(x[0])*1000;return{timestamp:new Date(ts).toISOString(),open:Number(x[3]),high:Number(x[2]),low:Number(x[1]),close:Number(x[4]),volume:Number(x[5]||0),complete:ts+cfg.granularity*1000<=Date.now()}}));
-  if(cfg.aggregate)candles=aggregate(candles,cfg.aggregate);
-  candles=clean(candles).slice(-300);
-  if(candles.length<50)throw new Error(`Coinbase devolveu poucos candles (${candles.length})`);
-  const lastCandle=candles[candles.length-1];
-  const candleStartAge=Math.max(0,Date.now()-Date.parse(lastCandle.timestamp));
-  const ticker=tr.data||{},livePrice=Number(ticker.price),tickerTs=Date.parse(ticker.time||"");
-  const quoteTimestamp=Number.isFinite(tickerTs)?new Date(tickerTs).toISOString():new Date().toISOString();
-  const quoteAge=Math.max(0,Date.now()-(Number.isFinite(tickerTs)?tickerTs:Date.now()));
-  return{success:true,source:"Coinbase PAXG/USD — ouro spot (proxy)",symbol:"PAXG/USD",displaySymbol:"OANDA:XAUUSD",timeframe,candles,last:lastCandle,price:Number.isFinite(livePrice)?livePrice:lastCandle.close,delayedBy:Math.round(quoteAge/1000),candleTimestamp:lastCandle.timestamp,quoteTimestamp,candleAgeSec:Math.round(candleStartAge/1000),candleStartAgeSec:Math.round(candleStartAge/1000),quoteAgeSec:Math.round(quoteAge/1000),stale:candleStartAge>180000||quoteAge>45000,oandaLive:false,feedNotice:"Preço ao vivo PAXG/USD + candles Coinbase; TradingView mostra OANDA:XAUUSD"}
+
+// Primary feed: Binance PAXG/USDT spot. PAXG represents one troy ounce of
+// allocated gold, so it is used here as the live XAU/USD proxy while TradingView
+// continues to display OANDA:XAUUSD visually.
+const BASE = "https://api.binance.com";
+const PRODUCT = "PAXGUSDT";
+const TF = {
+  "1m": { interval: "1m" },
+  "5m": { interval: "5m" },
+  "15m": { interval: "15m" },
+  "1h": { interval: "1h" }
+};
+
+const cache = new Map();
+const inflight = new Map();
+const CACHE_MS = 5000;
+const LIMIT = 500;
+
+function valid(c) {
+  return [c.open, c.high, c.low, c.close].every(Number.isFinite) &&
+    c.open > 0 &&
+    c.high >= Math.max(c.open, c.close) &&
+    c.low <= Math.min(c.open, c.close) &&
+    c.high >= c.low;
 }
-async function getMarket(timeframe){if(!TF[timeframe])throw new Error("Timeframe inválido");const key=`coinbase:${PRODUCT}:${timeframe}`,hit=cache.get(key);if(hit&&Date.now()-hit.t<CACHE_MS)return hit.v;if(inflight.has(key))return inflight.get(key);const p=fetchCandles(timeframe).then(v=>{cache.set(key,{t:Date.now(),v});inflight.delete(key);return v}).catch(e=>{inflight.delete(key);throw e});inflight.set(key,p);return p}
-async function handler(req,res){res.setHeader("Cache-Control","no-store, max-age=0");try{const timeframe=String(req.query.timeframe||"1m"),m=await getMarket(timeframe);res.status(200).json(m)}catch(e){console.error("MARKET ERROR",e.message);res.status(502).json({success:false,error:"Falha no feed de ouro",details:e.message,source:"Coinbase PAXG/USD"})}}
-handler.getMarket=getMarket;module.exports=handler;
+
+function clean(a) {
+  return a
+    .filter(valid)
+    .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+    .filter((c, i, s) => i === 0 || c.timestamp !== s[i - 1].timestamp);
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function request(url, params) {
+  let last;
+  for (let i = 0; i < 3; i++) {
+    try {
+      return await axios.get(url, {
+        params,
+        timeout: 8000,
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "RB-Gold-Sniper/2.0"
+        }
+      });
+    } catch (e) {
+      last = e;
+      if (i < 2) await sleep(350 * (i + 1));
+    }
+  }
+  throw last;
+}
+
+async function fetchCandles(timeframe) {
+  const cfg = TF[timeframe];
+  if (!cfg) throw new Error("Timeframe inválido");
+
+  const [cr, tr] = await Promise.all([
+    request(`${BASE}/api/v3/klines`, {
+      symbol: PRODUCT,
+      interval: cfg.interval,
+      limit: LIMIT
+    }),
+    request(`${BASE}/api/v3/ticker/price`, {
+      symbol: PRODUCT
+    })
+  ]);
+
+  if (!Array.isArray(cr.data) || !cr.data.length) {
+    throw new Error("Binance não devolveu candles PAXG/USDT");
+  }
+
+  const now = Date.now();
+  const candles = clean(cr.data.map(x => {
+    const ts = Number(x[0]);
+    const closeTime = Number(x[6]);
+    return {
+      timestamp: new Date(ts).toISOString(),
+      open: Number(x[1]),
+      high: Number(x[2]),
+      low: Number(x[3]),
+      close: Number(x[4]),
+      volume: Number(x[5] || 0),
+      closeTime: new Date(closeTime).toISOString(),
+      complete: closeTime <= now
+    };
+  })).slice(-300);
+
+  if (candles.length < 50) {
+    throw new Error(`Binance devolveu poucos candles (${candles.length})`);
+  }
+
+  const lastCandle = candles[candles.length - 1];
+  const candleTs = Date.parse(lastCandle.timestamp);
+  const candleAgeSec = Math.max(0, Math.round((now - candleTs) / 1000));
+  const tickerPrice = Number(cr?.data?.[cr.data.length - 1]?.[4]);
+  const livePrice = Number(tr?.data?.price);
+  const price = Number.isFinite(livePrice) ? livePrice : tickerPrice;
+  const quoteTimestamp = new Date().toISOString();
+
+  // Binance klines are refreshed continuously. A candle may be the currently
+  // forming candle, so its opening timestamp can be up to one timeframe old.
+  // For M1 the hard safety limit is 150s; this prevents stale feeds from ever
+  // generating a sniper signal.
+  const staleLimit = timeframe === "1m" ? 150 : Math.max(240, {
+    "5m": 720,
+    "15m": 1500,
+    "1h": 5400
+  }[timeframe] || 720);
+
+  return {
+    success: true,
+    source: "Binance PAXG/USDT — ouro spot (proxy)",
+    symbol: "PAXG/USDT",
+    displaySymbol: "OANDA:XAUUSD",
+    timeframe,
+    candles,
+    last: lastCandle,
+    price: Number.isFinite(price) ? price : lastCandle.close,
+    delayedBy: candleAgeSec,
+    candleTimestamp: lastCandle.timestamp,
+    quoteTimestamp,
+    candleAgeSec,
+    candleStartAgeSec: candleAgeSec,
+    quoteAgeSec: 0,
+    stale: candleAgeSec > staleLimit,
+    oandaLive: false,
+    feedNotice: "Preço e candles ao vivo PAXG/USDT; TradingView mostra OANDA:XAUUSD"
+  };
+}
+
+async function getMarket(timeframe) {
+  if (!TF[timeframe]) throw new Error("Timeframe inválido");
+
+  const key = `binance:${PRODUCT}:${timeframe}`;
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.t < CACHE_MS) return hit.v;
+
+  if (inflight.has(key)) return inflight.get(key);
+
+  const p = fetchCandles(timeframe)
+    .then(v => {
+      cache.set(key, { t: Date.now(), v });
+      inflight.delete(key);
+      return v;
+    })
+    .catch(e => {
+      inflight.delete(key);
+      throw e;
+    });
+
+  inflight.set(key, p);
+  return p;
+}
+
+async function handler(req, res) {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  try {
+    const timeframe = String(req.query.timeframe || "1m");
+    const m = await getMarket(timeframe);
+    res.status(200).json(m);
+  } catch (e) {
+    console.error("MARKET ERROR", e.message);
+    res.status(502).json({
+      success: false,
+      error: "Falha no feed de ouro",
+      details: e.message,
+      source: "Binance PAXG/USDT"
+    });
+  }
+}
+
+handler.getMarket = getMarket;
+module.exports = handler;
