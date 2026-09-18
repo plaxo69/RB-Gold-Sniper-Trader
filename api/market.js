@@ -8,7 +8,32 @@ function clean(a){return a.filter(valid).sort((a,b)=>Date.parse(a.timestamp)-Dat
 function aggregate(a,minutes){const size=minutes*60000,out=[];for(const c of a){const bucket=Math.floor(Date.parse(c.timestamp)/size)*size;let g=out[out.length-1];if(!g||g.bucket!==bucket){g={bucket,timestamp:new Date(bucket).toISOString(),open:c.open,high:c.high,low:c.low,close:c.close,volume:c.volume||0,complete:c.complete!==false}}else{g.high=Math.max(g.high,c.high);g.low=Math.min(g.low,c.low);g.close=c.close;g.volume+=c.volume||0;g.complete=g.complete&&c.complete!==false}}return out.map(({bucket,...c})=>c).filter(valid)}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 async function request(url,params){let last;for(let i=0;i<3;i++){try{return await axios.get(url,{params,timeout:10000,headers:{Accept:"application/json","User-Agent":"RB-Gold-Sniper/1.0"}})}catch(e){last=e;if(i<2)await sleep(400*(i+1))}}throw last}
-async function fetchCandles(timeframe){const cfg=TF[timeframe];const [cr,tr]=await Promise.all([request(`${BASE}/products/${PRODUCT}/candles`,{granularity:cfg.granularity}),request(`${BASE}/products/${PRODUCT}/ticker`)]);if(!Array.isArray(cr.data)||!cr.data.length)throw new Error("Coinbase não devolveu candles PAXG/USD");let candles=clean(cr.data.map(x=>{const ts=Number(x[0])*1000;return{timestamp:new Date(ts).toISOString(),open:Number(x[3]),high:Number(x[2]),low:Number(x[1]),close:Number(x[4]),volume:Number(x[5]||0),complete:ts+cfg.granularity*1000<=Date.now()}}));if(cfg.aggregate)candles=aggregate(candles,cfg.aggregate);candles=clean(candles).slice(-300);if(candles.length<50)throw new Error(`Coinbase devolveu poucos candles (${candles.length})`);const lastCandle=candles[candles.length-1];const candleStartAge=Math.max(0,Date.now()-Date.parse(lastCandle.timestamp));const ticker=tr.data||{},livePrice=Number(ticker.price),tickerTs=Date.parse(ticker.time||"");const quoteTimestamp=Number.isFinite(tickerTs)?new Date(tickerTs).toISOString():new Date().toISOString();const quoteAge=Math.max(0,Date.now()-(Number.isFinite(tickerTs)?tickerTs:Date.now()));return{success:true,source:"Coinbase PAXG/USD — ouro spot (proxy)",symbol:"PAXG/USD",displaySymbol:"OANDA:XAUUSD",timeframe,candles,last:lastCandle,price:Number.isFinite(livePrice)?livePrice:lastCandle.close,delayedBy:Math.round(quoteAge/1000),candleTimestamp:lastCandle.timestamp,quoteTimestamp,candleAgeSec:Math.round(candleStartAge/1000),candleStartAgeSec:Math.round(candleStartAge/1000),quoteAgeSec:Math.round(quoteAge/1000),stale:candleStartAge>180000||quoteAge>45000,oandaLive:false,feedNotice:"Preço ao vivo PAXG/USD + candles Coinbase; TradingView mostra OANDA:XAUUSD"}}
+async function fetchCandles(timeframe){
+  const cfg=TF[timeframe];
+  // 3m is built from the same cached 1m feed. This avoids a second Coinbase
+  // 1m request when the app asks for all timeframes in parallel and prevents
+  // the 3m panel from failing independently because of feed/rate limits.
+  if(timeframe==="3m"){
+    const base=await getMarket("1m");
+    const candles=clean(aggregate(base.candles,3)).slice(-300);
+    if(candles.length<50)throw new Error(`Coinbase devolveu poucos candles 3m (${candles.length})`);
+    const lastCandle=candles[candles.length-1];
+    const candleStartAge=Math.max(0,Date.now()-Date.parse(lastCandle.timestamp));
+    return{success:true,source:base.source,symbol:base.symbol,displaySymbol:base.displaySymbol,timeframe,candles,last:lastCandle,price:base.price,delayedBy:base.delayedBy,candleTimestamp:lastCandle.timestamp,quoteTimestamp:base.quoteTimestamp,candleAgeSec:Math.round(candleStartAge/1000),candleStartAgeSec:Math.round(candleStartAge/1000),quoteAgeSec:base.quoteAgeSec,stale:candleStartAge>180000||Number(base.quoteAgeSec||0)>45,oandaLive:false,feedNotice:base.feedNotice};
+  }
+  const [cr,tr]=await Promise.all([request(`${BASE}/products/${PRODUCT}/candles`,{granularity:cfg.granularity}),request(`${BASE}/products/${PRODUCT}/ticker`)]);
+  if(!Array.isArray(cr.data)||!cr.data.length)throw new Error("Coinbase não devolveu candles PAXG/USD");
+  let candles=clean(cr.data.map(x=>{const ts=Number(x[0])*1000;return{timestamp:new Date(ts).toISOString(),open:Number(x[3]),high:Number(x[2]),low:Number(x[1]),close:Number(x[4]),volume:Number(x[5]||0),complete:ts+cfg.granularity*1000<=Date.now()}}));
+  if(cfg.aggregate)candles=aggregate(candles,cfg.aggregate);
+  candles=clean(candles).slice(-300);
+  if(candles.length<50)throw new Error(`Coinbase devolveu poucos candles (${candles.length})`);
+  const lastCandle=candles[candles.length-1];
+  const candleStartAge=Math.max(0,Date.now()-Date.parse(lastCandle.timestamp));
+  const ticker=tr.data||{},livePrice=Number(ticker.price),tickerTs=Date.parse(ticker.time||"");
+  const quoteTimestamp=Number.isFinite(tickerTs)?new Date(tickerTs).toISOString():new Date().toISOString();
+  const quoteAge=Math.max(0,Date.now()-(Number.isFinite(tickerTs)?tickerTs:Date.now()));
+  return{success:true,source:"Coinbase PAXG/USD — ouro spot (proxy)",symbol:"PAXG/USD",displaySymbol:"OANDA:XAUUSD",timeframe,candles,last:lastCandle,price:Number.isFinite(livePrice)?livePrice:lastCandle.close,delayedBy:Math.round(quoteAge/1000),candleTimestamp:lastCandle.timestamp,quoteTimestamp,candleAgeSec:Math.round(candleStartAge/1000),candleStartAgeSec:Math.round(candleStartAge/1000),quoteAgeSec:Math.round(quoteAge/1000),stale:candleStartAge>180000||quoteAge>45000,oandaLive:false,feedNotice:"Preço ao vivo PAXG/USD + candles Coinbase; TradingView mostra OANDA:XAUUSD"}
+}
 async function getMarket(timeframe){if(!TF[timeframe])throw new Error("Timeframe inválido");const key=`coinbase:${PRODUCT}:${timeframe}`,hit=cache.get(key);if(hit&&Date.now()-hit.t<CACHE_MS)return hit.v;if(inflight.has(key))return inflight.get(key);const p=fetchCandles(timeframe).then(v=>{cache.set(key,{t:Date.now(),v});inflight.delete(key);return v}).catch(e=>{inflight.delete(key);throw e});inflight.set(key,p);return p}
 async function handler(req,res){res.setHeader("Cache-Control","no-store, max-age=0");try{const timeframe=String(req.query.timeframe||"1m"),m=await getMarket(timeframe);res.status(200).json(m)}catch(e){console.error("MARKET ERROR",e.message);res.status(502).json({success:false,error:"Falha no feed de ouro",details:e.message,source:"Coinbase PAXG/USD"})}}
 handler.getMarket=getMarket;module.exports=handler;
