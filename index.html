@@ -6,6 +6,7 @@
 <title>RB Gold Sniper — XAU/USD</title>
 <link rel="stylesheet" href="public/styles.css">
 <script src="https://s3.tradingview.com/tv.js"></script>
+<script src="public/asset-switch.js"></script>
 </head>
 <body>
 <div class="app-wrapper">
@@ -26,10 +27,7 @@
 </div>
 <div id="tradingview-chart" style="width:100%;height:520px;"></div>
 </div>
-
-<!-- Sinal/trade fica imediatamente por baixo do gráfico para a Entrada/TP/SL serem sempre visíveis. -->
 <section class="trades-section trade-under-chart"><div class="trades-header-compact"><h3>🎯 Sinal Sniper</h3><div class="trades-stats-compact"><span>Alertas: <strong id="total-trades">0</strong></span><span>Resultado: <strong id="total-profit">—</strong></span><span>Win rate: <strong id="win-rate">—</strong></span></div></div><div id="trades-container" class="trades-container-compact"><div class="no-trades">A obter dados do ouro…</div></div></section>
-
 <div class="data-wrapper">
 <section class="control-section">
 <div class="status-box"><h3>⚡ Estado</h3><div id="status" class="status-indicator offline">A iniciar…</div><div id="server-info" class="info-text"></div><button onclick="refresh()" class="btn btn-primary full-width">Atualizar agora</button></div>
