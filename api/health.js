@@ -1,7 +1,11 @@
-const axios=require("axios");
+const market=require("./market");
 module.exports=async function handler(req,res){
   res.setHeader("Cache-Control","no-store, max-age=0");
-  let spot=null,marketConnected=false;
-  try{const r=await axios.get("https://api.gold-api.com/price/XAU",{timeout:6000,headers:{"User-Agent":"RB-Gold-Sniper/4.0"}});spot=Number(r.data?.price);marketConnected=Number.isFinite(spot)}catch{}
-  res.status(marketConnected?200:503).json({status:marketConnected?"OK":"DEGRADED",marketConnected,source:marketConnected?"Gold API — XAU spot + market.js candles":"XAU spot indisponível",symbol:"XAUUSD",aiEnabled:false,mode:"ALERTAS",timestamp:new Date().toISOString()});
+  try{
+    const m=await market.getMarket("XAUUSD","1m");
+    const live=Boolean(m.marketState==="open"&&m.realOpenBar===true&&Number.isFinite(m.quoteAgeSec)&&m.quoteAgeSec<=15&&m.stale!==true);
+    res.status(200).json({status:"OK",marketConnected:true,liveM1:live,source:m.source,symbol:m.symbol,history:"localStorage",aiEnabled:false,mode:"ALERTAS",timestamp:new Date().toISOString()});
+  }catch(e){
+    res.status(503).json({status:"DEGRADED",marketConnected:false,liveM1:false,history:"localStorage",aiEnabled:false,mode:"ALERTAS",error:e.message,timestamp:new Date().toISOString()});
+  }
 };
