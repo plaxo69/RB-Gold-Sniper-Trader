@@ -1,5 +1,5 @@
 (function(root){
-const C={period:20,minHistory:205,minRR:1,minBodyAtr:.18,maxExtAtr:3.2,zoneAtr:.35,retestAtr:.55,reversalWickBody:.85,tacticalLookback:12,minTFAligned:2,minCloseLocation:.62,minBreakAtr:.15,tp2MinBodyAtr:1.15,tp2MinClose:.72};
+const C={period:20,minHistory:205,minRR:1,minBodyAtr:.18,maxExtAtr:3.2,zoneAtr:.35,retestAtr:.55,reversalWickBody:.85,tacticalLookback:12,minCloseLocation:.62,minBreakAtr:.15,tp2MinBodyAtr:1.15,tp2MinClose:.72,quantumBuyForce:55,quantumSellForce:45,quantumBuyRsi:60,quantumSellRsi:40};
 const sma=(v,p)=>v.length<p?null:v.slice(-p).reduce((a,b)=>a+b,0)/p;
 function ema(v,p){if(v.length<p)return null;const k=2/(p+1);let x=v[0];for(let i=1;i<v.length;i++)x=v[i]*k+x*(1-k);return x}
 function rsi(v,p=14){if(v.length<p+1)return null;let g=0,l=0;for(let i=v.length-p;i<v.length;i++){const d=v[i]-v[i-1];if(d>=0)g+=d;else l-=d}return l===0?100:100-100/(1+g/l)}
@@ -14,98 +14,58 @@ function tactical(c,dir,S,A,sig,prev){
  const rej=rejection(sig),tol=A*C.zoneAtr,level=dir==='BUY'?S.resistance:S.support;
  const direct=dir==='BUY'?sig.close>level&&prev.close<=level:sig.close<level&&prev.close>=level;
  const near=dir==='BUY'?sig.low<=level+tol&&sig.close>level&&rej.bull:sig.high>=level-tol&&sig.close<level&&rej.bear;
- const ev=recentEvent(c,dir);
- let retest=false,continuation=false,retestIndex=null,confirmationIndex=null;
- if(ev&&ev.index<c.length-1){
-   const after=c.slice(ev.index+1,-1);
-   if(after.length){
-     const touchTol=A*C.retestAtr;
-     if(dir==='BUY'){
-       for(let j=0;j<after.length;j++){
-         const p=after[j];
-         const touched=p.low<=ev.level+touchTol&&p.low>=ev.level-touchTol;
-         const held=p.close>=ev.level-touchTol;
-         if(!touched||!held)continue;
-         const next=after[j+1];
-         if(next){
-           const nextRej=rejection(next);
-           const confirmed=sig.close>next.high&&sig.close>ev.level&&nextRej.bull;
-           const currentRetest=sig.low<=ev.level+touchTol&&sig.close>ev.level&&rej.bull&&sig.close>p.high;
-           retest=confirmed||currentRetest;
-           if(retest){retestIndex=ev.index+1+j;confirmationIndex=ev.index+2+j;break}
-         }else{
-           const confirmed=sig.close>p.high&&sig.close>ev.level&&rej.bull;
-           retest=confirmed;
-           if(retest){retestIndex=ev.index+1+j;confirmationIndex=ev.index+1+j;break}
-         }
-       }
-       const priorHigh=Math.max(...after.map(x=>x.high));
-       const held=after.every(x=>x.close>=ev.level-touchTol);
-       continuation=held&&sig.close>priorHigh&&sig.close>ev.level;
-     }else{
-       for(let j=0;j<after.length;j++){
-         const p=after[j];
-         const touched=p.high>=ev.level-touchTol&&p.high<=ev.level+touchTol;
-         const held=p.close<=ev.level+touchTol;
-         if(!touched||!held)continue;
-         const next=after[j+1];
-         if(next){
-           const nextRej=rejection(next);
-           const confirmed=sig.close<next.low&&sig.close<ev.level&&nextRej.bear;
-           const currentRetest=sig.high>=ev.level-touchTol&&sig.close<ev.level&&rej.bear&&sig.close<p.low;
-           retest=confirmed||currentRetest;
-           if(retest){retestIndex=ev.index+1+j;confirmationIndex=ev.index+2+j;break}
-         }else{
-           const confirmed=sig.close<p.low&&sig.close<ev.level&&rej.bear;
-           retest=confirmed;
-           if(retest){retestIndex=ev.index+1+j;confirmationIndex=ev.index+1+j;break}
-         }
-       }
-       const priorLow=Math.min(...after.map(x=>x.low));
-       const held=after.every(x=>x.close<=ev.level+touchTol);
-       continuation=held&&sig.close<priorLow&&sig.close<ev.level;
-     }
-   }
- }
+ const ev=recentEvent(c,dir);let retest=false,continuation=false,retestIndex=null,confirmationIndex=null;
+ if(ev&&ev.index<c.length-1){const after=c.slice(ev.index+1,-1);if(after.length){const touchTol=A*C.retestAtr;
+  if(dir==='BUY'){
+   for(let j=0;j<after.length;j++){const p=after[j],touched=p.low<=ev.level+touchTol&&p.low>=ev.level-touchTol,held=p.close>=ev.level-touchTol;if(!touched||!held)continue;const next=after[j+1];if(next){const confirmed=sig.close>next.high&&sig.close>ev.level&&rejection(next).bull;const current=sig.low<=ev.level+touchTol&&sig.close>ev.level&&rej.bull&&sig.close>p.high;retest=confirmed||current;if(retest){retestIndex=ev.index+1+j;confirmationIndex=ev.index+2+j;break}}else{retest=sig.close>p.high&&sig.close>ev.level&&rej.bull;if(retest){retestIndex=ev.index+1+j;confirmationIndex=ev.index+1+j;break}}}
+   const priorHigh=Math.max(...after.map(x=>x.high));const held=after.every(x=>x.close>=ev.level-touchTol);continuation=held&&sig.close>priorHigh&&sig.close>ev.level;
+  }else{
+   for(let j=0;j<after.length;j++){const p=after[j],touched=p.high>=ev.level-touchTol&&p.high<=ev.level+touchTol,held=p.close<=ev.level+touchTol;if(!touched||!held)continue;const next=after[j+1];if(next){const confirmed=sig.close<next.low&&sig.close<ev.level&&rejection(next).bear;const current=sig.high>=ev.level-touchTol&&sig.close<ev.level&&rej.bear&&sig.close<p.low;retest=confirmed||current;if(retest){retestIndex=ev.index+1+j;confirmationIndex=ev.index+2+j;break}}else{retest=sig.close<p.low&&sig.close<ev.level&&rej.bear;if(retest){retestIndex=ev.index+1+j;confirmationIndex=ev.index+1+j;break}}}
+   const priorLow=Math.min(...after.map(x=>x.low));const held=after.every(x=>x.close<=ev.level+touchTol);continuation=held&&sig.close<priorLow&&sig.close<ev.level;
+  }
+ }}
  return{direct,near,retest,continuation,event:ev,level,retestIndex,confirmationIndex}
 }
-function strongMove(sig,A,dir){const body=Math.abs(sig.close-sig.open),range=Math.max(sig.high-sig.low,1e-9),closePos=(sig.close-sig.low)/range;return body>=A*C.tp2MinBodyAtr&&(dir==='BUY'?closePos>=C.tp2MinClose:closePos<=1-C.tp2MinClose)}
-function makeTargets(entry,sl,dir,sig,A,tb,ts){
- const risk=Math.abs(entry-sl);if(!Number.isFinite(risk)||risk<=0)return{tp1:null,tp2:null,rr1:null,rr2:null,tp2Eligible:false};
- const tp1=dir==='BUY'?entry+risk:entry-risk;
- const tacticalContinuation=dir==='BUY'?tb.continuation:ts.continuation;
- const tacticalBreak=dir==='BUY'?tb.direct:ts.direct;
- const strong=strongMove(sig,A,dir)&& (tacticalContinuation||tacticalBreak|| (dir==='BUY'?tb.retest:ts.retest));
- const tp2=strong?(dir==='BUY'?entry+risk*2:entry-risk*2):null;
- return{tp1, tp2, rr1:1, rr2:strong?2:null, tp2Eligible:strong}
+function quantum(main,m5,m15,h1,sig,ms,tb,ts){
+ const closed=main.slice(0,-1),cl=closed.map(x=>x.close),R=rsi(cl),e20=ema(cl,20),m1=trend(cl),t5=trend(m5.slice(0,-1)),t15=trend(m15.slice(0,-1)),t1=trend(h1.slice(0,-1));
+ const buyTrend=m1==='ALTA'&&t5==='ALTA'&&t15==='ALTA'&&t1!=='BAIXA',sellTrend=m1==='BAIXA'&&t5==='BAIXA'&&t15==='BAIXA'&&t1!=='ALTA';
+ const buyLine=sig.close>e20,sellLine=sig.close<e20,buyForce=Number.isFinite(R)?R:0,sellForce=Number.isFinite(R)?R:100;
+ const buyZone=Number.isFinite(R)&&R>C.quantumBuyRsi,sellZone=Number.isFinite(R)&&R<C.quantumSellRsi;
+ const markerBuy=!!(ms.bosBuy||ms.chochBuy||tb.event||tb.direct||tb.continuation),markerSell=!!(ms.bosSell||ms.chochSell||ts.event||ts.direct||ts.continuation);
+ const confluenceBuy=[m1==='ALTA',t5==='ALTA',t15==='ALTA'].filter(Boolean).length,confluenceSell=[m1==='BAIXA',t5==='BAIXA',t15==='BAIXA'].filter(Boolean).length;
+ const buyScore=Math.round((buyForce/100)*25+(confluenceBuy/3)*30+(buyLine?15:0)+(buyZone?15:0)+(markerBuy?15:0));
+ const sellScore=Math.round(((100-sellForce)/100)*25+(confluenceSell/3)*30+(sellLine?15:0)+(sellZone?15:0)+(markerSell?15:0));
+ const buyAligned=buyForce>C.quantumBuyForce&&buyZone&&buyTrend&&buyLine&&confluenceBuy===3&&markerBuy;
+ const sellAligned=sellForce<C.quantumSellForce&&sellZone&&sellTrend&&sellLine&&confluenceSell===3&&markerSell;
+ return{source:'proxy de candles — não é o indicador proprietário JIFU',buy:{force:buyForce,score:buyScore,trend:buyTrend,line:buyLine,zone:buyZone,confluence:confluenceBuy,marker:markerBuy,aligned:buyAligned},sell:{force:sellForce,score:sellScore,trend:sellTrend,line:sellLine,zone:sellZone,confluence:confluenceSell,marker:markerSell,aligned:sellAligned},rsi:R,ema20:e20};
 }
+function strongMove(sig,A,dir){const body=Math.abs(sig.close-sig.open),range=Math.max(sig.high-sig.low,1e-9),closePos=(sig.close-sig.low)/range;return body>=A*C.tp2MinBodyAtr&&(dir==='BUY'?closePos>=C.tp2MinClose:closePos<=1-C.tp2MinClose)}
+function makeTargets(entry,sl,dir,sig,A,tb,ts){const risk=Math.abs(entry-sl);if(!Number.isFinite(risk)||risk<=0)return{tp1:null,tp2:null,rr1:null,rr2:null,tp2Eligible:false};const tp1=dir==='BUY'?entry+risk:entry-risk,tacticalContinuation=dir==='BUY'?tb.continuation:ts.continuation,tacticalBreak=dir==='BUY'?tb.direct:ts.direct,strong=strongMove(sig,A,dir)&&(tacticalContinuation||tacticalBreak||(dir==='BUY'?tb.retest:ts.retest));return{tp1,tp2:strong?(dir==='BUY'?entry+risk*2:entry-risk*2):null,rr1:1,rr2:strong?2:null,tp2Eligible:strong}}
 function analyze(main,m5,m15,h1){
  if(![main,m5,m15,h1].every(Array.isArray)||main.length<C.minHistory||m5.length<55||m15.length<55||h1.length<55)return null;
- const closed=main.slice(0,-1),sig=closed.at(-1),prev=closed.at(-2),forming=main.at(-1),cl=closed.map(x=>x.close),entry=sig.close;
- const e20=ema(cl,20),e50=ema(cl,50),e200=ema(cl,200),R=rsi(cl),A=atr(closed),S=structure(closed);if([e20,e50,e200,R,A].some(x=>x==null)||!S)return null;
- const t5=trend(m5.slice(0,-1)),t15=trend(m15.slice(0,-1)),t1=trend(h1.slice(0,-1));
- const ms=structureSignal(closed),tb=tactical(closed,'BUY',S,A,sig,prev),ts=tactical(closed,'SELL',S,A,sig,prev);
- const bull=[t5==='ALTA',t15==='ALTA'].filter(Boolean).length,bear=[t5==='BAIXA',t15==='BAIXA'].filter(Boolean).length;
- const buyTF=bull>=C.minTFAligned&&bear===0&&t1!=='BAIXA',sellTF=bear>=C.minTFAligned&&bull===0&&t1!=='ALTA';
- const body=Math.abs(sig.close-sig.open),range=Math.max(sig.high-sig.low,1e-9),bodyOK=body>=A*C.minBodyAtr;
- const closePos=(sig.close-sig.low)/range,closeQualityBuy=closePos>=C.minCloseLocation,closeQualitySell=closePos<=1-C.minCloseLocation;
- const emaBuy=entry>e200,emaSell=entry<e200,extensionBuy=(entry-e20)/Math.max(A,1e-9)<=C.maxExtAtr,extensionSell=(e20-entry)/Math.max(A,1e-9)<=C.maxExtAtr;
- const directBuyQuality=!tb.direct||((sig.close-tb.level)>=A*C.minBreakAtr&&closeQualityBuy),directSellQuality=!ts.direct||((ts.level-sig.close)>=A*C.minBreakAtr&&closeQualitySell);
- const buyRSI=R>50&&R<=72,sellRSI=R>=28&&R<50,atrOK=A/Math.max(entry,1)>=0.000015&&A/Math.max(entry,1)<=0.012;
- const tacticalBuy=tb.retest&&closeQualityBuy?'PULLBACK/RETESTE + REJEIÇÃO':tb.direct&&directBuyQuality?'BREAKOUT FECHADO':tb.continuation&&closeQualityBuy?'BREAKOUT + CONTINUAÇÃO':tb.near&&closeQualityBuy?'REJEIÇÃO/DEFESA DA RESISTÊNCIA':null;
- const tacticalSell=ts.retest&&closeQualitySell?'RETESTE + REJEIÇÃO':ts.direct&&directSellQuality?'BREAKDOWN FECHADO':ts.continuation&&closeQualitySell?'BREAKDOWN + CONTINUAÇÃO':ts.near&&closeQualitySell?'REJEIÇÃO/DEFESA DO SUPORTE':null;
- const bosBuyConfirm=ms.bosBuy||ms.chochBuy,bosSellConfirm=ms.bosSell||ms.chochSell,buyStructuralConfirm=bosBuyConfirm||!!tb.direct||!!tb.retest||!!tb.continuation,sellStructuralConfirm=bosSellConfirm||!!ts.direct||!!ts.retest||!!ts.continuation;
- const buySetup=buyTF&&emaBuy&&extensionBuy&&buyRSI&&atrOK&&!!tacticalBuy&&buyStructuralConfirm,sellSetup=sellTF&&emaSell&&extensionSell&&sellRSI&&atrOK&&!!tacticalSell&&sellStructuralConfirm,bothSetup=buySetup&&sellSetup;
- const type=!bothSetup&&bodyOK&&buySetup?'BUY':!bothSetup&&bodyOK&&sellSetup?'SELL':'WAIT';let sl=null,tp1=null,tp2=null,rr1=null,rr2=null,rr=null,tp2Eligible=false;
- if(type==='BUY'){const tacticalLow=Math.min(sig.low,S.support);sl=Math.min(tacticalLow-A*.20,e20-A*.15);const targets=makeTargets(entry,sl,'BUY',sig,A,tb,ts);tp1=targets.tp1;tp2=targets.tp2;rr1=targets.rr1;rr2=targets.rr2;tp2Eligible=targets.tp2Eligible;rr=rr1}
- if(type==='SELL'){const tacticalHigh=Math.max(sig.high,S.resistance);sl=Math.max(tacticalHigh+A*.20,e20+A*.15);const targets=makeTargets(entry,sl,'SELL',sig,A,tb,ts);tp1=targets.tp1;tp2=targets.tp2;rr1=targets.rr1;rr2=targets.rr2;tp2Eligible=targets.tp2Eligible;rr=rr1}
+ const closed=main.slice(0,-1),sig=closed.at(-1),prev=closed.at(-2),forming=main.at(-1),cl=closed.map(x=>x.close),entry=sig.close,e20=ema(cl,20),e50=ema(cl,50),e200=ema(cl,200),R=rsi(cl),A=atr(closed),S=structure(closed);if([e20,e50,e200,R,A].some(x=>x==null)||!S)return null;
+ const t5=trend(m5.slice(0,-1)),t15=trend(m15.slice(0,-1)),t1=trend(h1.slice(0,-1)),m1Trend=trend(closed),ms=structureSignal(closed),tb=tactical(closed,'BUY',S,A,sig,prev),ts=tactical(closed,'SELL',S,A,sig,prev),q=quantum(main,m5,m15,h1,sig,ms,tb,ts);
+ const body=Math.abs(sig.close-sig.open),range=Math.max(sig.high-sig.low,1e-9),bodyOK=body>=A*C.minBodyAtr,closePos=(sig.close-sig.low)/range,closeQualityBuy=closePos>=C.minCloseLocation,closeQualitySell=closePos<=1-C.minCloseLocation,emaBuy=entry>e200,emaSell=entry<e200,extensionBuy=(entry-e20)/Math.max(A,1e-9)<=C.maxExtAtr,extensionSell=(e20-entry)/Math.max(A,1e-9)<=C.maxExtAtr;
+ const directBuyQuality=!tb.direct||((sig.close-tb.level)>=A*C.minBreakAtr&&closeQualityBuy),directSellQuality=!ts.direct||((ts.level-sig.close)>=A*C.minBreakAtr&&closeQualitySell),atrOK=A/Math.max(entry,1)>=0.000015&&A/Math.max(entry,1)<=0.012;
+ const strategyABuy=tb.retest&&tb.confirmationIndex===closed.length-1&&closeQualityBuy,strategyASell=ts.retest&&ts.confirmationIndex===closed.length-1&&closeQualitySell;
+ const strategyBBuy=q.buyTrend&&tb.continuation&&closeQualityBuy,strategyBSell=q.sellTrend&&ts.continuation&&closeQualitySell;
+ const buySetup=q.buy.aligned&&emaBuy&&extensionBuy&&atrOK&&bodyOK&&(strategyABuy||strategyBBuy),sellSetup=q.sell.aligned&&emaSell&&extensionSell&&atrOK&&bodyOK&&(strategyASell||strategyBSell),both=buySetup&&sellSetup;
+ const type=!both&&buySetup?'BUY':!both&&sellSetup?'SELL':'WAIT';let sl=null,tp1=null,tp2=null,rr1=null,rr2=null,rr=null,tp2Eligible=false;
+ if(type==='BUY'){sl=Math.min(Math.min(sig.low,S.support)-A*.20,e20-A*.15);const z=makeTargets(entry,sl,'BUY',sig,A,tb,ts);({tp1,tp2,rr1,rr2,tp2Eligible}=z);rr=rr1}
+ if(type==='SELL'){sl=Math.max(Math.max(sig.high,S.resistance)+A*.20,e20+A*.15);const z=makeTargets(entry,sl,'SELL',sig,A,tb,ts);({tp1,tp2,rr1,rr2,tp2Eligible}=z);rr=rr1}
  const validRisk=Number.isFinite(rr1)&&rr1>=C.minRR&&Number.isFinite(tp1)&&Number.isFinite(sl),finalType=validRisk?type:'WAIT';
- const directionalPass=finalType==='BUY'?(buyTF&&emaBuy&&extensionBuy&&buyRSI):finalType==='SELL'?(sellTF&&emaSell&&extensionSell&&sellRSI):(buyTF&&emaBuy&&extensionBuy&&buyRSI)||(sellTF&&emaSell&&extensionSell&&sellRSI),setupPass=finalType==='BUY'?buyStructuralConfirm:finalType==='SELL'?sellStructuralConfirm:!!(tacticalBuy||tacticalSell);
- const qualityParts=[atrOK,bodyOK,directionalPass,setupPass,(finalType==='BUY'?closeQualityBuy&&directBuyQuality:finalType==='SELL'?closeQualitySell&&directSellQuality:true),validRisk],passed=qualityParts.filter(Boolean).length,rejReasons=[];
- if(!atrOK)rejReasons.push('volatilidade fora da faixa');if(!bodyOK)rejReasons.push('candle de confirmação demasiado fraca');if(!buyTF&&!sellTF)rejReasons.push('M5/M15 sem alinhamento');if(finalType==='BUY'&&!emaBuy)rejReasons.push('preço abaixo da EMA200');if(finalType==='SELL'&&!emaSell)rejReasons.push('preço acima da EMA200');if(finalType==='BUY'&&!extensionBuy)rejReasons.push('BUY demasiado esticado da EMA20');if(finalType==='SELL'&&!extensionSell)rejReasons.push('SELL demasiado esticado da EMA20');if(!buyRSI&&!sellRSI)rejReasons.push('RSI sem momentum direcional');if(!setupPass)rejReasons.push('sem confirmação estrutural BOS/CHOCH ou breakout/reteste');if(tacticalBuy&&(!closeQualityBuy||!directBuyQuality))rejReasons.push('breakout BUY sem força/fecho suficiente');if(tacticalSell&&(!closeQualitySell||!directSellQuality))rejReasons.push('breakdown SELL sem força/fecho suficiente');if(bothSetup)rejReasons.push('BUY e SELL simultaneamente — sinal ambíguo');if(!validRisk)rejReasons.push('sem risco/TP1 válido');
- const formingR=rsi(main.map(x=>x.close)),tol=A*C.zoneAtr,armedBuy=!!tacticalBuy||((forming.high>=S.resistance-tol)&&(forming.close<=S.resistance+A*C.retestAtr)),armedSell=!!tacticalSell||((forming.low<=S.support+tol)&&(forming.close>=S.support-A*C.retestAtr)),armed=armedBuy&&!armedSell?'BUY':armedSell&&!armedBuy?'SELL':null;
- const reasons=finalType==='BUY'?[tacticalBuy,'M5 + M15 alinhados','H1 não contrário','preço acima da EMA200','RSI > 50','fecho do M1 com força','confirmação estrutural','TP1 1:1',tp2Eligible?'TP2 1:2 por força':'TP2 só se houver força']:finalType==='SELL'?[tacticalSell,'M5 + M15 alinhados','H1 não contrário','preço abaixo da EMA200','RSI < 50','fecho do M1 com força','confirmação estrutural','TP1 1:1',tp2Eligible?'TP2 1:2 por força':'TP2 só se houver força']:[];
- return{type:finalType,score:passed,confidence:finalType==='WAIT'?0:70+passed*4,price:entry,signalTimestamp:sig.timestamp||null,rsi:R,ema20:e20,ema50:e50,ema200:e200,atr:A,support:S.support,resistance:S.resistance,trend5:t5,trend15:t15,trend1:t1,sl:sl==null?null:round(sl),tp:tp1==null?null:round(tp1),tp1:tp1==null?null:round(tp1),tp2:tp2==null?null:round(tp2),rr:rr==null?null:rr,rr1:rr1==null?null:rr1,rr2:rr2==null?null:rr2,tp2Eligible,reasons,rejectionReasons:rejReasons,setupState:armed?'ARMADO':'SEM SETUP',armedDirection:armed,formingPrice:forming.close,formingRsi:Number.isFinite(formingR)?formingR:null,tactical:{buy:tacticalBuy,sell:tacticalSell,buyLevel:tb.level,sellLevel:ts.level,buyEvent:tb.event,sellEvent:ts.event,buyRetestIndex:tb.retestIndex,sellRetestIndex:ts.retestIndex,buyConfirmationIndex:tb.confirmationIndex,sellConfirmationIndex:ts.confirmationIndex,bosBuy:ms.bosBuy,chochBuy:ms.chochBuy,bosSell:ms.bosSell,chochSell:ms.chochSell,buyStructuralConfirm,sellStructuralConfirm},source:'candles reais fechados',filters:{marketIsTradable:atrOK,bodyIsDecisive:bodyOK,buyTrend:buyTF,sellTrend:sellTF,ema200Buy:emaBuy,ema200Sell:emaSell,extensionBuy,extensionSell,buyBreakout:tb.direct&&directBuyQuality,sellBreakdown:ts.direct&&directSellQuality,buyPullback:tb.retest,sellRetest:ts.retest,buyContinuation:tb.continuation,sellContinuation:ts.continuation,reversalBuy:tb.near&&closeQualityBuy,reversalSell:ts.near&&closeQualitySell,bosBuy:ms.bosBuy,bosSell:ms.bosSell,chochBuy:ms.chochBuy,chochSell:ms.chochSell,bosConfirmed:bosBuyConfirm,chochConfirmed:ms.chochBuy||ms.chochSell,structuralConfirmBuy:buyStructuralConfirm,structuralConfirmSell:sellStructuralConfirm,technicalPass:atrOK&&bodyOK,m5Buy:t5==='ALTA',m5Sell:t5==='BAIXA',m15Buy:t15==='ALTA',m15Sell:t15==='BAIXA',h1Buy:t1==='ALTA',h1Sell:t1==='BAIXA',closeQualityBuy,closeQualitySell,directBreakQualityBuy:directBuyQuality,directBreakQualitySell:directSellQuality,tp2Eligible}};
+ const tacticalName=finalType==='BUY'?(strategyABuy?'A — BREAKOUT → RETESTE → CONFIRMAÇÃO':strategyBBuy?'B — TENDÊNCIA → PULLBACK → DEFESA → RETOMA':''):finalType==='SELL'?(strategyASell?'A — BREAKDOWN → RETESTE → CONFIRMAÇÃO':strategyBSell?'B — TENDÊNCIA → PULLBACK → DEFESA → RETOMA':''):'';
+ const rejectionReasons=[];
+ if(!q.buy.aligned&&!q.sell.aligned)rejectionReasons.push('Quantum não alinhado');
+ if(!q.buy.aligned&&!q.sell.aligned&&Number.isFinite(R)&&R>=C.quantumSellRsi&&R<=C.quantumBuyRsi)rejectionReasons.push('Força/RSI entre 40 e 60 — aguardar');
+ if(!bodyOK)rejectionReasons.push('candle M1 sem força');if(!atrOK)rejectionReasons.push('volatilidade fora da faixa');
+ if(!buySetup&&!sellSetup){if(q.buy.aligned)rejectionReasons.push('BUY armado — aguardar pullback/reteste e confirmação M1');else if(q.sell.aligned)rejectionReasons.push('SELL armado — aguardar pullback/reteste e confirmação M1');else rejectionReasons.push('aguardar alinhamento Quantum')}
+ if(finalType==='BUY'&&m1Trend!=='ALTA')rejectionReasons.push('M1 não alinhado em ALTA');if(finalType==='SELL'&&m1Trend!=='BAIXA')rejectionReasons.push('M1 não alinhado em BAIXA');
+ if(finalType==='BUY'&&t1==='BAIXA')rejectionReasons.push('H1 contrário');if(finalType==='SELL'&&t1==='ALTA')rejectionReasons.push('H1 contrário');
+ const alignedDir=q.buy.aligned&&!q.sell.aligned?'BUY':q.sell.aligned&&!q.buy.aligned?'SELL':null,setupState=finalType!=='WAIT'?'SNIPER':alignedDir?'ARMADO — AGUARDAR MOVIMENTO':'SEM SETUP';
+ const reasons=finalType==='BUY'?[tacticalName,'Quantum azul alinhado',`Força/RSI ${R.toFixed(2)} > 60`,'M1 + M5 + M15 alinhados','H1 não contrário','confirmação M1','TP1 1:1',tp2Eligible?'TP2 1:2 — reação forte':'TP2 1:2 só com reação forte']:finalType==='SELL'?[tacticalName,'Quantum vermelho alinhado',`Força/RSI ${R.toFixed(2)} < 40`,'M1 + M5 + M15 alinhados','H1 não contrário','confirmação M1','TP1 1:1',tp2Eligible?'TP2 1:2 — reação forte':'TP2 1:2 só com reação forte']:[];
+ const score=finalType==='BUY'?q.buy.score:finalType==='SELL'?q.sell.score:Math.max(q.buy.score,q.sell.score),confidence=finalType==='WAIT'?0:70+Math.min(25,score/4);
+ return{type:finalType,score,confidence,price:entry,signalTimestamp:sig.timestamp||null,rsi:R,ema20:e20,ema50:e50,ema200:e200,atr:A,support:S.support,resistance:S.resistance,trend1:m1Trend,trend5:t5,trend15:t15,trendH1:t1,sl:sl==null?null:round(sl),tp:tp1==null?null:round(tp1),tp1:tp1==null?null:round(tp1),tp2:tp2==null?null:round(tp2),rr,rr1,rr2,tp2Eligible,reasons,rejectionReasons,setupState,armedDirection:alignedDir,formingPrice:forming.close,formingRsi:rsi(main.map(x=>x.close)),tactical:{buy:tb.retest?'PULLBACK/RETESTE':tb.direct?'BREAKOUT':tb.continuation?'CONTINUAÇÃO':tb.near?'DEFESA':null,sell:ts.retest?'RETESTE':ts.direct?'BREAKDOWN':ts.continuation?'CONTINUAÇÃO':ts.near?'DEFESA':null,buyLevel:tb.level,sellLevel:ts.level,buyEvent:tb.event,sellEvent:ts.event,buyRetestIndex:tb.retestIndex,sellRetestIndex:ts.retestIndex,buyConfirmationIndex:tb.confirmationIndex,sellConfirmationIndex:ts.confirmationIndex,bosBuy:ms.bosBuy,chochBuy:ms.chochBuy,bosSell:ms.bosSell,chochSell:ms.chochSell,buyStructuralConfirm:strategyABuy||strategyBBuy,sellStructuralConfirm:strategyASell||strategyBSell},quantum:q,filters:{marketIsTradable:atrOK,bodyIsDecisive:bodyOK,buyTrend:q.buyTrend,sellTrend:q.sellTrend,ema200Buy:emaBuy,ema200Sell:emaSell,extensionBuy,extensionSell,buyBreakout:tb.direct&&directBuyQuality,sellBreakdown:ts.direct&&directSellQuality,buyPullback:strategyABuy,sellRetest:strategyASell,buyContinuation:strategyBBuy,sellContinuation:strategyBSell,reversalBuy:tb.near&&closeQualityBuy,reversalSell:ts.near&&closeQualitySell,bosBuy:ms.bosBuy,bosSell:ms.bosSell,chochBuy:ms.chochBuy,chochSell:ms.chochSell,bosConfirmed:ms.bosBuy||ms.bosSell,chochConfirmed:ms.chochBuy||ms.chochSell,structuralConfirmBuy:strategyABuy||strategyBBuy,structuralConfirmSell:strategyASell||strategyBSell,technicalPass:atrOK&&bodyOK,m1Buy:m1Trend==='ALTA',m1Sell:m1Trend==='BAIXA',m5Buy:t5==='ALTA',m5Sell:t5==='BAIXA',m15Buy:t15==='ALTA',m15Sell:t15==='BAIXA',h1Buy:t1==='ALTA',h1Sell:t1==='BAIXA',closeQualityBuy,closeQualitySell,directBreakQualityBuy:directBuyQuality,directBreakQualitySell:directSellQuality,quantumBuy:q.buy.aligned,quantumSell:q.sell.aligned,quantumBuyScore:q.buy.score,quantumSellScore:q.sell.score,quantumBuyForce:q.buy.force,quantumSellForce:q.sell.force,quantumBuyConfluence:q.buy.confluence,quantumSellConfluence:q.sell.confluence,quantumSource:q.source,tp2Eligible}},strategy:tacticalName||null};
 }
 root.RBGoldSniper=Object.assign(root.RBGoldSniper||{},{CONFIG:C,sma,ema,rsi,atr,trend,priorStructure:structure,structureSignal,analyze});
 })(globalThis);
