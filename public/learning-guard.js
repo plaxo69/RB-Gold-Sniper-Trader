@@ -10,54 +10,33 @@ function guard(c,a,dir){
  if(last?.status==='ALERTA')return`já existe ${last.type} aberto`;
  const lt=ts(last?.signalTimestamp??last?.time);
  if(Number.isFinite(lt)&&Number.isFinite(now)&&now-lt<COOLDOWN)return'aguardar novo ciclo após sinal anterior';
- if(sameLoss){
-  const resolved=ts(sameLoss.resolvedAt),ev=a?.tactical?.[dir==='BUY'?'buyEvent':'sellEvent'];
-  const et=ev&&c[ev.index]?ts(c[ev.index].timestamp):NaN;
-  if(!Number.isFinite(resolved)||!Number.isFinite(et)||et<=resolved)return`${dir} bloqueado após SL — exige novo breakout`;
- }
+ if(sameLoss){const resolved=ts(sameLoss.resolvedAt),ev=a?.tactical?.[dir==='BUY'?'buyEvent':'sellEvent'],et=ev&&c[ev.index]?ts(c[ev.index].timestamp):NaN;if(!Number.isFinite(resolved)||!Number.isFinite(et)||et<=resolved)return`${dir} bloqueado após SL — exige novo breakout`}
  return null;
 }
-function roomGuard(c,dir){
- const closed=c.slice(0,-1),sig=closed.at(-1),A=atr(closed),S=levels(closed);
- if(!sig||!Number.isFinite(A)||!S)return null;
- if(dir==='BUY'&&sig.close<S.resistance){const room=S.resistance-sig.close;if(room<A*ROOM_ATR)return`BUY bloqueado — apenas ${room.toFixed(2)} até à resistência (mínimo ${(A*ROOM_ATR).toFixed(2)})`}
- if(dir==='SELL'&&sig.close>S.support){const room=sig.close-S.support;if(room<A*ROOM_ATR)return`SELL bloqueado — apenas ${room.toFixed(2)} até ao suporte (mínimo ${(A*ROOM_ATR).toFixed(2)})`}
- return null;
-}
+function roomGuard(c,dir){const closed=c.slice(0,-1),sig=closed.at(-1),A=atr(closed),S=levels(closed);if(!sig||!Number.isFinite(A)||!S)return null;if(dir==='BUY'&&sig.close<S.resistance){const room=S.resistance-sig.close;if(room<A*ROOM_ATR)return`BUY bloqueado — apenas ${room.toFixed(2)} até à resistência (mínimo ${(A*ROOM_ATR).toFixed(2)})`}if(dir==='SELL'&&sig.close>S.support){const room=sig.close-S.support;if(room<A*ROOM_ATR)return`SELL bloqueado — apenas ${room.toFixed(2)} até ao suporte (mínimo ${(A*ROOM_ATR).toFixed(2)})`}return null}
 function wrap(){
- const api=window.RBGoldSniper;if(!api||typeof api.analyze!=='function'||api.analyze.__learningGuard)return;
- const original=api.analyze;
+ const api=window.RBGoldSniper;if(!api||typeof api.analyze!=='function'||api.analyze.__learningGuard)return;const original=api.analyze;
  function analyze(main,m5,m15,h1){
-  const a=original(main,m5,m15,h1);if(!a)return a;
-  const f=a.filters||{},t=a.tactical||{},closed=Array.isArray(main)?main.length-2:-1;
-  const m1Trend=trend(Array.isArray(main)?main.slice(0,-1):[]);
-  let block=null;
+  const a=original(main,m5,m15,h1);if(!a)return a;const f=a.filters||{},t=a.tactical||{},q=a.quantum||{},closed=Array.isArray(main)?main.length-2:-1,m1Trend=trend(Array.isArray(main)?main.slice(0,-1):[]);let block=null;
   if(a.type==='BUY'){
-   const retest=t.buyRetestIndex!=null;
-   const continuation=!!(f.buyContinuation);
-   if(!retest&&!continuation)block='BUY sem Estratégia A (breakout + reteste) ou Estratégia B (pullback + continuação)';
+   const retest=t.buyRetestIndex!=null,continuation=!!f.buyContinuation;
+   if(!q.buy?.aligned)block='BUY bloqueado — Quantum não está alinhado';
+   else if(!retest&&!continuation)block='BUY sem Estratégia A (breakout + reteste) ou Estratégia B (pullback + continuação)';
    else if(retest&&t.buyConfirmationIndex!==closed)block='BUY com reteste sem confirmação no último M1 fechado';
-   else if(m1Trend!=='ALTA')block='BUY bloqueado — M1 não está alinhado em ALTA';
-   else if(!(f.m5Buy&&f.m15Buy))block='BUY bloqueado — M1 + M5 + M15 não estão os 3 alinhados';
+   else if(m1Trend!=='ALTA'||!(f.m1Buy&&f.m5Buy&&f.m15Buy))block='BUY bloqueado — M1 + M5 + M15 não estão os 3 alinhados';
    else if(f.h1Sell)block='BUY contra H1';
-   else if(!(f.bosBuy||f.chochBuy))block='BUY sem BOS/CHOCH confirmado';
    else block=roomGuard(main,'BUY')||guard(main,a,'BUY');
   }else if(a.type==='SELL'){
-   const retest=t.sellRetestIndex!=null;
-   const continuation=!!(f.sellContinuation);
-   if(!retest&&!continuation)block='SELL sem Estratégia A (breakout + reteste) ou Estratégia B (pullback + continuação)';
+   const retest=t.sellRetestIndex!=null,continuation=!!f.sellContinuation;
+   if(!q.sell?.aligned)block='SELL bloqueado — Quantum não está alinhado';
+   else if(!retest&&!continuation)block='SELL sem Estratégia A (breakdown + reteste) ou Estratégia B (pullback + continuação)';
    else if(retest&&t.sellConfirmationIndex!==closed)block='SELL com reteste sem confirmação no último M1 fechado';
-   else if(m1Trend!=='BAIXA')block='SELL bloqueado — M1 não está alinhado em BAIXA';
-   else if(!(f.m5Sell&&f.m15Sell))block='SELL bloqueado — M1 + M5 + M15 não estão os 3 alinhados';
+   else if(m1Trend!=='BAIXA'||!(f.m1Sell&&f.m5Sell&&f.m15Sell))block='SELL bloqueado — M1 + M5 + M15 não estão os 3 alinhados';
    else if(f.h1Buy)block='SELL contra H1';
-   else if(!(f.bosSell||f.chochSell))block='SELL sem BOS/CHOCH confirmado';
    else block=roomGuard(main,'SELL')||guard(main,a,'SELL');
   }
-  if(block){
-   a.type='WAIT';a.score=0;a.confidence=0;a.sl=null;a.tp=null;a.tp1=null;a.tp2=null;a.rr=null;a.rr1=null;a.rr2=null;a.tp2Eligible=false;
-   a.rejectionReasons=[block,...(a.rejectionReasons||[]).filter(x=>x!==block)];
-   a.reasons=[];a.setupState='SEM SETUP';a.armedDirection=null;a.learning={blocked:true,reason:block};
-  }else if(a.type==='BUY'||a.type==='SELL')a.learning={blocked:false,rule:'duas estratégias independentes: A breakout → reteste → confirmação OU B tendência M1+M5+M15 → pullback → defesa → retoma → breakout/continuação; H1 não contrário + BOS/CHOCH + espaço até à zona',cooldownMs:COOLDOWN,roomAtr:ROOM_ATR};
+  if(block){a.type='WAIT';a.score=0;a.confidence=0;a.sl=null;a.tp=null;a.tp1=null;a.tp2=null;a.rr=null;a.rr1=null;a.rr2=null;a.tp2Eligible=false;a.rejectionReasons=[block,...(a.rejectionReasons||[]).filter(x=>x!==block)];a.reasons=[];a.setupState='SEM SETUP';a.armedDirection=null;a.learning={blocked:true,reason:block}}
+  else if(a.type==='BUY'||a.type==='SELL')a.learning={blocked:false,rule:'Quantum alinhado → setup armado → Estratégia A breakout/reteste OU Estratégia B tendência/pullback/defesa/retoma → confirmação M1 → Sniper; M1+M5+M15 alinhados; H1 não contrário; cooldown após sinal/SL',cooldownMs:COOLDOWN,roomAtr:ROOM_ATR};
   return a;
  }
  analyze.__learningGuard=true;api.analyze=analyze;
