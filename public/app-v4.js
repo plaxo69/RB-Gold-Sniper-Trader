@@ -1,3 +1,4 @@
+/* RB Gold Sniper — verified XAUUSD/Quantum baseline */
 const API_BASE="/api",POLL_MS=10000,KEY="rb_gold_sniper_signals_v1",MAX_M1_AGE_SEC=150,MAX_M1_QUOTE_AGE_SEC=15;
 const state={timeframe:"1m",last:null,audio:null,alerts:false,tv:null,feedStale:false,marketClosed:false,refreshing:false,refreshTimer:null};
 const $=id=>document.getElementById(id);
