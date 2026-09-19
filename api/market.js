@@ -5,7 +5,7 @@ const axios = require("axios");
 const BASE = "https://biquote.io/api";
 const ASSETS = {
   XAUUSD: { displaySymbol: "OANDA:XAUUSD", label: "Ouro", stale: { "1m": 150, "5m": 720, "15m": 1500, "1h": 5400 } },
-  BTCUSD: { displaySymbol: "BITSTAMP:BTCUSD", label: "Bitcoin", stale: { "1m": 150, "5m": 720, "15m": 1500, "1h": 5400 } }
+  BTCUSD: { displaySymbol: "BTCUSD", label: "Bitcoin", stale: { "1m": 150, "5m": 720, "15m": 1500, "1h": 5400 } }
 };
 const TF = {
   "1m": { interval: "1m", limit: 500 },
