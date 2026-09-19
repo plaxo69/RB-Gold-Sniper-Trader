@@ -33,8 +33,8 @@ function wrap(){
   const m1Trend=trend(Array.isArray(main)?main.slice(0,-1):[]);
   let block=null;
   if(a.type==='BUY'){
-   const retest= t.buyRetestIndex!=null;
-   const continuation= !!(t.buyContinuation??t.buyContinuationValid);
+   const retest=t.buyRetestIndex!=null;
+   const continuation=!!(f.buyContinuation);
    if(!retest&&!continuation)block='BUY sem Estratégia A (breakout + reteste) ou Estratégia B (pullback + continuação)';
    else if(retest&&t.buyConfirmationIndex!==closed)block='BUY com reteste sem confirmação no último M1 fechado';
    else if(m1Trend!=='ALTA')block='BUY bloqueado — M1 não está alinhado em ALTA';
@@ -43,8 +43,8 @@ function wrap(){
    else if(!(f.bosBuy||f.chochBuy))block='BUY sem BOS/CHOCH confirmado';
    else block=roomGuard(main,'BUY')||guard(main,a,'BUY');
   }else if(a.type==='SELL'){
-   const retest= t.sellRetestIndex!=null;
-   const continuation= !!(t.sellContinuation??t.sellContinuationValid);
+   const retest=t.sellRetestIndex!=null;
+   const continuation=!!(f.sellContinuation);
    if(!retest&&!continuation)block='SELL sem Estratégia A (breakout + reteste) ou Estratégia B (pullback + continuação)';
    else if(retest&&t.sellConfirmationIndex!==closed)block='SELL com reteste sem confirmação no último M1 fechado';
    else if(m1Trend!=='BAIXA')block='SELL bloqueado — M1 não está alinhado em BAIXA';
