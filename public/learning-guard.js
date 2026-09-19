@@ -33,16 +33,20 @@ function wrap(){
   const m1Trend=trend(Array.isArray(main)?main.slice(0,-1):[]);
   let block=null;
   if(a.type==='BUY'){
-   if(t.buyRetestIndex==null)block='BUY sem pullback/reteste confirmado';
-   else if(t.buyConfirmationIndex!==closed)block='BUY sem confirmação no último M1 fechado';
+   const retest= t.buyRetestIndex!=null;
+   const continuation= !!(t.buyContinuation??t.buyContinuationValid);
+   if(!retest&&!continuation)block='BUY sem Estratégia A (breakout + reteste) ou Estratégia B (pullback + continuação)';
+   else if(retest&&t.buyConfirmationIndex!==closed)block='BUY com reteste sem confirmação no último M1 fechado';
    else if(m1Trend!=='ALTA')block='BUY bloqueado — M1 não está alinhado em ALTA';
    else if(!(f.m5Buy&&f.m15Buy))block='BUY bloqueado — M1 + M5 + M15 não estão os 3 alinhados';
    else if(f.h1Sell)block='BUY contra H1';
    else if(!(f.bosBuy||f.chochBuy))block='BUY sem BOS/CHOCH confirmado';
    else block=roomGuard(main,'BUY')||guard(main,a,'BUY');
   }else if(a.type==='SELL'){
-   if(t.sellRetestIndex==null)block='SELL sem pullback/reteste confirmado';
-   else if(t.sellConfirmationIndex!==closed)block='SELL sem confirmação no último M1 fechado';
+   const retest= t.sellRetestIndex!=null;
+   const continuation= !!(t.sellContinuation??t.sellContinuationValid);
+   if(!retest&&!continuation)block='SELL sem Estratégia A (breakout + reteste) ou Estratégia B (pullback + continuação)';
+   else if(retest&&t.sellConfirmationIndex!==closed)block='SELL com reteste sem confirmação no último M1 fechado';
    else if(m1Trend!=='BAIXA')block='SELL bloqueado — M1 não está alinhado em BAIXA';
    else if(!(f.m5Sell&&f.m15Sell))block='SELL bloqueado — M1 + M5 + M15 não estão os 3 alinhados';
    else if(f.h1Buy)block='SELL contra H1';
@@ -53,7 +57,7 @@ function wrap(){
    a.type='WAIT';a.score=0;a.confidence=0;a.sl=null;a.tp=null;a.tp1=null;a.tp2=null;a.rr=null;a.rr1=null;a.rr2=null;a.tp2Eligible=false;
    a.rejectionReasons=[block,...(a.rejectionReasons||[]).filter(x=>x!==block)];
    a.reasons=[];a.setupState='SEM SETUP';a.armedDirection=null;a.learning={blocked:true,reason:block};
-  }else if(a.type==='BUY'||a.type==='SELL')a.learning={blocked:false,rule:'strict sniper: M1 + M5 + M15 alinhados + breakout → pullback → confirmação + H1 não contrário + BOS/CHOCH + espaço até à zona',cooldownMs:COOLDOWN,roomAtr:ROOM_ATR};
+  }else if(a.type==='BUY'||a.type==='SELL')a.learning={blocked:false,rule:'duas estratégias independentes: A breakout → reteste → confirmação OU B tendência M1+M5+M15 → pullback → defesa → retoma → breakout/continuação; H1 não contrário + BOS/CHOCH + espaço até à zona',cooldownMs:COOLDOWN,roomAtr:ROOM_ATR};
   return a;
  }
  analyze.__learningGuard=true;api.analyze=analyze;
