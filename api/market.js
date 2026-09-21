@@ -13,7 +13,11 @@ const TF = {
 };
 const cache = new Map();
 const inflight = new Map();
+let quoteCache = null;
+let quoteInflight = null;
 const CACHE_MS = 5000;
+const QUOTE_CACHE_MS = 5000;
+const TIMEOUT_MS = 6000;
 
 function finite(v) { return Number.isFinite(Number(v)); }
 function valid(c) {
@@ -31,7 +35,7 @@ function clean(a) {
 async function request(path, params = {}) {
   return axios.get(`${BASE}/${path}`, {
     params,
-    timeout: 9000,
+    timeout: TIMEOUT_MS,
     headers: {
       Accept: "application/json",
       "User-Agent": "RB-Gold-Sniper/5.3"
@@ -39,17 +43,33 @@ async function request(path, params = {}) {
   });
 }
 
+async function getQuote() {
+  if (quoteCache && Date.now() - quoteCache.t < QUOTE_CACHE_MS) return quoteCache.v;
+  if (quoteInflight) return quoteInflight;
+  quoteInflight = request(SYMBOL, { allowStale: true })
+    .then(r => {
+      const v = r.data || {};
+      quoteCache = { t: Date.now(), v };
+      quoteInflight = null;
+      return v;
+    })
+    .catch(e => {
+      quoteInflight = null;
+      if (quoteCache) return quoteCache.v;
+      throw e;
+    });
+  return quoteInflight;
+}
+
 async function fetchCandles(timeframe) {
   const cfg = TF[timeframe];
   if (!cfg) throw new Error("Timeframe inválido");
 
-  // IMPORTANT: allowStale=true is intentional here. When the market is
-  // closed Biquote returns the last price plus marketState=closed. We need
-  // that state so the UI can say MARKET CLOSED instead of reporting a feed
-  // failure. Stale data is still blocked from generating signals below.
-  const [br, tr] = await Promise.all([
+  // One shared live quote is used by all timeframes in the same server instance.
+  // This avoids four identical quote calls every 10 seconds from the browser.
+  const [br, tick] = await Promise.all([
     request(`${SYMBOL}/ohlc`, { interval: cfg.interval, limit: cfg.limit }),
-    request(SYMBOL, { allowStale: true })
+    getQuote()
   ]);
 
   const bars = Array.isArray(br.data?.bars) ? br.data.bars : [];
@@ -71,7 +91,6 @@ async function fetchCandles(timeframe) {
   }
 
   const now = Date.now();
-  const tick = tr.data || {};
   const livePrice = Number(tick.mid);
   const quoteAge = Number(tick.quoteAgeSeconds);
   const marketState = String(tick.marketState || "unknown").toLowerCase();
@@ -82,9 +101,6 @@ async function fetchCandles(timeframe) {
     ? Math.max(0, Math.round((now - lastTs) / 1000))
     : Number.POSITIVE_INFINITY;
 
-  // NEVER fabricate an M1 candle. Biquote documents that its latest open bar
-  // (isOpen=true) is the real current bar built from live ticks. We use it
-  // directly. If that bar is missing/delayed, M1 remains blocked.
   const realOpenBar = last.isOpen === true;
   const effectiveAge = age;
   const quoteFresh = Number.isFinite(quoteAge) && quoteAge <= 15;
@@ -137,6 +153,12 @@ async function getMarket(timeframe) {
     })
     .catch(e => {
       inflight.delete(key);
+      // Keep the UI alive on a short upstream outage, but explicitly mark the
+      // snapshot stale so the client cannot generate a signal from it.
+      const old = cache.get(key);
+      if (old && Date.now() - old.t < 120000) {
+        return { ...old.v, stale: true, liveM1: false, feedNotice: `${old.v.feedNotice} • último snapshot mantido após falha temporária do feed` };
+      }
       throw e;
     });
 
