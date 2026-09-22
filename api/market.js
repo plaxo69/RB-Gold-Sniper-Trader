@@ -61,7 +61,7 @@ async function getQuote() {
   return quoteInflight;
 }
 
-async function fetchCandles(timeframe, requestedLimit = 500) {
+async function fetchCandles(timeframe, requestedLimit = 500, from = null, to = null) {
   const cfg = TF[timeframe];
   const limit = Math.min(2000, Math.max(60, Number(requestedLimit) || cfg.limit));
   if (!cfg) throw new Error("Timeframe inválido");
@@ -69,7 +69,7 @@ async function fetchCandles(timeframe, requestedLimit = 500) {
   // One shared live quote is used by all timeframes in the same server instance.
   // This avoids four identical quote calls every 10 seconds from the browser.
   const [br, tick] = await Promise.all([
-    request(`${SYMBOL}/ohlc`, { interval: cfg.interval, limit: limit }),
+    request(`${SYMBOL}/ohlc`, { interval: cfg.interval, limit: Math.min(limit, 1000), ...(from ? { from } : {}), ...(to ? { to } : {}) }),
     getQuote()
   ]);
 
@@ -139,15 +139,15 @@ async function fetchCandles(timeframe, requestedLimit = 500) {
   };
 }
 
-async function getMarket(timeframe, requestedLimit = 500) {
+async function getMarket(timeframe, requestedLimit = 500, from = null, to = null) {
   if (!TF[timeframe]) throw new Error("Timeframe inválido");
   const limit = Math.min(2000, Math.max(60, Number(requestedLimit) || 500));
-  const key = `biquote:${SYMBOL}:${timeframe}:${limit}`;
+  const key = `biquote:${SYMBOL}:${timeframe}:${limit}:${from || ''}:${to || ''}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.t < CACHE_MS) return hit.v;
   if (inflight.has(key)) return inflight.get(key);
 
-  const p = fetchCandles(timeframe, limit)
+  const p = fetchCandles(timeframe, limit, from, to)
     .then(v => {
       cache.set(key, { t: Date.now(), v });
       inflight.delete(key);
@@ -173,7 +173,9 @@ async function handler(req, res) {
   try {
     const timeframe = String(req.query.timeframe || "1m");
     const requestedLimit = Math.min(2000, Math.max(60, Number(req.query.limit) || 500));
-    const m = await getMarket(timeframe, requestedLimit);
+    const from = req.query.from ? String(req.query.from) : null;
+    const to = req.query.to ? String(req.query.to) : null;
+    const m = await getMarket(timeframe, requestedLimit, from, to);
     res.status(200).json(m);
   } catch (e) {
     console.error("MARKET ERROR", e.message);
