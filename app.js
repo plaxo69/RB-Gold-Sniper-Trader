@@ -7,6 +7,7 @@ const state = {
   lastSignalKey: null,
   lastRefresh: null,
   history: JSON.parse(localStorage.getItem("rb_sniper_history") || "[]"),
+  historyLoaded: false,
   chart: null
 };
 
@@ -268,15 +269,20 @@ function saveSignal(a) {
 
   const item = { ...a, id: Date.now(), time: new Date().toISOString(), status: "ALERTA" };
   state.history.unshift(item);
-  state.history = state.history.slice(0, 100);
   localStorage.setItem("rb_sniper_history", JSON.stringify(state.history));
   renderHistory();
   notify(`🎯 ${a.type} ${a.confidence}% — entrada ${a.price.toFixed(2)}`, "success");
 
-  fetch(`${API_BASE}/signals/create`, {
+  fetch(`${API_BASE}/trades`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(item)
+  }).then(r => r.json()).then(d => {
+    if (d && d.trades) {
+      state.history = d.trades;
+      localStorage.setItem("rb_sniper_history", JSON.stringify(state.history));
+      renderHistory();
+    }
   }).catch(() => {});
 }
 
@@ -378,9 +384,27 @@ function changeTimeframe(tf) {
   if (state.candles[tf]) updateUI(state.candles[tf]);
 }
 
-window.addEventListener("load", () => {
+async function loadPersistentHistory() {
+  try {
+    const r = await fetch(`${API_BASE}/trades?t=${Date.now()}`);
+    if (!r.ok) throw new Error("Histórico indisponível");
+    const d = await r.json();
+    if (Array.isArray(d.trades)) {
+      state.history = d.trades;
+      localStorage.setItem("rb_sniper_history", JSON.stringify(state.history));
+    }
+  } catch (_) {
+    // Mantém o histórico local como fallback.
+  } finally {
+    state.historyLoaded = true;
+    renderHistory();
+  }
+}
+
+window.addEventListener("load", async () => {
   initChart();
   renderHistory();
+  await loadPersistentHistory();
   document.querySelectorAll(".timeframe-btn").forEach(b => b.addEventListener("click", () => changeTimeframe(b.dataset.tf)));
   $("status").textContent = "🟡 A obter mercado real…";
   refresh();
