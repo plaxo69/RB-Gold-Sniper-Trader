@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const axios = require("axios");
+const fs = require("fs");
+const TRADES_FILE = path.join(__dirname, "trades.json");
 require("dotenv").config();
 
 const app = express();
@@ -82,6 +84,98 @@ async function market(timeframe) {
   }
   return yahoo(timeframe);
 }
+
+async function readTradesFile() {
+  try {
+    const raw = await fs.promises.readFile(TRADES_FILE, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+async function writeTradesFile(trades) {
+  await fs.promises.writeFile(TRADES_FILE, JSON.stringify(trades, null, 2) + "\n", "utf8");
+}
+
+function githubConfigured() {
+  return Boolean(process.env.GITHUB_TOKEN && process.env.GITHUB_REPO);
+}
+
+async function githubGetTrades() {
+  const repo = process.env.GITHUB_REPO;
+  const ref = process.env.GITHUB_BRANCH || "fixed-app";
+  const url = `https://api.github.com/repos/${repo}/contents/trades.json?ref=${encodeURIComponent(ref)}`;
+  const r = await axios.get(url, {
+    headers: {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Accept: "application/vnd.github+json",
+      "User-Agent": "RB-Gold-Sniper"
+    },
+    timeout: 10000
+  });
+  const content = Buffer.from(r.data.content.replace(/\\n/g, ""), "base64").toString("utf8");
+  return { sha: r.data.sha, trades: Array.isArray(JSON.parse(content)) ? JSON.parse(content) : [] };
+}
+
+async function githubSaveTrades(trades) {
+  const repo = process.env.GITHUB_REPO;
+  const ref = process.env.GITHUB_BRANCH || "fixed-app";
+  const url = `https://api.github.com/repos/${repo}/contents/trades.json`;
+  let current = await githubGetTrades();
+  const merged = [...current.trades, ...trades.filter(t => !current.trades.some(x => String(x.id) === String(t.id)))];
+  const content = Buffer.from(JSON.stringify(merged, null, 2) + "\n").toString("base64");
+  const r = await axios.put(url, {
+    message: "chore: guardar histórico de trades",
+    content,
+    sha: current.sha,
+    branch: ref
+  }, {
+    headers: {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Accept: "application/vnd.github+json",
+      "User-Agent": "RB-Gold-Sniper"
+    },
+    timeout: 15000
+  });
+  return { trades: merged, commit: r.data.commit?.sha || null };
+}
+
+app.get("/api/trades", async (_req, res) => {
+  try {
+    const data = githubConfigured() ? await githubGetTrades() : { trades: await readTradesFile() };
+    res.json({ success: true, persistent: githubConfigured(), file: "trades.json", trades: data.trades });
+  } catch (e) {
+    res.status(500).json({ success: false, error: "Não foi possível ler trades.json", details: e.message });
+  }
+});
+
+app.post("/api/trades", async (req, res) => {
+  try {
+    const incoming = req.body && req.body.id ? [req.body] : Array.isArray(req.body) ? req.body : [];
+    if (!incoming.length) return res.status(400).json({ success: false, error: "Trade inválida" });
+
+    if (githubConfigured()) {
+      const current = await githubGetTrades();
+      const merged = [...current.trades];
+      for (const trade of incoming) {
+        if (!merged.some(x => String(x.id) === String(trade.id))) merged.push(trade);
+      }
+      const saved = await githubSaveTrades(merged);
+      return res.json({ success: true, persistent: true, file: "trades.json", trades: saved.trades });
+    }
+
+    const current = await readTradesFile();
+    for (const trade of incoming) {
+      if (!current.some(x => String(x.id) === String(trade.id))) current.push(trade);
+    }
+    await writeTradesFile(current);
+    res.json({ success: true, persistent: true, file: "trades.json", trades: current });
+  } catch (e) {
+    res.status(500).json({ success: false, persistent: false, error: "Falha a guardar trades.json", details: e.message });
+  }
+});
 
 app.get("/api/health", async (_req, res) => {
   try {
