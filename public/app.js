@@ -38,16 +38,35 @@ function evaluate(main,m5,m15,h1){
   buy+=s5.scoreBuy+s15.scoreBuy+s1.scoreBuy;sell+=s5.scoreSell+s15.scoreSell+s1.scoreSell;
   if(s5.scoreBuy)br.push(s5.label);else if(s15.scoreBuy)br.push(s15.label);else if(s1.scoreBuy)br.push(s1.label);
   if(s5.scoreSell)sr.push(s5.label);else if(s15.scoreSell)sr.push(s15.label);else if(s1.scoreSell)sr.push(s1.label);
-  const bullBreak=last>lv.resistance&&closed.at(-2).close<=lv.resistance;const bearBreak=last<lv.support&&closed.at(-2).close>=lv.support;
+  const prevClose=closed.at(-2)?.close;
+  const bullBreak=last>lv.resistance&&prevClose<=lv.resistance&&closed.at(-1).close>closed.at(-1).open;
+  const bearBreak=last<lv.support&&prevClose>=lv.support&&closed.at(-1).close<closed.at(-1).open;
+
+  // Pullback real: procura um rompimento confirmado nos últimos 5 candles
+  // e exige reteste da zona + fecho de confirmação na direção do rompimento.
+  const recent=closed.slice(-6,-1);
+  const recentBullBreak=recent.findIndex((x,i)=>{
+    const before=closed.slice(Math.max(0,closed.length-20+i-5),closed.length-6+i);
+    const resistance=before.length?Math.max(...before.map(v=>v.high)):null;
+    return resistance!=null&&x.close>resistance&&x.close>x.open;
+  });
+  const recentBearBreak=recent.findIndex((x,i)=>{
+    const before=closed.slice(Math.max(0,closed.length-20+i-5),closed.length-6+i);
+    const support=before.length?Math.min(...before.map(v=>v.low)):null;
+    return support!=null&&x.close<support&&x.close<x.open;
+  });
+  const bullishRetest=recentBullBreak>=0&&last>lv.resistance&&closed.at(-1).low<=lv.resistance+a*0.45&&closed.at(-1).close>closed.at(-1).open;
+  const bearishRetest=recentBearBreak>=0&&last<lv.support&&closed.at(-1).high>=lv.support-a*0.45&&closed.at(-1).close<closed.at(-1).open;
+  const pullbackBuy=bullishRetest&&r>=45&&r<=70&&t5!=="BAIXA"&&t15!=="BAIXA";
+  const pullbackSell=bearishRetest&&r>=30&&r<=55&&t5!=="ALTA"&&t15!=="ALTA";
   if(bullBreak){buy+=3;br.push("Rompimento confirmado")};if(bearBreak){sell+=3;sr.push("Rompimento confirmado")}
   const bullishStructure=s5.scoreBuy>0||s15.scoreBuy>0||s1.scoreBuy>0;const bearishStructure=s5.scoreSell>0||s15.scoreSell>0||s1.scoreSell>0;
   const htfBull=t15!=="BAIXA"&&t1!=="BAIXA",htfBear=t15!=="ALTA"&&t1!=="ALTA";
-  const pullbackBuy=last>e20&&last<=e20+a*0.55&&r>=45&&r<=65;const pullbackSell=last<e20&&last>=e20-a*0.55&&r>=35&&r<=55;
   let type="WAIT",reasons=[],score=Math.max(buy,sell);
   if(buy>=7&&buy>=sell+2&&bullishStructure&&htfBull){type="BUY";reasons=br}
   else if(sell>=7&&sell>=buy+2&&bearishStructure&&htfBear){type="SELL";reasons=sr}
-  else if(buy>=6&&buy>=sell+2&&pullbackBuy&&htfBull){type="BUY";reasons=[...br,"Pullback confirmado"]}
-  else if(sell>=6&&sell>=buy+2&&pullbackSell&&htfBear){type="SELL";reasons=[...sr,"Pullback confirmado"]}
+  else if((bullBreak||pullbackBuy)&&buy>=6&&buy>=sell+1&&t5!=="BAIXA"){type="BUY";reasons=[...br,(bullBreak?"Breakout confirmado":"Pullback/reteste confirmado")]}
+  else if((bearBreak||pullbackSell)&&sell>=6&&sell>=buy+1&&t5!=="ALTA"){type="SELL";reasons=[...sr,(bearBreak?"Breakdown confirmado":"Pullback/reteste confirmado")]}
   const confidence=type==="WAIT"?Math.min(69,45+Math.max(0,score-4)*5):Math.min(96,65+Math.max(0,score-7)*5);
   let sl=null,tp=null,rr=null;if(type!=="WAIT"&&a>0){if(type==="BUY"){sl=Math.min(lv.support-a*.15,last-a*1.15);const risk=last-sl;tp=last+Math.max(risk*2,a*2.2);rr=(tp-last)/risk}else{sl=Math.max(lv.resistance+a*.15,last+a*1.15);const risk=sl-last;tp=last-Math.max(risk*2,a*2.2);rr=(last-tp)/risk}}
   return{type,score,confidence,buyScore:buy,sellScore:sell,price:live.close,signalPrice:last,signalTime:closed.at(-1).timestamp,rsi:rsi(closes),ema20:e20,ema50:e50,ema200:e200,atr:a,support:lv.support,resistance:lv.resistance,trend5:t5,trend15:t15,trend1:t1,structure5:s5.label,structure15:s15.label,structure1:s1.label,structureEvent5:s5.event,structureEvent15:s15.event,structureEvent1:s1.event,sl,tp,rr,reasons,source:"candles reais XAUUSD",bullBreak,bearBreak};
