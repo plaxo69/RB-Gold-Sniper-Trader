@@ -47,7 +47,7 @@ async function yahoo(timeframe) {
     headers: { "User-Agent": "Mozilla/5.0 RB-Sniper" }
   });
   const x = r.data?.chart?.result?.[0];
-  if (!x) throw new Error("Yahoo não devolveu dados BTCUSD");
+  if (!x) throw new Error("Yahoo não devolveu dados XAUUSD");
   const q = x.indicators?.quote?.[0] || {};
   let candles = (x.timestamp || []).map((t, i) => ({
     timestamp: new Date(t * 1000).toISOString(),
@@ -55,7 +55,7 @@ async function yahoo(timeframe) {
   })).filter(c => Number.isFinite(c.open) && Number.isFinite(c.high) && Number.isFinite(c.low) && Number.isFinite(c.close));
   if (timeframe === "3m") candles = aggregate3m(candles);
   candles = candles.slice(-500);
-  if (candles.length < 60) throw new Error(`Dados BTCUSD insuficientes (${candles.length} candles)`);
+  if (candles.length < 60) throw new Error(`Dados XAUUSD insuficientes (${candles.length} candles)`);
   return { source: "Yahoo Finance GC=F", symbol: "XAUUSD", timeframe, candles, last: candles.at(-1) };
 }
 
@@ -141,6 +141,32 @@ async function githubSaveTrades(trades) {
   });
   return { trades: merged, commit: r.data.commit?.sha || null };
 }
+
+app.delete("/api/trades", async (_req, res) => {
+  try {
+    if (githubConfigured()) {
+      const current = await githubGetTrades();
+      const repo = process.env.GITHUB_REPO;
+      const ref = process.env.GITHUB_BRANCH || "fixed-app";
+      const url = `https://api.github.com/repos/${repo}/contents/trades.json`;
+      const content = Buffer.from("[]\\n").toString("base64");
+      const r = await axios.put(url, {
+        message: "chore: limpar histórico de trades",
+        content,
+        sha: current.sha,
+        branch: ref
+      }, {
+        headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}`, Accept: "application/vnd.github+json", "User-Agent": "RB-Gold-Sniper" },
+        timeout: 15000
+      });
+      return res.json({ success: true, persistent: true, file: "trades.json", trades: [], commit: r.data.commit?.sha || null });
+    }
+    await writeTradesFile([]);
+    res.json({ success: true, persistent: true, file: "trades.json", trades: [] });
+  } catch (e) {
+    res.status(500).json({ success: false, error: "Falha a limpar trades.json", details: e.message });
+  }
+});
 
 app.get("/api/trades", async (_req, res) => {
   try {
