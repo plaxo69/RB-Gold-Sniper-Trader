@@ -61,14 +61,15 @@ async function getQuote() {
   return quoteInflight;
 }
 
-async function fetchCandles(timeframe) {
+async function fetchCandles(timeframe, requestedLimit = 500) {
   const cfg = TF[timeframe];
+  const limit = Math.min(2000, Math.max(60, Number(requestedLimit) || cfg.limit));
   if (!cfg) throw new Error("Timeframe inválido");
 
   // One shared live quote is used by all timeframes in the same server instance.
   // This avoids four identical quote calls every 10 seconds from the browser.
   const [br, tick] = await Promise.all([
-    request(`${SYMBOL}/ohlc`, { interval: cfg.interval, limit: cfg.limit }),
+    request(`${SYMBOL}/ohlc`, { interval: cfg.interval, limit: limit }),
     getQuote()
   ]);
 
@@ -84,7 +85,7 @@ async function fetchCandles(timeframe) {
     volume: Number(b.volume || 0),
     complete: b.isOpen !== true,
     isOpen: b.isOpen === true
-  }))).slice(-cfg.limit);
+  }))).slice(-limit);
 
   if (candles.length < 50) {
     throw new Error(`Biquote devolveu poucos candles (${candles.length})`);
@@ -138,14 +139,15 @@ async function fetchCandles(timeframe) {
   };
 }
 
-async function getMarket(timeframe) {
+async function getMarket(timeframe, requestedLimit = 500) {
   if (!TF[timeframe]) throw new Error("Timeframe inválido");
-  const key = `biquote:${SYMBOL}:${timeframe}`;
+  const limit = Math.min(2000, Math.max(60, Number(requestedLimit) || 500));
+  const key = `biquote:${SYMBOL}:${timeframe}:${limit}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.t < CACHE_MS) return hit.v;
   if (inflight.has(key)) return inflight.get(key);
 
-  const p = fetchCandles(timeframe)
+  const p = fetchCandles(timeframe, limit)
     .then(v => {
       cache.set(key, { t: Date.now(), v });
       inflight.delete(key);
@@ -170,7 +172,8 @@ async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   try {
     const timeframe = String(req.query.timeframe || "1m");
-    const m = await getMarket(timeframe);
+    const requestedLimit = Math.min(2000, Math.max(60, Number(req.query.limit) || 500));
+    const m = await getMarket(timeframe, requestedLimit);
     res.status(200).json(m);
   } catch (e) {
     console.error("MARKET ERROR", e.message);
