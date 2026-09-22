@@ -217,7 +217,8 @@ app.get("/api/market", async (req, res) => {
   try {
     const m = await market(timeframe);
     const p = m.last.close;
-    res.json({ success: true, source: m.source, symbol: m.symbol, timeframe, candles: m.candles, price: p, bid: p, ask: p, spread: m.last.high - m.last.low, timestamp: m.last.timestamp, marketOpen: true });
+    const marketOpen = (() => { const d=new Date(); const day=d.getUTCDay(); const h=d.getUTCHours(); return day!==0 && day!==6 && h>=22 || day===1 && h>=0 || day>=2 && day<=5 || day===5 && h<22; })();
+    res.json({ success: true, source: m.source, symbol: m.symbol, timeframe, candles: m.candles, price: p, bid: p, ask: p, spread: m.last.high - m.last.low, timestamp: m.last.timestamp, marketOpen });
   } catch (e) {
     res.status(502).json({ success: false, error: "Não foi possível obter dados reais do XAUUSD.", details: e.message });
   }
