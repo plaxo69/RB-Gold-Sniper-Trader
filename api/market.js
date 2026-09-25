@@ -4,7 +4,7 @@ const axios = require("axios");
 // Biquote supplies real XAUUSD OHLC candles plus a live MT5-based quote.
 // TradingView remains OANDA:XAUUSD visually. Sniper strategy is unchanged.
 const BASE = "https://biquote.io/api";
-const SYMBOL = "XAUUSD";
+const SYMBOLS = { XAUUSD: "XAUUSD", BTCUSD: "BTCUSD" };
 const TF = {
   "1m": { interval: "1m", stale: 150, limit: 500 },
   "5m": { interval: "5m", stale: 720, limit: 500 },
@@ -13,8 +13,8 @@ const TF = {
 };
 const cache = new Map();
 const inflight = new Map();
-let quoteCache = null;
-let quoteInflight = null;
+const quoteCache = new Map();
+const quoteInflight = new Map();
 const CACHE_MS = 5000;
 const QUOTE_CACHE_MS = 5000;
 const TIMEOUT_MS = 6000;
@@ -43,37 +43,40 @@ async function request(path, params = {}) {
   });
 }
 
-async function getQuote() {
-  if (quoteCache && Date.now() - quoteCache.t < QUOTE_CACHE_MS) return quoteCache.v;
-  if (quoteInflight) return quoteInflight;
-  quoteInflight = request(SYMBOL, { allowStale: true })
+async function getQuote(symbol) {
+  const hit = quoteCache.get(symbol);
+  if (hit && Date.now() - hit.t < QUOTE_CACHE_MS) return hit.v;
+  if (quoteInflight.has(symbol)) return quoteInflight.get(symbol);
+  const p = request(symbol, { allowStale: true })
     .then(r => {
       const v = r.data || {};
-      quoteCache = { t: Date.now(), v };
-      quoteInflight = null;
+      quoteCache.set(symbol, { t: Date.now(), v });
+      quoteInflight.delete(symbol);
       return v;
     })
     .catch(e => {
-      quoteInflight = null;
-      if (quoteCache) return quoteCache.v;
+      quoteInflight.delete(symbol);
+      const old = quoteCache.get(symbol);
+      if (old) return old.v;
       throw e;
     });
-  return quoteInflight;
+  quoteInflight.set(symbol, p);
+  return p;
 }
 
-async function fetchCandles(timeframe) {
+async function fetchCandles(timeframe, symbol) {
   const cfg = TF[timeframe];
   if (!cfg) throw new Error("Timeframe inválido");
 
   // One shared live quote is used by all timeframes in the same server instance.
   // This avoids four identical quote calls every 10 seconds from the browser.
   const [br, tick] = await Promise.all([
-    request(`${SYMBOL}/ohlc`, { interval: cfg.interval, limit: cfg.limit }),
-    getQuote()
+    request(`${symbol}/ohlc`, { interval: cfg.interval, limit: cfg.limit }),
+    getQuote(symbol)
   ]);
 
   const bars = Array.isArray(br.data?.bars) ? br.data.bars : [];
-  if (!bars.length) throw new Error("Biquote não devolveu candles XAUUSD");
+  if (!bars.length) throw new Error(`Biquote não devolveu candles ${symbol}`);
 
   const candles = clean(bars.map(b => ({
     timestamp: new Date(b.openTime).toISOString(),
@@ -116,9 +119,9 @@ async function fetchCandles(timeframe) {
 
   return {
     success: true,
-    source: "Biquote XAUUSD — feed MT5",
-    symbol: SYMBOL,
-    displaySymbol: "OANDA:XAUUSD",
+    source: `Biquote ${symbol} — feed MT5`,
+    symbol,
+    displaySymbol: symbol === "BTCUSD" ? "COINBASE:BTCUSD" : "OANDA:XAUUSD",
     timeframe,
     candles,
     last,
@@ -134,18 +137,18 @@ async function fetchCandles(timeframe) {
     realOpenBar,
     liveM1: timeframe === "1m" && realOpenBar && quoteFresh && !stale,
     oandaLive: false,
-    feedNotice: "XAUUSD/MT5 com candle OHLC real; M1 usa apenas o candle aberto oficial do feed; nenhum candle é inventado; M5/M15/H1 permanecem oficiais; TradingView mostra OANDA:XAUUSD"
+    feedNotice: `${symbol}/MT5 com candle OHLC real; M1 usa apenas o candle aberto oficial do feed; nenhum candle é inventado; M5/M15/H1 permanecem oficiais; TradingView mostra ${symbol === "BTCUSD" ? "COINBASE:BTCUSD" : "OANDA:XAUUSD"}`
   };
 }
 
-async function getMarket(timeframe) {
+async function getMarket(timeframe, symbol) {
   if (!TF[timeframe]) throw new Error("Timeframe inválido");
-  const key = `biquote:${SYMBOL}:${timeframe}`;
+  const key = `biquote:${symbol}:${timeframe}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.t < CACHE_MS) return hit.v;
   if (inflight.has(key)) return inflight.get(key);
 
-  const p = fetchCandles(timeframe)
+  const p = fetchCandles(timeframe, symbol)
     .then(v => {
       cache.set(key, { t: Date.now(), v });
       inflight.delete(key);
@@ -168,17 +171,20 @@ async function getMarket(timeframe) {
 
 async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
+  const asset = String(req.query.asset || "XAUUSD").toUpperCase();
   try {
     const timeframe = String(req.query.timeframe || "1m");
-    const m = await getMarket(timeframe);
+    const symbol = SYMBOLS[asset];
+    if (!symbol) return res.status(400).json({ success:false, error:"Ativo inválido", details:"Use XAUUSD ou BTCUSD" });
+    const m = await getMarket(timeframe, symbol);
     res.status(200).json(m);
   } catch (e) {
     console.error("MARKET ERROR", e.message);
     res.status(502).json({
       success: false,
-      error: "Falha no feed XAUUSD",
+      error: `Falha no feed ${asset || "XAUUSD"}`,
       details: e.message,
-      source: "Biquote XAUUSD"
+      source: `Biquote ${asset || "XAUUSD"}`
     });
   }
 }
