@@ -171,9 +171,9 @@ async function getMarket(timeframe, symbol) {
 
 async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
+  const asset = String(req.query.asset || "XAUUSD").toUpperCase();
   try {
     const timeframe = String(req.query.timeframe || "1m");
-    const asset = String(req.query.asset || "XAUUSD").toUpperCase();
     const symbol = SYMBOLS[asset];
     if (!symbol) return res.status(400).json({ success:false, error:"Ativo inválido", details:"Use XAUUSD ou BTCUSD" });
     const m = await getMarket(timeframe, symbol);
