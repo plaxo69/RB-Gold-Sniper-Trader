@@ -13,8 +13,8 @@ const TF = {
 };
 const cache = new Map();
 const inflight = new Map();
-let quoteCache = null;
-let quoteInflight = null;
+const quoteCache = new Map();
+const quoteInflight = new Map();
 const CACHE_MS = 5000;
 const QUOTE_CACHE_MS = 5000;
 const TIMEOUT_MS = 6000;
@@ -44,21 +44,24 @@ async function request(path, params = {}) {
 }
 
 async function getQuote(symbol) {
-  if (quoteCache && Date.now() - quoteCache.t < QUOTE_CACHE_MS) return quoteCache.v;
-  if (quoteInflight) return quoteInflight;
-  quoteInflight = request(symbol, { allowStale: true })
+  const hit = quoteCache.get(symbol);
+  if (hit && Date.now() - hit.t < QUOTE_CACHE_MS) return hit.v;
+  if (quoteInflight.has(symbol)) return quoteInflight.get(symbol);
+  const p = request(symbol, { allowStale: true })
     .then(r => {
       const v = r.data || {};
-      quoteCache = { t: Date.now(), v };
-      quoteInflight = null;
+      quoteCache.set(symbol, { t: Date.now(), v });
+      quoteInflight.delete(symbol);
       return v;
     })
     .catch(e => {
-      quoteInflight = null;
-      if (quoteCache) return quoteCache.v;
+      quoteInflight.delete(symbol);
+      const old = quoteCache.get(symbol);
+      if (old) return old.v;
       throw e;
     });
-  return quoteInflight;
+  quoteInflight.set(symbol, p);
+  return p;
 }
 
 async function fetchCandles(timeframe, symbol) {
@@ -68,8 +71,8 @@ async function fetchCandles(timeframe, symbol) {
   // One shared live quote is used by all timeframes in the same server instance.
   // This avoids four identical quote calls every 10 seconds from the browser.
   const [br, tick] = await Promise.all([
-    request(`${SYMBOL}/ohlc`, { interval: cfg.interval, limit: cfg.limit }),
-    getQuote()
+    request(`${symbol}/ohlc`, { interval: cfg.interval, limit: cfg.limit }),
+    getQuote(symbol)
   ]);
 
   const bars = Array.isArray(br.data?.bars) ? br.data.bars : [];
@@ -116,9 +119,9 @@ async function fetchCandles(timeframe, symbol) {
 
   return {
     success: true,
-    source: "Biquote XAUUSD — feed MT5",
-    symbol: SYMBOL,
-    displaySymbol: "OANDA:XAUUSD",
+    source: `Biquote ${symbol} — feed MT5`,
+    symbol,
+    displaySymbol: symbol === "BTCUSD" ? "COINBASE:BTCUSD" : "OANDA:XAUUSD",
     timeframe,
     candles,
     last,
@@ -170,15 +173,18 @@ async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   try {
     const timeframe = String(req.query.timeframe || "1m");
-    const m = await getMarket(timeframe);
+    const asset = String(req.query.asset || "XAUUSD").toUpperCase();
+    const symbol = SYMBOLS[asset];
+    if (!symbol) return res.status(400).json({ success:false, error:"Ativo inválido", details:"Use XAUUSD ou BTCUSD" });
+    const m = await getMarket(timeframe, symbol);
     res.status(200).json(m);
   } catch (e) {
     console.error("MARKET ERROR", e.message);
     res.status(502).json({
       success: false,
-      error: "Falha no feed XAUUSD",
+      error: `Falha no feed ${asset || "XAUUSD"}`,
       details: e.message,
-      source: "Biquote XAUUSD"
+      source: `Biquote ${asset || "XAUUSD"}`
     });
   }
 }
