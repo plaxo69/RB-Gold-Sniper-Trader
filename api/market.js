@@ -4,7 +4,7 @@ const axios = require("axios");
 // Biquote supplies real XAUUSD OHLC candles plus a live MT5-based quote.
 // TradingView remains OANDA:XAUUSD visually. Sniper strategy is unchanged.
 const BASE = "https://biquote.io/api";
-const SYMBOL = "XAUUSD";
+const SYMBOLS = { XAUUSD: "XAUUSD", BTCUSD: "BTCUSD" };
 const TF = {
   "1m": { interval: "1m", stale: 150, limit: 500 },
   "5m": { interval: "5m", stale: 720, limit: 500 },
@@ -43,10 +43,10 @@ async function request(path, params = {}) {
   });
 }
 
-async function getQuote() {
+async function getQuote(symbol) {
   if (quoteCache && Date.now() - quoteCache.t < QUOTE_CACHE_MS) return quoteCache.v;
   if (quoteInflight) return quoteInflight;
-  quoteInflight = request(SYMBOL, { allowStale: true })
+  quoteInflight = request(symbol, { allowStale: true })
     .then(r => {
       const v = r.data || {};
       quoteCache = { t: Date.now(), v };
@@ -61,7 +61,7 @@ async function getQuote() {
   return quoteInflight;
 }
 
-async function fetchCandles(timeframe) {
+async function fetchCandles(timeframe, symbol) {
   const cfg = TF[timeframe];
   if (!cfg) throw new Error("Timeframe inválido");
 
@@ -73,7 +73,7 @@ async function fetchCandles(timeframe) {
   ]);
 
   const bars = Array.isArray(br.data?.bars) ? br.data.bars : [];
-  if (!bars.length) throw new Error("Biquote não devolveu candles XAUUSD");
+  if (!bars.length) throw new Error(`Biquote não devolveu candles ${symbol}`);
 
   const candles = clean(bars.map(b => ({
     timestamp: new Date(b.openTime).toISOString(),
@@ -134,18 +134,18 @@ async function fetchCandles(timeframe) {
     realOpenBar,
     liveM1: timeframe === "1m" && realOpenBar && quoteFresh && !stale,
     oandaLive: false,
-    feedNotice: "XAUUSD/MT5 com candle OHLC real; M1 usa apenas o candle aberto oficial do feed; nenhum candle é inventado; M5/M15/H1 permanecem oficiais; TradingView mostra OANDA:XAUUSD"
+    feedNotice: `${symbol}/MT5 com candle OHLC real; M1 usa apenas o candle aberto oficial do feed; nenhum candle é inventado; M5/M15/H1 permanecem oficiais; TradingView mostra ${symbol === "BTCUSD" ? "COINBASE:BTCUSD" : "OANDA:XAUUSD"}`
   };
 }
 
-async function getMarket(timeframe) {
+async function getMarket(timeframe, symbol) {
   if (!TF[timeframe]) throw new Error("Timeframe inválido");
-  const key = `biquote:${SYMBOL}:${timeframe}`;
+  const key = `biquote:${symbol}:${timeframe}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.t < CACHE_MS) return hit.v;
   if (inflight.has(key)) return inflight.get(key);
 
-  const p = fetchCandles(timeframe)
+  const p = fetchCandles(timeframe, symbol)
     .then(v => {
       cache.set(key, { t: Date.now(), v });
       inflight.delete(key);
