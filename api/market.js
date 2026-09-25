@@ -187,20 +187,25 @@ async function fetchBtcCandles(timeframe) {
   };
 }
 
-async function fetchCandles(timeframe, symbol) {
-  if (symbol === "BTCUSD") return fetchBtcCandles(timeframe);
+
+
+async function fetchXauCandles(timeframe, requestedLimit = 500, from = null, to = null) {
   const cfg = TF[timeframe];
   if (!cfg) throw new Error("Timeframe inválido");
+  const limit = Math.min(2000, Math.max(60, Number(requestedLimit) || cfg.limit));
 
-  // One shared live quote is used by all timeframes in the same server instance.
-  // This avoids four identical quote calls every 10 seconds from the browser.
   const [br, tick] = await Promise.all([
-    request(`${symbol}/ohlc`, { interval: cfg.interval, limit: cfg.limit }),
-    getQuote(symbol)
+    request(`XAUUSD/ohlc`, {
+      interval: cfg.interval,
+      limit: Math.min(limit, 1000),
+      ...(from ? { from } : {}),
+      ...(to ? { to } : {})
+    }),
+    getQuote("XAUUSD")
   ]);
 
   const bars = Array.isArray(br.data?.bars) ? br.data.bars : [];
-  if (!bars.length) throw new Error(`Biquote não devolveu candles ${symbol}`);
+  if (!bars.length) throw new Error("Biquote não devolveu candles XAUUSD");
 
   const candles = clean(bars.map(b => ({
     timestamp: new Date(b.openTime).toISOString(),
@@ -211,11 +216,9 @@ async function fetchCandles(timeframe, symbol) {
     volume: Number(b.volume || 0),
     complete: b.isOpen !== true,
     isOpen: b.isOpen === true
-  }))).slice(-cfg.limit);
+  }))).slice(-limit);
 
-  if (candles.length < 50) {
-    throw new Error(`Biquote devolveu poucos candles (${candles.length})`);
-  }
+  if (candles.length < 50) throw new Error(`Biquote devolveu poucos candles (${candles.length})`);
 
   const now = Date.now();
   const livePrice = Number(tick.mid);
@@ -224,55 +227,52 @@ async function fetchCandles(timeframe, symbol) {
   const quoteTimestamp = tick.timestamp || tick.lastQuoteAt || null;
   const last = candles[candles.length - 1];
   const lastTs = Date.parse(last.timestamp);
-  const age = Number.isFinite(lastTs)
-    ? Math.max(0, Math.round((now - lastTs) / 1000))
-    : Number.POSITIVE_INFINITY;
-
+  const age = Number.isFinite(lastTs) ? Math.max(0, Math.round((now - lastTs) / 1000)) : Number.POSITIVE_INFINITY;
   const realOpenBar = last.isOpen === true;
-  const effectiveAge = age;
   const quoteFresh = Number.isFinite(quoteAge) && quoteAge <= 15;
   const marketOpen = marketState === "open";
-  const stale = !marketOpen ||
-    !Number.isFinite(quoteAge) ||
-    quoteAge > 300 ||
-    !Number.isFinite(effectiveAge) ||
-    effectiveAge > cfg.stale ||
-    (timeframe === "1m" && !realOpenBar && effectiveAge > 60);
-
-  const price = Number.isFinite(livePrice) ? livePrice : last.close;
+  const stale = !marketOpen || !Number.isFinite(quoteAge) || quoteAge > 300 ||
+    !Number.isFinite(age) || age > cfg.stale ||
+    (timeframe === "1m" && !realOpenBar && age > 60);
 
   return {
     success: true,
-    source: `Biquote ${symbol} — feed MT5`,
-    symbol,
-    displaySymbol: symbol === "BTCUSD" ? "COINBASE:BTCUSD" : "OANDA:XAUUSD",
+    source: "Biquote XAUUSD — feed MT5",
+    symbol: "XAUUSD",
+    displaySymbol: "OANDA:XAUUSD",
     timeframe,
     candles,
     last,
-    price: Number.isFinite(price) ? price : last.close,
-    delayedBy: effectiveAge,
+    price: Number.isFinite(livePrice) ? livePrice : last.close,
+    delayedBy: age,
     candleTimestamp: last.timestamp,
     quoteTimestamp: quoteTimestamp || last.timestamp,
-    candleAgeSec: effectiveAge,
-    candleStartAgeSec: effectiveAge,
+    candleAgeSec: age,
+    candleStartAgeSec: age,
     quoteAgeSec: Number.isFinite(quoteAge) ? quoteAge : null,
     stale,
     marketState,
     realOpenBar,
     liveM1: timeframe === "1m" && realOpenBar && quoteFresh && !stale,
     oandaLive: false,
-    feedNotice: `${symbol}/MT5 com candle OHLC real; M1 usa apenas o candle aberto oficial do feed; nenhum candle é inventado; M5/M15/H1 permanecem oficiais; TradingView mostra ${symbol === "BTCUSD" ? "COINBASE:BTCUSD" : "OANDA:XAUUSD"}`
+    feedNotice: "XAUUSD/MT5 com candle OHLC real; M1 usa apenas o candle aberto oficial do feed; nenhum candle é inventado; M5/M15/H1 permanecem oficiais; TradingView mostra OANDA:XAUUSD"
   };
 }
 
-async function getMarket(timeframe, symbol) {
+async function getMarket(timeframe, requestedLimit = 500, from = null, to = null, asset = "XAUUSD") {
   if (!TF[timeframe]) throw new Error("Timeframe inválido");
-  const key = `biquote:${symbol}:${timeframe}`;
+  const symbol = String(asset || "XAUUSD").toUpperCase();
+  if (!SYMBOLS[symbol]) throw new Error("Ativo inválido");
+
+  if (symbol === "BTCUSD") return fetchBtcCandles(timeframe);
+
+  const limit = Math.min(2000, Math.max(60, Number(requestedLimit) || 500));
+  const key = `biquote:XAUUSD:${timeframe}:${limit}:${from || ''}:${to || ''}`;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.t < CACHE_MS) return hit.v;
   if (inflight.has(key)) return inflight.get(key);
 
-  const p = fetchCandles(timeframe, symbol)
+  const p = fetchXauCandles(timeframe, limit, from, to)
     .then(v => {
       cache.set(key, { t: Date.now(), v });
       inflight.delete(key);
@@ -280,8 +280,6 @@ async function getMarket(timeframe, symbol) {
     })
     .catch(e => {
       inflight.delete(key);
-      // Keep the UI alive on a short upstream outage, but explicitly mark the
-      // snapshot stale so the client cannot generate a signal from it.
       const old = cache.get(key);
       if (old && Date.now() - old.t < 120000) {
         return { ...old.v, stale: true, liveM1: false, feedNotice: `${old.v.feedNotice} • último snapshot mantido após falha temporária do feed` };
@@ -298,17 +296,18 @@ async function handler(req, res) {
   const asset = String(req.query.asset || "XAUUSD").toUpperCase();
   try {
     const timeframe = String(req.query.timeframe || "1m");
-    const symbol = SYMBOLS[asset];
-    if (!symbol) return res.status(400).json({ success:false, error:"Ativo inválido", details:"Use XAUUSD ou BTCUSD" });
-    const m = await getMarket(timeframe, symbol);
+    const requestedLimit = Math.min(2000, Math.max(60, Number(req.query.limit) || 500));
+    const from = req.query.from ? String(req.query.from) : null;
+    const to = req.query.to ? String(req.query.to) : null;
+    const m = await getMarket(timeframe, requestedLimit, from, to, asset);
     res.status(200).json(m);
   } catch (e) {
     console.error("MARKET ERROR", e.message);
     res.status(502).json({
       success: false,
-      error: `Falha no feed ${asset || "XAUUSD"}`,
+      error: `Falha no feed ${asset}`,
       details: e.message,
-      source: `Biquote ${asset || "XAUUSD"}`
+      source: `Biquote ${asset}`
     });
   }
 }
