@@ -18,6 +18,17 @@ const quoteInflight = new Map();
 const CACHE_MS = 5000;
 const QUOTE_CACHE_MS = 5000;
 const TIMEOUT_MS = 6000;
+const COINBASE_BASE = "https://api.exchange.coinbase.com";
+const BTC_TF = {
+  "1m": { granularity: 60, stale: 150, limit: 300 },
+  "5m": { granularity: 300, stale: 720, limit: 300 },
+  "15m": { granularity: 900, stale: 1500, limit: 300 },
+  "1h": { granularity: 3600, stale: 5400, limit: 300 }
+};
+const btcCache = new Map();
+const btcInflight = new Map();
+const btcQuoteCache = { t: 0, v: null };
+const btcQuoteInflight = { p: null };
 
 function finite(v) { return Number.isFinite(Number(v)); }
 function valid(c) {
@@ -64,7 +75,120 @@ async function getQuote(symbol) {
   return p;
 }
 
+async function requestCoinbase(path, params = {}) {
+  return axios.get(`${COINBASE_BASE}/${path}`, {
+    params,
+    timeout: TIMEOUT_MS,
+    headers: {
+      Accept: "application/json",
+      "User-Agent": "RB-Gold-Sniper/5.3"
+    }
+  });
+}
+
+async function getBtcQuote() {
+  if (btcQuoteCache.v && Date.now() - btcQuoteCache.t < QUOTE_CACHE_MS) return btcQuoteCache.v;
+  if (btcQuoteInflight.p) return btcQuoteInflight.p;
+  btcQuoteInflight.p = requestCoinbase("products/BTC-USD/ticker")
+    .then(r => {
+      const v = r.data || {};
+      btcQuoteCache.t = Date.now();
+      btcQuoteCache.v = v;
+      btcQuoteInflight.p = null;
+      return v;
+    })
+    .catch(e => {
+      btcQuoteInflight.p = null;
+      if (btcQuoteCache.v) return btcQuoteCache.v;
+      throw e;
+    });
+  return btcQuoteInflight.p;
+}
+
+async function fetchBtcCandles(timeframe) {
+  const cfg = BTC_TF[timeframe];
+  if (!cfg) throw new Error("Timeframe inválido");
+
+  const [cr, tick] = await Promise.all([
+    requestCoinbase("products/BTC-USD/candles", {
+      granularity: cfg.granularity,
+      limit: cfg.limit
+    }),
+    getBtcQuote()
+  ]);
+
+  const raw = Array.isArray(cr.data) ? cr.data : [];
+  if (!raw.length) throw new Error("Coinbase não devolveu candles BTC-USD");
+
+  const now = Date.now();
+  const candles = raw.map(row => {
+    const ts = Number(row[0]) * 1000;
+    return {
+      timestamp: new Date(ts).toISOString(),
+      open: Number(row[3]),
+      high: Number(row[2]),
+      low: Number(row[1]),
+      close: Number(row[4]),
+      volume: Number(row[5] || 0),
+      complete: true,
+      isOpen: false
+    };
+  }).filter(valid)
+    .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+    .filter((c, i, s) => i === 0 || c.timestamp !== s[i - 1].timestamp)
+    .slice(-cfg.limit);
+
+  if (candles.length < 50) throw new Error(`Coinbase devolveu poucos candles BTC-USD (${candles.length})`);
+
+  const last = candles[candles.length - 1];
+  const lastTs = Date.parse(last.timestamp);
+  const intervalMs = cfg.granularity * 1000;
+  const bucketNow = Math.floor(now / intervalMs) * intervalMs;
+  const realOpenBar = Number.isFinite(lastTs) &&
+    lastTs === bucketNow &&
+    now - lastTs < intervalMs + 5000;
+  last.isOpen = realOpenBar;
+  last.complete = !realOpenBar;
+
+  const quotePrice = Number(tick.price);
+  const quoteTime = Date.parse(tick.time || "");
+  const quoteAge = Number.isFinite(quoteTime)
+    ? Math.max(0, Math.round((now - quoteTime) / 1000))
+    : Number.POSITIVE_INFINITY;
+  const price = Number.isFinite(quotePrice) ? quotePrice : last.close;
+  const stale = !Number.isFinite(quoteAge) ||
+    quoteAge > 300 ||
+    !Number.isFinite(lastTs) ||
+    now - lastTs > cfg.stale * 1000 ||
+    (timeframe === "1m" && !realOpenBar && now - lastTs > 60000);
+  const quoteFresh = quoteAge <= 15;
+
+  return {
+    success: true,
+    source: "Coinbase BTC-USD",
+    symbol: "BTCUSD",
+    displaySymbol: "COINBASE:BTCUSD",
+    timeframe,
+    candles,
+    last,
+    price: Number.isFinite(price) ? price : last.close,
+    delayedBy: Math.max(0, Math.round((now - lastTs) / 1000)),
+    candleTimestamp: last.timestamp,
+    quoteTimestamp: Number.isFinite(quoteTime) ? new Date(quoteTime).toISOString() : last.timestamp,
+    candleAgeSec: Math.max(0, Math.round((now - lastTs) / 1000)),
+    candleStartAgeSec: Math.max(0, Math.round((now - lastTs) / 1000)),
+    quoteAgeSec: Number.isFinite(quoteAge) ? quoteAge : null,
+    stale,
+    marketState: "open",
+    realOpenBar,
+    liveM1: timeframe === "1m" && realOpenBar && quoteFresh && !stale,
+    oandaLive: false,
+    feedNotice: "BTC/USD via Coinbase — candles OHLC oficiais e preço live; TradingView mostra COINBASE:BTCUSD"
+  };
+}
+
 async function fetchCandles(timeframe, symbol) {
+  if (symbol === "BTCUSD") return fetchBtcCandles(timeframe);
   const cfg = TF[timeframe];
   if (!cfg) throw new Error("Timeframe inválido");
 
