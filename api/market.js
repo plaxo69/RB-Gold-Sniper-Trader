@@ -159,16 +159,35 @@ async function fetchBtcCandles(timeframe) {
 
   const now = Date.now(), last = candles[candles.length - 1], lastTs = Date.parse(last.timestamp);
   const intervalMs = cfg.granularity * 1000, bucketNow = Math.floor(now / intervalMs) * intervalMs;
-  const realOpenBar = Number.isFinite(lastTs) && lastTs === bucketNow && now - lastTs < intervalMs + 5000;
-  last.isOpen = realOpenBar; last.complete = !realOpenBar;
+  // Coinbase/Kraken OHLC endpoints normally return completed candles. Build the
+  // current live candle from the exchange ticker so M1 does not freeze between
+  // completed candles. No historical candle is fabricated; only the open candle
+  // is reconstructed from the previous close + current live price.
+  if (Number.isFinite(quotePrice) && Number.isFinite(lastTs) && lastTs < bucketNow) {
+    const liveOpen = Number(last.close);
+    candles.push({
+      timestamp: new Date(bucketNow).toISOString(),
+      open: liveOpen,
+      high: Math.max(liveOpen, quotePrice),
+      low: Math.min(liveOpen, quotePrice),
+      close: quotePrice,
+      volume: 0,
+      complete: false,
+      isOpen: true
+    });
+  }
+  const currentLast = candles[candles.length - 1], currentLastTs = Date.parse(currentLast.timestamp);
+  const realOpenBar = Number.isFinite(currentLastTs) && currentLastTs === bucketNow && now - currentLastTs < intervalMs + 5000;
+  const liveLast = candles[candles.length - 1];
+  liveLast.isOpen = realOpenBar; liveLast.complete = !realOpenBar;
   const quoteAge = Number.isFinite(quoteTime) ? Math.max(0, Math.round((now - quoteTime) / 1000)) : Number.POSITIVE_INFINITY;
-  const price = Number.isFinite(quotePrice) ? quotePrice : last.close;
-  const stale = !Number.isFinite(quoteAge) || quoteAge > 300 || !Number.isFinite(lastTs) || now-lastTs > cfg.stale*1000 || (timeframe==="1m" && !realOpenBar && now-lastTs>60000);
+  const price = Number.isFinite(quotePrice) ? quotePrice : liveLast.close;
+  const stale = !Number.isFinite(quoteAge) || quoteAge > 300 || !Number.isFinite(currentLastTs) || now-currentLastTs > cfg.stale*1000 || (timeframe==="1m" && !realOpenBar && now-currentLastTs>60000);
   const quoteFresh = quoteAge <= 15;
-  return { success:true, source, symbol:"BTCUSD", displaySymbol:"COINBASE:BTCUSD", timeframe, candles, last,
-    price:Number.isFinite(price)?price:last.close, delayedBy:Math.max(0,Math.round((now-lastTs)/1000)),
-    candleTimestamp:last.timestamp, quoteTimestamp:Number.isFinite(quoteTime)?new Date(quoteTime).toISOString():last.timestamp,
-    candleAgeSec:Math.max(0,Math.round((now-lastTs)/1000)), candleStartAgeSec:Math.max(0,Math.round((now-lastTs)/1000)),
+  return { success:true, source, symbol:"BTCUSD", displaySymbol:"COINBASE:BTCUSD", timeframe, candles, last:liveLast,
+    price:Number.isFinite(price)?price:last.close, delayedBy:Math.max(0,Math.round((now-currentLastTs)/1000)),
+    candleTimestamp:liveLast.timestamp, quoteTimestamp:Number.isFinite(quoteTime)?new Date(quoteTime).toISOString():liveLast.timestamp,
+    candleAgeSec:Math.max(0,Math.round((now-currentLastTs)/1000)), candleStartAgeSec:Math.max(0,Math.round((now-currentLastTs)/1000)),
     quoteAgeSec:Number.isFinite(quoteAge)?quoteAge:null, stale, marketState:"open", realOpenBar,
     liveM1:timeframe==="1m" && realOpenBar && quoteFresh && !stale, oandaLive:false,
     feedNotice:source==="Coinbase BTC-USD" ? "BTC/USD via Coinbase — candles OHLC e preço live; TradingView mostra COINBASE:BTCUSD" : "BTC/USD via Kraken (fallback) — candles OHLC e preço live; TradingView mostra COINBASE:BTCUSD" };
