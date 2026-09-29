@@ -15,12 +15,22 @@ module.exports = async function handler(req, res) {
     return json(res, 405, { ok: false, error: 'Method not allowed' });
   }
 
-  const origin = req.headers.origin || '';
-  const allowed = new Set([
-    'https://rb-gold-sniper-trader.vercel.app',
-    'https://rb-gold-sniper-live-ai-sniper.vercel.app'
-  ]);
-  if (origin && !allowed.has(origin)) {
+  // The production app can be served through the main Vercel alias or a
+  // generated *.vercel.app deployment alias. The GitHub token never reaches
+  // the browser, so Origin is only a compatibility check here.
+  const origin = String(req.headers.origin || '');
+  let allowedOrigin = !origin;
+  if (origin) {
+    try {
+      const u = new URL(origin);
+      allowedOrigin =
+        u.protocol === 'https:' &&
+        u.hostname.endsWith('.vercel.app') &&
+        (u.hostname === 'rb-gold-sniper-trader.vercel.app' ||
+         u.hostname.startsWith('rb-gold-sniper-trader-'));
+    } catch {}
+  }
+  if (!allowedOrigin) {
     return json(res, 403, { ok: false, error: 'Origin not allowed' });
   }
 
