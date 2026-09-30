@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-// Mock MT5 connection state
+// LEGACY MOCK ONLY — current app does not execute MT5 orders.
 let mt5Connected = false;
 let tradingActive = false;
 
