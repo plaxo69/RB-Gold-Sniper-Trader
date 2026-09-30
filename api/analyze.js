@@ -1,4 +1,5 @@
 const express = require('express');
+// LEGACY MOCK ROUTER — current app uses /api/market + public/sniper-v2.js.
 const router = express.Router();
 
 // Mock market data
