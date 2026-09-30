@@ -10,6 +10,7 @@ function save(a){if(!a||!['BUY','SELL'].includes(a.type)||!a.signalTimestamp)ret
 function stats(){const h=load(),r=h.filter(x=>['WIN','LOSS','EXPIRADA'].includes(x.status)),w=r.filter(x=>x.status==='WIN').length;const total=$("total-trades"),rate=$("win-rate"),profit=$("total-profit");if(total)total.textContent=h.length;if(rate)rate.textContent=r.length?`${(w/r.length*100).toFixed(1)}%`:'—';if(profit)profit.textContent=r.length?`${w} WIN / ${r.filter(x=>x.status==='LOSS').length} LOSS / ${r.filter(x=>x.status==='EXPIRADA').length} EXP`:'—'}
 function result(a){const k=`${a?.type}-${a?.signalTimestamp||''}`;return load().find(x=>x.signalKey===k||x.key===k)}
 function latestActiveTrade(){return load().find(x=>['BUY','SELL'].includes(x.type)&&x.status==='ALERTA')||null}
+function latestTradeBefore(signal){const ts=Date.parse(signal?.signalTimestamp||'');return load().filter(x=>['BUY','SELL'].includes(x.type)&&Date.parse(x.signalTimestamp||x.time||'')<ts).sort((a,b)=>Date.parse(b.signalTimestamp||b.time||'')-Date.parse(a.signalTimestamp||a.time||''))[0]||null}
 function direction(v){return v==='ALTA'?'BUY':v==='BAIXA'?'SELL':null}
 function label(d){return d==='BUY'?'COMPRA':d==='SELL'?'VENDA':d==='CONFLICT'?'CONFLITO':'WAIT'}
 function box(n,v,stateClass){return `<div class="filter-item direction-${stateClass||'wait'}"><span>${n}</span><strong>${v}</strong></div>`}
