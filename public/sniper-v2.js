@@ -3,7 +3,7 @@ const C={period:20,minHistory:205,minRR:1,minBodyAtr:.18,maxExtAtr:3.2,zoneAtr:.
 const sma=(v,p)=>v.length<p?null:v.slice(-p).reduce((a,b)=>a+b,0)/p;
 function ema(v,p){if(v.length<p)return null;const k=2/(p+1);let x=v[0];for(let i=1;i<v.length;i++)x=v[i]*k+x*(1-k);return x}
 function rma(values,p){if(values.length<p)return null;let x=values.slice(0,p).reduce((a,b)=>a+b,0)/p;for(let i=p;i<values.length;i++)x=(x*(p-1)+values[i])/p;return x}
-function rsi(v,p=14){if(v.length<p+1)return null;const g=[],l=[];for(let i=1;i<v.length;i++){const d=v[i]-v[i-1];g.push(d>0?d:0);l.push(d<0?-d:0)}let ag=rma(g,p),al=rma(l,p);if(ag==null||al==null)return null;for(let i=p;i<g.length;i++){ag=(ag*(p-1)+g[i])/p;al=(al*(p-1)+l[i])/p}if(al===0&&ag===0)return 50;if(al===0)return 100;return 100-100/(1+ag/al)}
+function rsi(v,p=14){if(v.length<p+1)return null;const g=[],l=[];for(let i=1;i<v.length;i++){const d=v[i]-v[i-1];g.push(d>0?d:0);l.push(d<0?-d:0)}let ag=rma(g,p),al=rma(l,p);if(ag==null||al==null)return null;if(al===0&&ag===0)return 50;if(al===0)return 100;return 100-100/(1+ag/al)}
 function trueRanges(c){const r=[];for(let i=1;i<c.length;i++){const x=c[i],q=c[i-1].close;r.push(Math.max(x.high-x.low,Math.abs(x.high-q),Math.abs(x.low-q)))}return r}
 function atr(c,p=14){return rma(trueRanges(c),p)}
 function adx(c,p=14){if(c.length<2*p+1)return null;const tr=[],plus=[],minus=[];for(let i=1;i<c.length;i++){const x=c[i],q=c[i-1];tr.push(Math.max(x.high-x.low,Math.abs(x.high-q.close),Math.abs(x.low-q.close)));const up=x.high-q.high,down=q.low-x.low;plus.push(up>down&&up>0?up:0);minus.push(down>up&&down>0?down:0)}
