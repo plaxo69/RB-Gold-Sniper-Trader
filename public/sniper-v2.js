@@ -1,5 +1,5 @@
 (function(root){
-const C={period:20,minHistory:205,minRR:1,minBodyAtr:.18,maxExtAtr:3.2,zoneAtr:.35,retestAtr:.55,reversalWickBody:.85,tacticalLookback:12,minTFAligned:3,minCloseLocation:.62,minBreakAtr:.15,tp2MinBodyAtr:1.15,tp2MinClose:.72,buyScoreMin:60,sellScoreMax:45,adxMin:22,rsiBuyMax:68,volumePeriod:20};
+const C={period:20,minHistory:205,minRR:1,minBodyAtr:.18,maxExtAtr:3.2,zoneAtr:.35,retestAtr:.55,reversalWickBody:.85,tacticalLookback:12,minTFAligned:3,minCloseLocation:.62,minBreakAtr:.15,tp2MinBodyAtr:1.15,tp2MinClose:.72,buyScoreMin:60,sellScoreMax:45,adxMin:22,rsiBuyMax:75,volumePeriod:20};
 const sma=(v,p)=>v.length<p?null:v.slice(-p).reduce((a,b)=>a+b,0)/p;
 function ema(v,p){if(v.length<p)return null;const k=2/(p+1);let x=v[0];for(let i=1;i<v.length;i++)x=v[i]*k+x*(1-k);return x}
 function rma(values,p){if(values.length<p)return null;let x=values.slice(0,p).reduce((a,b)=>a+b,0)/p;for(let i=p;i<values.length;i++)x=(x*(p-1)+values[i])/p;return x}
