@@ -1,192 +1,67 @@
 const axios = require("axios");
 
-// XAUUSD market feed.
-// Biquote supplies real XAUUSD OHLC candles plus a live MT5-based quote.
-// TradingView remains OANDA:XAUUSD visually. Sniper strategy is unchanged.
-const BASE = "https://biquote.io/api";
-const SYMBOL = "XAUUSD";
-const TF = {
-  "1m": { interval: "1m", stale: 150, limit: 500 },
-  "5m": { interval: "5m", stale: 720, limit: 500 },
-  "15m": { interval: "15m", stale: 1500, limit: 500 },
-  "1h": { interval: "1h", stale: 5400, limit: 500 }
+const BASE="https://api.exchange.coinbase.com";
+const ASSETS={
+  BTCUSD:{product:"BTC-USD",display:"COINBASE:BTCUSD"},
+  ETHUSD:{product:"ETH-USD",display:"COINBASE:ETHUSD"}
 };
-const cache = new Map();
-const inflight = new Map();
-let quoteCache = null;
-let quoteInflight = null;
-const CACHE_MS = 5000;
-const QUOTE_CACHE_MS = 5000;
-const TIMEOUT_MS = 6000;
-
-function finite(v) { return Number.isFinite(Number(v)); }
-function valid(c) {
-  return [c.open, c.high, c.low, c.close].every(finite) &&
-    c.open > 0 &&
-    c.high >= Math.max(c.open, c.close) &&
-    c.low <= Math.min(c.open, c.close) &&
-    c.high >= c.low;
+const TF={
+  "1m":{granularity:60,stale:150},
+  "5m":{granularity:300,stale:720},
+  "15m":{granularity:900,stale:1500},
+  "1h":{granularity:3600,stale:5400}
+};
+const cache=new Map(),inflight=new Map(),quoteCache=new Map(),quoteInflight=new Map();
+const CACHE_MS=5000,QUOTE_CACHE_MS=3000,TIMEOUT_MS=6000;
+function finite(v){return Number.isFinite(Number(v))}
+function clean(a){return a.filter(c=>[c.open,c.high,c.low,c.close].every(finite)&&c.open>0&&c.high>=Math.max(c.open,c.close)&&c.low<=Math.min(c.open,c.close)&&c.high>=c.low).sort((a,b)=>Date.parse(a.timestamp)-Date.parse(b.timestamp)).filter((c,i,s)=>i===0||c.timestamp!==s[i-1].timestamp)}
+async function request(path,params={}){return axios.get(`${BASE}/${path}`,{params,timeout:TIMEOUT_MS,headers:{Accept:"application/json","User-Agent":"RB-Crypto-Sniper/1.0"}})}
+async function getQuote(asset){
+  if(quoteCache.has(asset)&&Date.now()-quoteCache.get(asset).t<QUOTE_CACHE_MS)return quoteCache.get(asset).v;
+  if(quoteInflight.has(asset))return quoteInflight.get(asset);
+  const product=ASSETS[asset].product;
+  const p=request(`products/${product}/ticker`).then(r=>{const d=r.data||{};const v={price:Number(d.price),time:d.time||null,volume:Number(d.volume)};quoteCache.set(asset,{t:Date.now(),v});quoteInflight.delete(asset);return v}).catch(e=>{quoteInflight.delete(asset);if(quoteCache.has(asset))return quoteCache.get(asset).v;throw e});
+  quoteInflight.set(asset,p);return p;
 }
-function clean(a) {
-  return a.filter(valid)
-    .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
-    .filter((c, i, s) => i === 0 || c.timestamp !== s[i - 1].timestamp);
-}
-async function request(path, params = {}) {
-  return axios.get(`${BASE}/${path}`, {
-    params,
-    timeout: TIMEOUT_MS,
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "RB-Gold-Sniper/5.3"
-    }
-  });
-}
-
-async function getQuote() {
-  if (quoteCache && Date.now() - quoteCache.t < QUOTE_CACHE_MS) return quoteCache.v;
-  if (quoteInflight) return quoteInflight;
-  quoteInflight = request(SYMBOL, { allowStale: true })
-    .then(r => {
-      const v = r.data || {};
-      quoteCache = { t: Date.now(), v };
-      quoteInflight = null;
-      return v;
-    })
-    .catch(e => {
-      quoteInflight = null;
-      if (quoteCache) return quoteCache.v;
-      throw e;
-    });
-  return quoteInflight;
-}
-
-async function fetchCandles(timeframe, requestedLimit = 500, from = null, to = null) {
-  const cfg = TF[timeframe];
-  const limit = Math.min(2000, Math.max(60, Number(requestedLimit) || cfg.limit));
-  if (!cfg) throw new Error("Timeframe inválido");
-
-  // One shared live quote is used by all timeframes in the same server instance.
-  // This avoids four identical quote calls every 10 seconds from the browser.
-  const [br, tick] = await Promise.all([
-    request(`${SYMBOL}/ohlc`, { interval: cfg.interval, limit: Math.min(limit, 1000), ...(from ? { from } : {}), ...(to ? { to } : {}) }),
-    getQuote()
+async function fetchCandles(asset,timeframe,requestedLimit=300){
+  const cfg=TF[timeframe],meta=ASSETS[asset];
+  if(!cfg)throw new Error("Timeframe inválido");
+  const limit=Math.min(300,Math.max(60,Number(requestedLimit)||300));
+  const [cr,tick]=await Promise.all([
+    request(`products/${meta.product}/candles`,{granularity:cfg.granularity}),
+    getQuote(asset)
   ]);
-
-  const bars = Array.isArray(br.data?.bars) ? br.data.bars : [];
-  if (!bars.length) throw new Error("Biquote não devolveu candles XAUUSD");
-
-  const candles = clean(bars.map(b => ({
-    timestamp: new Date(b.openTime).toISOString(),
-    open: Number(b.open),
-    high: Number(b.high),
-    low: Number(b.low),
-    close: Number(b.close),
-    volume: Number(b.volume || 0),
-    complete: b.isOpen !== true,
-    isOpen: b.isOpen === true
-  }))).slice(-limit);
-
-  if (candles.length < 50) {
-    throw new Error(`Biquote devolveu poucos candles (${candles.length})`);
-  }
-
-  const now = Date.now();
-  const livePrice = Number(tick.mid);
-  const quoteAge = Number(tick.quoteAgeSeconds);
-  const marketState = String(tick.marketState || "unknown").toLowerCase();
-  const quoteTimestamp = tick.timestamp || tick.lastQuoteAt || null;
-  const last = candles[candles.length - 1];
-  const lastTs = Date.parse(last.timestamp);
-  const age = Number.isFinite(lastTs)
-    ? Math.max(0, Math.round((now - lastTs) / 1000))
-    : Number.POSITIVE_INFINITY;
-
-  const realOpenBar = last.isOpen === true;
-  const effectiveAge = age;
-  const quoteFresh = Number.isFinite(quoteAge) && quoteAge <= 15;
-  const marketOpen = marketState === "open";
-  const stale = !marketOpen ||
-    !Number.isFinite(quoteAge) ||
-    quoteAge > 300 ||
-    !Number.isFinite(effectiveAge) ||
-    effectiveAge > cfg.stale ||
-    (timeframe === "1m" && !realOpenBar && effectiveAge > 60);
-
-  const price = Number.isFinite(livePrice) ? livePrice : last.close;
-
-  return {
-    success: true,
-    source: "Biquote XAUUSD — feed MT5",
-    symbol: SYMBOL,
-    displaySymbol: "OANDA:XAUUSD",
-    timeframe,
-    candles,
-    last,
-    price: Number.isFinite(price) ? price : last.close,
-    delayedBy: effectiveAge,
-    candleTimestamp: last.timestamp,
-    quoteTimestamp: quoteTimestamp || last.timestamp,
-    candleAgeSec: effectiveAge,
-    candleStartAgeSec: effectiveAge,
-    quoteAgeSec: Number.isFinite(quoteAge) ? quoteAge : null,
-    stale,
-    marketState,
-    realOpenBar,
-    liveM1: timeframe === "1m" && realOpenBar && quoteFresh && !stale,
-    oandaLive: false,
-    feedNotice: "XAUUSD/MT5 com candle OHLC real; M1 usa apenas o candle aberto oficial do feed; nenhum candle é inventado; M5/M15/H1 permanecem oficiais; TradingView mostra OANDA:XAUUSD"
-  };
+  if(!Array.isArray(cr.data)||!cr.data.length)throw new Error(`Coinbase não devolveu candles ${asset}`);
+  const candles=clean(cr.data.slice(0,limit).map(b=>{
+    const ts=Number(b[0])*1000;
+    const open=Number(b[3]),high=Number(b[2]),low=Number(b[1]),close=Number(b[4]);
+    const intervalMs=cfg.granularity*1000;
+    const isOpen=Date.now()<ts+intervalMs+5000;
+    return {timestamp:new Date(ts).toISOString(),open,high,low,close,volume:Number(b[5]||0),complete:!isOpen,isOpen};
+  }));
+  if(candles.length<50)throw new Error(`Coinbase devolveu poucos candles (${candles.length})`);
+  const last=candles[candles.length-1],lastTs=Date.parse(last.timestamp),age=Number.isFinite(lastTs)?Math.max(0,Math.round((Date.now()-lastTs)/1000)):Infinity;
+  const price=Number.isFinite(tick.price)?tick.price:last.close;
+  const quoteTime=tick.time?Date.parse(tick.time):NaN;
+  const quoteAge=Number.isFinite(quoteTime)?Math.max(0,Math.round((Date.now()-quoteTime)/1000)):null;
+  const stale=age>cfg.stale||(Number.isFinite(quoteAge)&&quoteAge>30)||!Number.isFinite(price);
+  return {success:true,source:`Coinbase ${meta.product}`,symbol:asset,displaySymbol:meta.display,timeframe,candles,last,price,delayedBy:age,candleTimestamp:last.timestamp,quoteTimestamp:tick.time||last.timestamp,candleAgeSec:age,candleStartAgeSec:age,quoteAgeSec:quoteAge,stale,marketState:"open",realOpenBar:last.isOpen===true,liveM1:timeframe==="1m"&&!stale,oandaLive:false,feedNotice:`${meta.product} OHLC + cotação ao vivo via Coinbase; TradingView mostra ${meta.display}`};
 }
-
-async function getMarket(timeframe, requestedLimit = 500, from = null, to = null) {
-  if (!TF[timeframe]) throw new Error("Timeframe inválido");
-  const limit = Math.min(2000, Math.max(60, Number(requestedLimit) || 500));
-  const key = `biquote:${SYMBOL}:${timeframe}:${limit}:${from || ''}:${to || ''}`;
-  const hit = cache.get(key);
-  if (hit && Date.now() - hit.t < CACHE_MS) return hit.v;
-  if (inflight.has(key)) return inflight.get(key);
-
-  const p = fetchCandles(timeframe, limit, from, to)
-    .then(v => {
-      cache.set(key, { t: Date.now(), v });
-      inflight.delete(key);
-      return v;
-    })
-    .catch(e => {
-      inflight.delete(key);
-      // Keep the UI alive on a short upstream outage, but explicitly mark the
-      // snapshot stale so the client cannot generate a signal from it.
-      const old = cache.get(key);
-      if (old && Date.now() - old.t < 120000) {
-        return { ...old.v, stale: true, liveM1: false, feedNotice: `${old.v.feedNotice} • último snapshot mantido após falha temporária do feed` };
-      }
-      throw e;
-    });
-
-  inflight.set(key, p);
-  return p;
+async function getMarket(asset,timeframe,requestedLimit=300){
+  if(!ASSETS[asset])throw new Error("Ativo inválido");
+  if(!TF[timeframe])throw new Error("Timeframe inválido");
+  const limit=Math.min(300,Math.max(60,Number(requestedLimit)||300)),key=`coinbase:${asset}:${timeframe}:${limit}`;
+  const hit=cache.get(key);if(hit&&Date.now()-hit.t<CACHE_MS)return hit.v;
+  if(inflight.has(key))return inflight.get(key);
+  const p=fetchCandles(asset,timeframe,limit).then(v=>{cache.set(key,{t:Date.now(),v});inflight.delete(key);return v}).catch(e=>{inflight.delete(key);const old=cache.get(key);if(old&&Date.now()-old.t<120000)return {...old.v,stale:true,liveM1:false,feedNotice:old.v.feedNotice+" • snapshot anterior após falha temporária"};throw e});
+  inflight.set(key,p);return p;
 }
-
-async function handler(req, res) {
-  res.setHeader("Cache-Control", "no-store, max-age=0");
-  try {
-    const timeframe = String(req.query.timeframe || "1m");
-    const requestedLimit = Math.min(2000, Math.max(60, Number(req.query.limit) || 500));
-    const from = req.query.from ? String(req.query.from) : null;
-    const to = req.query.to ? String(req.query.to) : null;
-    const m = await getMarket(timeframe, requestedLimit, from, to);
-    res.status(200).json(m);
-  } catch (e) {
-    console.error("MARKET ERROR", e.message);
-    res.status(502).json({
-      success: false,
-      error: "Falha no feed XAUUSD",
-      details: e.message,
-      source: "Biquote XAUUSD"
-    });
-  }
+async function handler(req,res){
+  res.setHeader("Cache-Control","no-store,max-age=0");
+  try{
+    const asset=String(req.query.asset||"BTCUSD").toUpperCase(),timeframe=String(req.query.timeframe||"1m");
+    const limit=Math.min(300,Math.max(60,Number(req.query.limit)||300));
+    res.status(200).json(await getMarket(asset,timeframe,limit));
+  }catch(e){console.error("CRYPTO MARKET ERROR",e.message);res.status(502).json({success:false,error:"Falha no feed de mercado cripto",details:e.message,source:"Coinbase BTC/ETH"})}
 }
-
-handler.getMarket = getMarket;
-module.exports = handler;
+handler.getMarket=getMarket;module.exports=handler;
