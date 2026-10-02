@@ -1,7 +1,7 @@
-(()=>{const KEY="rb_gold_sniper_ai_v4",MIN_TRAIN=40,MIN_DIR=10,MIN_VALID=10,MIN_VALID_ACC=.55,FILTER_PWIN=.57,FILTER_SCORE=62,MAX_HISTORY=1000;
+(()=>{const KEY="rb_crypto_sniper_ai_v4",MIN_TRAIN=40,MIN_DIR=10,MIN_VALID=10,MIN_VALID_ACC=.55,FILTER_PWIN=.57,FILTER_SCORE=62,MAX_HISTORY=1000;
 const safe=(v,d=0)=>Number.isFinite(+v)?+v:d;const bucket=(v,s)=>{for(let i=0;i<s.length;i++)if(v<s[i])return i;return s.length};
 function features(a){const f=a?.filters||{},t=a?.tactical||{},dir=a?.type;return{dir:dir==='SELL'?'S':'B',score:Math.round(safe(a?.score,50)/5)*5,rsi:bucket(safe(a?.rsi,50),[40,45,50,55,60,65,70]),atrRel:bucket(safe(a?.atr,0)/Math.max(safe(a?.price,1),1),[.0005,.001,.002,.004,.008]),align:(f.m5Buy||f.m5Sell?1:0)+(f.m15Buy||f.m15Sell?1:0)+(f.h1Buy||f.h1Sell?1:0),body:f.bodyIsDecisive?1:0,struct:(f.structuralConfirmBuy||f.structuralConfirmSell)?1:0,tactical:t.buy?'BUY':t.sell?'SELL':'NONE',tp2:a?.tp2Eligible?1:0}};
-function resolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS','BE'].includes(String(t?.status||"").toUpperCase())).slice(0,MAX_HISTORY):[]}catch{return[]}}
+function resolved(){try{const x=JSON.parse(localStorage.getItem("rb_crypto_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS','BE'].includes(String(t?.status||"").toUpperCase())).slice(0,MAX_HISTORY):[]}catch{return[]}}
 function outcome(s){s=String(s||"").toUpperCase();return s==="WIN"?1:s==="LOSS"?0:.5}
 function rows(hist){return hist.map(t=>({f:t.aiFeatures||features(t),y:outcome(t.status),status:String(t.status||"").toUpperCase()})).filter(r=>r.f&&['B','S'].includes(r.f.dir))}
 function model(rs){const stats={};for(const r of rs)for(const[k,v]of Object.entries(r.f)){const id=k+":"+v;if(!stats[id])stats[id]={sum:1,n:2};stats[id].sum+=r.y;stats[id].n++}const n=rs.length,base=n?rs.reduce((a,r)=>a+r.y,0)/n:.5;return{n,base,stats}}
