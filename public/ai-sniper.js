@@ -65,9 +65,9 @@ function atrSeries(xs,p=14){const a=candleSeries(xs);if(a.length<p+1)return NaN;
 function tfDir(xs){const a=candleSeries(xs);if(a.length<55)return null;const c=Number(a.at(-1).close),e20=ema(a,20),e50=ema(a,50);return c>e20&&e20>e50?'BUY':c<e20&&e20<e50?'SELL':null}
 function independentOpportunity(ctx){
  const m1=candleSeries(ctx?.m1),m5=candleSeries(ctx?.m5),m15=candleSeries(ctx?.m15),h1=candleSeries(ctx?.h1);if(m1.length<80||m5.length<55||m15.length<55||h1.length<55)return null;
- const a=m1.at(-1),prev=m1.at(-2),entry=Number(a.close),atr=atrSeries(m1,14),r=rsiSeries(m1,14),e20=ema(m1,20),e50=ema(m1,50);if(!Number.isFinite(entry)||!Number.isFinite(atr)||atr<=0||!Number.isFinite(r)||!Number.isFinite(e20)||!Number.isFinite(e50))return null;
+ const series=m1.slice(0,-1);if(series.length<80)return null;const a=series.at(-1),prev=series.at(-2),entry=Number(a.close),atr=atrSeries(series,14),r=rsiSeries(series,14),e20=ema(series,20),e50=ema(series,50);if(!Number.isFinite(entry)||!Number.isFinite(atr)||atr<=0||!Number.isFinite(r)||!Number.isFinite(e20)||!Number.isFinite(e50))return null;
  const dirs=[tfDir(m5),tfDir(m15),tfDir(h1)],hi=dirs.filter(x=>x==='BUY').length,lo=dirs.filter(x=>x==='SELL').length;
- const look=m1.slice(-21,-1),recentHigh=Math.max(...look.map(c=>Number(c.high))),recentLow=Math.min(...look.map(c=>Number(c.low)));
+ const look=series.slice(-20),recentHigh=Math.max(...look.map(c=>Number(c.high))),recentLow=Math.min(...look.map(c=>Number(c.low)));
  const body=Math.abs(Number(a.close)-Number(a.open||a.close)),range=Math.max(Number(a.high)-Number(a.low),0.0001),closePos=(entry-Number(a.low))/range;
  const upper=Number(a.high)-Math.max(entry,Number(a.open||entry)),lower=Math.min(entry,Number(a.open||entry))-Number(a.low);
  const bull=entry>Number(prev.close)&&entry>e20&&e20>=e50,bear=entry<Number(prev.close)&&entry<e20&&e20<=e50;
@@ -76,7 +76,7 @@ function independentOpportunity(ctx){
  const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r<45&&r>22?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0);
  const dir=buyEvidence>=sellEvidence?'BUY':'SELL',score=clamp(Math.max(buyEvidence,sellEvidence),0,100),tfCount=dir==='BUY'?hi:lo;
  if(score<72||tfCount<2)return null;if((dir==='BUY'&&r<32)||(dir==='SELL'&&r>68))return null;
- const swing=dir==='BUY'?Math.min(...m1.slice(-12).map(c=>Number(c.low))):Math.max(...m1.slice(-12).map(c=>Number(c.high)));
+ const swing=dir==='BUY'?Math.min(...series.slice(-12).map(c=>Number(c.low))):Math.max(...series.slice(-12).map(c=>Number(c.high)));
  const risk=Math.max(atr*.80,Math.abs(entry-swing)+atr*.15),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
  const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.35+technical*.65)*100),55,88);
  const ts=a.timestamp||new Date().toISOString(),reasons=[];reasons.push(tfCount>=3?'M5/M15/H1 alinhados':'2 timeframes alinhados');
