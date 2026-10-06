@@ -1,5 +1,5 @@
 // Persists the complete RB TRADER PRO history in one GitHub file.
-const REPO='plaxo69/RB-Gold-Sniper-Trader',BRANCH='rb-trader-pro',PATH='historico-trades.json',API='https://api.github.com';
+const REPO='plaxo69/RB-Gold-Sniper-Trader',BRANCH='main',PATH='historico-trades.json',API='https://api.github.com';
 function json(res,status,body){return res.status(status).json(body)}
 function allowedHost(host){
   host=String(host||'').split(':')[0].toLowerCase();
