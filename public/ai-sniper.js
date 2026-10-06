@@ -30,7 +30,9 @@ function technical(a,f){
 function opinion(a,ai,f){
  const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),trend=f.align===3?"M5/M15/H1 alinhados":f.align===2?"2 timeframes alinhados":"alinhamento parcial";
  const positives=[],warnings=[];
- if(f.align>=2)positives.push(trend);\n if(Number.isFinite(adx))positives.push(`ADX ${adx.toFixed(1)}`);\n if(Number.isFinite(vol)&&Number.isFinite(volSma))positives.push(vol>volSma?'volume > SMA20':'volume < SMA20');
+ if(f.align>=2)positives.push(trend);
+ if(Number.isFinite(adx))positives.push(`ADX ${adx.toFixed(1)}`);
+ if(Number.isFinite(vol)&&Number.isFinite(volSma))positives.push(vol>volSma?'volume > SMA20':'volume < SMA20');
  if(f.structure||f.bos)positives.push(f.bos?"estrutura BOS/CHOCH confirmada":"estrutura confirmada");
  if(f.retest||f.rejection)positives.push(f.retest?"reteste com confirmação":"rejeição de zona");
  if(f.continuation)positives.push("continuação");
