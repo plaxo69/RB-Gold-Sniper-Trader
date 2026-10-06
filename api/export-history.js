@@ -39,10 +39,17 @@ module.exports=async function handler(req,res){
      return json(res,existing.status,{ok:false,error:'Não foi possível consultar o histórico no GitHub.'});
    }
    const map=new Map();
-   for(const t of [...remoteTrades,...body.trades]){
-     const k=keyOf(t);
-     if(k)map.set(k,t);
-   }
+   const put=(t)=>{
+     const k=keyOf(t); if(!k)return;
+     const prev=map.get(k);
+     if(!prev){map.set(k,t);return}
+     const ps=String(prev.status||'ALERTA'),ns=String(t.status||'ALERTA'),pr=ps==='ALERTA',nr=ns==='ALERTA';
+     if(pr&&!nr){map.set(k,t);return}
+     if(!pr&&nr)return;
+     map.set(k,t);
+   };
+   for(const t of remoteTrades||[])put(t);
+   for(const t of body.trades||[])put(t);
    const trades=[...map.values()].sort((a,b)=>ts(b)-ts(a)).slice(0,500);
    const payload={exportedAt:new Date().toISOString(),source:'RB TRADER PRO',formatVersion:2,total:trades.length,trades};
    const encoded=Buffer.from(JSON.stringify(payload,null,2),'utf8').toString('base64');
