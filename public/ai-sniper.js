@@ -66,9 +66,9 @@ function rsiSeries(xs,p=14){const a=candleSeries(xs);if(a.length<p+1)return NaN;
 function atrSeries(xs,p=14){const a=candleSeries(xs);if(a.length<p+1)return NaN;const tr=[];for(let i=1;i<a.length;i++){const h=Number(a[i].high),l=Number(a[i].low),pc=Number(a[i-1].close);tr.push(Math.max(h-l,Math.abs(h-pc),Math.abs(l-pc)))}if(tr.length<p)return NaN;let v=tr.slice(0,p).reduce((s,x)=>s+x,0)/p;for(let i=p;i<tr.length;i++)v=(v*(p-1)+tr[i])/p;return v}
 function tfDir(xs){const a=candleSeries(xs);if(a.length<55)return null;const c=Number(a.at(-1).close),e20=ema(a,20),e50=ema(a,50);return c>e20&&e20>e50?'BUY':c<e20&&e20<e50?'SELL':null}
 function independentOpportunity(ctx){
- const m1=candleSeries(ctx?.m1),m5=candleSeries(ctx?.m5),m15=candleSeries(ctx?.m15),h1=candleSeries(ctx?.h1);if(m1.length<80||m5.length<55||m15.length<55||h1.length<55)return null;
+ const m1=candleSeries(ctx?.m1),m5=candleSeries(ctx?.m5),m15=candleSeries(ctx?.m15);if(m1.length<80||m5.length<55||m15.length<55)return null;
  const series=m1.slice(0,-1);if(series.length<80)return null;const a=series.at(-1),prev=series.at(-2),entry=Number(a.close),atr=atrSeries(series,14),r=rsiSeries(series,14),e20=ema(series,20),e50=ema(series,50);if(!Number.isFinite(entry)||!Number.isFinite(atr)||atr<=0||!Number.isFinite(r)||!Number.isFinite(e20)||!Number.isFinite(e50))return null;
- const dirs=[tfDir(m5),tfDir(m15),tfDir(h1)],hi=dirs.filter(x=>x==='BUY').length,lo=dirs.filter(x=>x==='SELL').length;
+ const dirs=[tfDir(m1),tfDir(m5),tfDir(m15)],hi=dirs.filter(x=>x==='BUY').length,lo=dirs.filter(x=>x==='SELL').length;
  const look=series.slice(-20),recentHigh=Math.max(...look.map(c=>Number(c.high))),recentLow=Math.min(...look.map(c=>Number(c.low)));
  const body=Math.abs(Number(a.close)-Number(a.open||a.close)),range=Math.max(Number(a.high)-Number(a.low),0.0001),closePos=(entry-Number(a.low))/range;
  const upper=Number(a.high)-Math.max(entry,Number(a.open||entry)),lower=Math.min(entry,Number(a.open||entry))-Number(a.low);
@@ -81,11 +81,11 @@ function independentOpportunity(ctx){
  const swing=dir==='BUY'?Math.min(...series.slice(-12).map(c=>Number(c.low))):Math.max(...series.slice(-12).map(c=>Number(c.high)));
  const risk=Math.max(atr*.80,Math.abs(entry-swing)+atr*.15),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
  const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.35+technical*.65)*100),55,88);
- const ts=a.timestamp||new Date().toISOString(),reasons=[];reasons.push(tfCount>=3?'M5/M15/H1 alinhados':'2 timeframes alinhados');
+ const ts=a.timestamp||new Date().toISOString(),reasons=[];reasons.push(tfCount>=3?'M1/M5/M15 alinhados':'2 de 3 timeframes M1/M5/M15 alinhados');
  if(dir==='BUY'&&(breakoutBuy||rejectBuy))reasons.push(breakoutBuy?'rompimento de resistência':'rejeição de suporte');
  if(dir==='SELL'&&(breakoutSell||rejectSell))reasons.push(breakoutSell?'rompimento de suporte':'rejeição de resistência');
  reasons.push(dir==='BUY'?'momentum BUY + EMA20/EMA50':'momentum SELL + EMA20/EMA50');
- return{type:dir,source:'IA',signalKind:'IA',signalTimestamp:new Date(ts).toISOString(),price:entry,tp,sl,rr:1.5,rr1:1.5,atr,rsi:r,trend5:dirs[0]==='BUY'?'ALTA':dirs[0]==='SELL'?'BAIXA':'NEUTRO',trend15:dirs[1]==='BUY'?'ALTA':dirs[1]==='SELL'?'BAIXA':'NEUTRO',trend1:dirs[2]==='BUY'?'ALTA':dirs[2]==='SELL'?'BAIXA':'NEUTRO',confidence:pWin,score,reasons,setupState:'IA_OPORTUNIDADE',ai:{mode:'OPORTUNIDADE IA',score,pWin,samples:hist.length,recommendation:pWin>=70?'FORTE':'FAVORÁVEL',opinion:'A IA detetou uma oportunidade independente dos filtros Sniper.',reasons,source:'IA'},aiOpportunity:true,aiModelVersion:MODEL_VERSION};
+ return{type:dir,source:'IA',signalKind:'IA',signalTimestamp:new Date(ts).toISOString(),price:entry,tp,sl,rr:1.5,rr1:1.5,atr,rsi:r,trend5:dirs[0]==='BUY'?'ALTA':dirs[0]==='SELL'?'BAIXA':'NEUTRO',trend15:dirs[1]==='BUY'?'ALTA':dirs[1]==='SELL'?'BAIXA':'NEUTRO',trend1:dirs[2]==='BUY'?'ALTA':dirs[2]==='SELL'?'BAIXA':'NEUTRO',confidence:pWin,score,reasons,setupState:'IA_OPORTUNIDADE',ai:{mode:'OPORTUNIDADE IA',score,pWin,samples:hist.length,recommendation:pWin>=70?'FORTE':'FAVORÁVEL',opinion:'A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.',reasons,source:'IA'},aiOpportunity:true,aiModelVersion:MODEL_VERSION};
 }
 function rrSafe(a){return n(a?.rr1,n(a?.rr,0))}
 function attach(a,ctx){if(!a)return a;if(["BUY","SELL"].includes(up(a.type))){const x=evaluate(a);return{...a,ai:x,aiScore:x.score,aiWinRate:x.pWin,aiOpinion:x.opinion,aiRecommendation:x.recommendation,aiFeatures:x.aiFeatures,aiModelVersion:MODEL_VERSION}}const opp=independentOpportunity(ctx);return{...a,aiOpportunity:opp,ai:opp?.ai||{mode:"OPINIÃO",score:0,pWin:null,samples:resolved().length,recommendation:"SEM OPORTUNIDADE",opinion:"A IA está a analisar o mercado independentemente dos filtros.",reasons:[]},aiModelVersion:MODEL_VERSION}}
