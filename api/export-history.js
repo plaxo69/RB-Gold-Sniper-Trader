@@ -43,7 +43,7 @@ module.exports=async function handler(req,res){
      const k=keyOf(t);
      if(k)map.set(k,t);
    }
-   const trades=[...map.values()].sort((a,b)=>ts(b)-ts(a)).slice(0,5000);
+   const trades=[...map.values()].sort((a,b)=>ts(b)-ts(a)).slice(0,500);
    const payload={exportedAt:new Date().toISOString(),source:'RB TRADER PRO',formatVersion:2,total:trades.length,trades};
    const encoded=Buffer.from(JSON.stringify(payload,null,2),'utf8').toString('base64');
    const commit=await fetch(`${API}/repos/${REPO}/contents/${PATH}`,{
