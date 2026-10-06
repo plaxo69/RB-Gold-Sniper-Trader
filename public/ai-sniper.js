@@ -4,8 +4,8 @@ function resolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_
 function outcome(s){return up(s)==="WIN"?1:up(s)==="LOSS"?0:.5}
 function direction(a){return up(a?.type)==="SELL"?"SELL":"BUY"}
 function features(a){
- const f=a?.filters||{},t=a?.tactical||{},d=direction(a),r=n(a?.rsi,50),atr=n(a?.atr,0),price=Math.max(n(a?.price,1),1),rr=n(a?.rr1,n(a?.rr,0)),align=[up(a?.trend5),up(a?.trend15),up(a?.trend1)].filter(x=>x===("BUY"===d?"ALTA":"BAIXA")).length;
- return{dir:d==="SELL"?"S":"B",score:Math.round(n(a?.score,50)/5)*5,rsiBand:r<30?"EXTREME":r<40?"LOW":r<50?"MIDLOW":r<60?"MID":r<70?"GOOD":"HIGH",atrBand:atr/price<.0005?"LOW":atr/price<.001?"NORMAL":atr/price<.002?"HIGH":"VERY_HIGH",align,h1Aligned:up(a?.trend1)===(d==="BUY"?"ALTA":"BAIXA")?1:0,ema:(d==="BUY"?!!f.emaBuy:!!f.emaSell)?1:0,structure:(d==="BUY"?!!f.structuralConfirmBuy:!!f.structuralConfirmSell)?1:0,bos:(d==="BUY"?!!(t.bosBuy||t.chochBuy):!!(t.bosSell||t.chochSell))?1:0,tactical:t.buy?'BUY':t.sell?'SELL':'NONE',retest:(d==="BUY"?!!f.pullbackRetestBuy:!!f.pullbackRetestSell)?1:0,rejection:(d==="BUY"?!!f.rejectionBuy:!!f.rejectionSell)?1:0,continuation:(d==="BUY"?!!f.continuationBuy:!!f.continuationSell)?1:0,body:f.bodyIsDecisive?1:0,close:d==="BUY"?(n(a?.closeLocation,.5)>=.55?1:0):(n(a?.closeLocation,.5)<=.45?1:0),extension:(d==="BUY"?!!f.extensionBuy:!!f.extensionSell)?1:0,rr:rr>=1.5?"GOOD":rr>=1?"OK":"LOW",tp2:a?.tp2Eligible?1:0}
+ const f=a?.filters||{},t=a?.tactical||{},d=direction(a),r=n(a?.rsi,50),atr=n(a?.atr,0),price=Math.max(n(a?.price,1),1),rr=n(a?.rr1,n(a?.rr,0)),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN),align=[up(a?.trend5),up(a?.trend15),up(a?.trend1)].filter(x=>x===("BUY"===d?"ALTA":"BAIXA")).length;
+ return{dir:d==="SELL"?"S":"B",adx14:Number.isFinite(adx)?Math.round(adx*100)/100:null,volume:Number.isFinite(vol)?vol:null,volumeSma20:Number.isFinite(volSma)?volSma:null,volumeAboveSma:Number.isFinite(vol)&&Number.isFinite(volSma)?vol>volSma:null,score:Math.round(n(a?.score,50)/5)*5,rsiBand:r<30?"EXTREME":r<40?"LOW":r<50?"MIDLOW":r<60?"MID":r<70?"GOOD":"HIGH",atrBand:atr/price<.0005?"LOW":atr/price<.001?"NORMAL":atr/price<.002?"HIGH":"VERY_HIGH",align,h1Aligned:up(a?.trend1)===(d==="BUY"?"ALTA":"BAIXA")?1:0,ema:(d==="BUY"?!!f.emaBuy:!!f.emaSell)?1:0,structure:(d==="BUY"?!!f.structuralConfirmBuy:!!f.structuralConfirmSell)?1:0,bos:(d==="BUY"?!!(t.bosBuy||t.chochBuy):!!(t.bosSell||t.chochSell))?1:0,tactical:t.buy?'BUY':t.sell?'SELL':'NONE',retest:(d==="BUY"?!!f.pullbackRetestBuy:!!f.pullbackRetestSell)?1:0,rejection:(d==="BUY"?!!f.rejectionBuy:!!f.rejectionSell)?1:0,continuation:(d==="BUY"?!!f.continuationBuy:!!f.continuationSell)?1:0,body:f.bodyIsDecisive?1:0,close:d==="BUY"?(n(a?.closeLocation,.5)>=.55?1:0):(n(a?.closeLocation,.5)<=.45?1:0),extension:(d==="BUY"?!!f.extensionBuy:!!f.extensionSell)?1:0,rr:rr>=1.5?"GOOD":rr>=1?"OK":"LOW",tp2:a?.tp2Eligible?1:0}
 }
 function signature(f){return [f.dir,f.align,f.rsiBand,f.ema,f.structure,f.bos,f.tactical,f.retest,f.rejection,f.continuation,f.rr].join("|")}
 function rows(){return resolved().map(t=>({f:t.aiFeatures&&t.aiModelVersion===MODEL_VERSION?t.aiFeatures:features(t),y:outcome(t.status),status:up(t.status)}))}
@@ -17,7 +17,7 @@ function historical(f,rs){
  return{p,setupSamples:same.length,directionSamples:dir.length,totalSamples:rs.length}
 }
 function technical(a,f){
- const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),score=n(a?.score,50);
+ const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),score=n(a?.score,50),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN);
  let s=40;
  s+=f.align*9+f.ema*8+f.structure*10+f.bos*6+f.retest*7+f.rejection*5+f.continuation*5+f.body*4+f.close*4+f.tp2*3;
  if(d==="BUY")s+=r>=60&&r<72?8:r>=72&&r<75?3:r<30?-12:r<40?-7:0;
@@ -30,7 +30,7 @@ function technical(a,f){
 function opinion(a,ai,f){
  const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),trend=f.align===3?"M5/M15/H1 alinhados":f.align===2?"2 timeframes alinhados":"alinhamento parcial";
  const positives=[],warnings=[];
- if(f.align>=2)positives.push(trend);
+ if(f.align>=2)positives.push(trend);\n if(Number.isFinite(adx))positives.push(`ADX ${adx.toFixed(1)}`);\n if(Number.isFinite(vol)&&Number.isFinite(volSma))positives.push(vol>volSma?'volume > SMA20':'volume < SMA20');
  if(f.structure||f.bos)positives.push(f.bos?"estrutura BOS/CHOCH confirmada":"estrutura confirmada");
  if(f.retest||f.rejection)positives.push(f.retest?"reteste com confirmação":"rejeição de zona");
  if(f.continuation)positives.push("continuação");
