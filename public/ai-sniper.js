@@ -58,7 +58,34 @@ function evaluate(a){
  if(rrSafe(a)<1)reasons.push("RR abaixo de 1");
  return{mode:"OPINIÃO",score,pWin,samples:rs.length,setupSamples:h.setupSamples,directionSamples:h.directionSamples,approved:pWin>=FILTER_PWIN&&score>=FILTER_SCORE,recommendation:op.label,opinion:op.text,reasons:reasons.length?reasons:["IA considera o setup tecnicamente coerente"],aiFeatures:f,baseWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):50,featuresUsed:Object.keys(f).length,modelVersion:MODEL_VERSION};
 }
+function candleSeries(xs){return Array.isArray(xs)?xs.filter(c=>Number.isFinite(+c?.close)&&Number.isFinite(+c?.high)&&Number.isFinite(+c?.low)):[]}
+function ema(xs,p){const a=candleSeries(xs);if(a.length<p)return NaN;let e=a.slice(0,p).reduce((s,c)=>s+Number(c.close),0)/p,k=2/(p+1);for(let i=p;i<a.length;i++)e=Number(a[i].close)*k+e*(1-k);return e}
+function rsiSeries(xs,p=14){const a=candleSeries(xs);if(a.length<p+1)return NaN;let g=0,l=0;for(let i=1;i<=p;i++){const d=Number(a[i].close)-Number(a[i-1].close);if(d>0)g+=d;else l-=d}let ag=g/p,al=l/p;for(let i=p+1;i<a.length;i++){const d=Number(a[i].close)-Number(a[i-1].close);ag=(ag*(p-1)+Math.max(0,d))/p;al=(al*(p-1)+Math.max(0,-d))/p}return al===0?100:100-(100/(1+ag/al))}
+function atrSeries(xs,p=14){const a=candleSeries(xs);if(a.length<p+1)return NaN;const tr=[];for(let i=1;i<a.length;i++){const h=Number(a[i].high),l=Number(a[i].low),pc=Number(a[i-1].close);tr.push(Math.max(h-l,Math.abs(h-pc),Math.abs(l-pc)))}if(tr.length<p)return NaN;let v=tr.slice(0,p).reduce((s,x)=>s+x,0)/p;for(let i=p;i<tr.length;i++)v=(v*(p-1)+tr[i])/p;return v}
+function tfDir(xs){const a=candleSeries(xs);if(a.length<55)return null;const c=Number(a.at(-1).close),e20=ema(a,20),e50=ema(a,50);return c>e20&&e20>e50?'BUY':c<e20&&e20<e50?'SELL':null}
+function independentOpportunity(ctx){
+ const m1=candleSeries(ctx?.m1),m5=candleSeries(ctx?.m5),m15=candleSeries(ctx?.m15),h1=candleSeries(ctx?.h1);if(m1.length<80||m5.length<55||m15.length<55||h1.length<55)return null;
+ const a=m1.at(-1),prev=m1.at(-2),entry=Number(a.close),atr=atrSeries(m1,14),r=rsiSeries(m1,14),e20=ema(m1,20),e50=ema(m1,50);if(!Number.isFinite(entry)||!Number.isFinite(atr)||atr<=0||!Number.isFinite(r)||!Number.isFinite(e20)||!Number.isFinite(e50))return null;
+ const dirs=[tfDir(m5),tfDir(m15),tfDir(h1)],hi=dirs.filter(x=>x==='BUY').length,lo=dirs.filter(x=>x==='SELL').length;
+ const look=m1.slice(-21,-1),recentHigh=Math.max(...look.map(c=>Number(c.high))),recentLow=Math.min(...look.map(c=>Number(c.low)));
+ const body=Math.abs(Number(a.close)-Number(a.open||a.close)),range=Math.max(Number(a.high)-Number(a.low),0.0001),closePos=(entry-Number(a.low))/range;
+ const upper=Number(a.high)-Math.max(entry,Number(a.open||entry)),lower=Math.min(entry,Number(a.open||entry))-Number(a.low);
+ const bull=entry>Number(prev.close)&&entry>e20&&e20>=e50,bear=entry<Number(prev.close)&&entry<e20&&e20<=e50;
+ const breakoutBuy=entry>recentHigh,breakoutSell=entry<recentLow,rejectBuy=lower>=body*.9&&closePos>=.60,rejectSell=upper>=body*.9&&closePos<=.40;
+ const buyEvidence=(hi>=2?22:0)+(bull?16:0)+(r>55&&r<78?12:0)+(breakoutBuy?18:0)+(rejectBuy?14:0)+(body>=atr*.18?8:0)+(closePos>=.65?6:0);
+ const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r<45&&r>22?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0);
+ const dir=buyEvidence>=sellEvidence?'BUY':'SELL',score=clamp(Math.max(buyEvidence,sellEvidence),0,100),tfCount=dir==='BUY'?hi:lo;
+ if(score<72||tfCount<2)return null;if((dir==='BUY'&&r<32)||(dir==='SELL'&&r>68))return null;
+ const swing=dir==='BUY'?Math.min(...m1.slice(-12).map(c=>Number(c.low))):Math.max(...m1.slice(-12).map(c=>Number(c.high)));
+ const risk=Math.max(atr*.80,Math.abs(entry-swing)+atr*.15),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
+ const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.35+technical*.65)*100),55,88);
+ const ts=a.timestamp||new Date().toISOString(),reasons=[];reasons.push(tfCount>=3?'M5/M15/H1 alinhados':'2 timeframes alinhados');
+ if(dir==='BUY'&&(breakoutBuy||rejectBuy))reasons.push(breakoutBuy?'rompimento de resistência':'rejeição de suporte');
+ if(dir==='SELL'&&(breakoutSell||rejectSell))reasons.push(breakoutSell?'rompimento de suporte':'rejeição de resistência');
+ reasons.push(dir==='BUY'?'momentum BUY + EMA20/EMA50':'momentum SELL + EMA20/EMA50');
+ return{type:dir,source:'IA',signalKind:'IA',signalTimestamp:new Date(ts).toISOString(),price:entry,tp,sl,rr:1.5,rr1:1.5,atr,rsi:r,trend5:dirs[0]==='BUY'?'ALTA':dirs[0]==='SELL'?'BAIXA':'NEUTRO',trend15:dirs[1]==='BUY'?'ALTA':dirs[1]==='SELL'?'BAIXA':'NEUTRO',trend1:dirs[2]==='BUY'?'ALTA':dirs[2]==='SELL'?'BAIXA':'NEUTRO',confidence:pWin,score,reasons,setupState:'IA_OPORTUNIDADE',ai:{mode:'OPORTUNIDADE IA',score,pWin,samples:hist.length,recommendation:pWin>=70?'FORTE':'FAVORÁVEL',opinion:'A IA detetou uma oportunidade independente dos filtros Sniper.',reasons,source:'IA'},aiOpportunity:true,aiModelVersion:MODEL_VERSION};
+}
 function rrSafe(a){return n(a?.rr1,n(a?.rr,0))}
-function attach(a){if(!a||!["BUY","SELL"].includes(up(a.type)))return a;const x=evaluate(a);return{...a,ai:x,aiScore:x.score,aiWinRate:x.pWin,aiOpinion:x.opinion,aiRecommendation:x.recommendation,aiFeatures:x.aiFeatures,aiModelVersion:MODEL_VERSION}}
+function attach(a,ctx){if(!a)return a;if(["BUY","SELL"].includes(up(a.type))){const x=evaluate(a);return{...a,ai:x,aiScore:x.score,aiWinRate:x.pWin,aiOpinion:x.opinion,aiRecommendation:x.recommendation,aiFeatures:x.aiFeatures,aiModelVersion:MODEL_VERSION}}const opp=independentOpportunity(ctx);return{...a,aiOpportunity:opp,ai:opp?.ai||{mode:"OPINIÃO",score:0,pWin:null,samples:resolved().length,recommendation:"SEM OPORTUNIDADE",opinion:"A IA está a analisar o mercado independentemente dos filtros.",reasons:[]},aiModelVersion:MODEL_VERSION}}
 function learn(){const rs=rows();return{samples:rs.length,baseWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):50,trained:rs.length>0,modelVersion:MODEL_VERSION}}
-window.RBTraderProAI={evaluate,attach,learn,features,constants:{FILTER_PWIN,FILTER_SCORE,MAX_HISTORY,KEY,MODEL:MODEL_VERSION}};learn()})();
+window.RBTraderProAI={evaluate,attach,independentOpportunity,learn,features,constants:{FILTER_PWIN,FILTER_SCORE,MAX_HISTORY,KEY,MODEL:MODEL_VERSION}};learn()})();
