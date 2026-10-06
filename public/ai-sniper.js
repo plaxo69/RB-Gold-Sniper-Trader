@@ -28,7 +28,7 @@ function technical(a,f){
  return clamp(Math.round(s),0,100)
 }
 function opinion(a,ai,f){
- const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),trend=f.align===3?"M5/M15/H1 alinhados":f.align===2?"2 timeframes alinhados":"alinhamento parcial";
+ const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN),trend=f.align===3?"M5/M15/H1 alinhados":f.align===2?"2 timeframes alinhados":"alinhamento parcial";
  const positives=[],warnings=[];
  if(f.align>=2)positives.push(trend);
  if(Number.isFinite(adx))positives.push(`ADX ${adx.toFixed(1)}`);
