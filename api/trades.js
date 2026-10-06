@@ -1,5 +1,5 @@
 const REPO = 'plaxo69/RB-Gold-Sniper-Trader';
-const BRANCH = 'rb-trader-pro';
+const BRANCH = 'main';
 const PATH = 'historico-trades.json';
 const API = 'https://api.github.com';
 
