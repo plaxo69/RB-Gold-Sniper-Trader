@@ -77,7 +77,8 @@ function independentOpportunity(ctx){
  const buyEvidence=(hi>=2?22:0)+(bull?16:0)+(r>55&&r<78?12:0)+(breakoutBuy?18:0)+(rejectBuy?14:0)+(body>=atr*.18?8:0)+(closePos>=.65?6:0);
  const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r<45&&r>22?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0);
  const dir=buyEvidence>=sellEvidence?'BUY':'SELL',score=clamp(Math.max(buyEvidence,sellEvidence),0,100),tfCount=dir==='BUY'?hi:lo;
- if(score<72||tfCount<2)return null;if((dir==='BUY'&&r<32)||(dir==='SELL'&&r>68))return null;
+ const confirmations=dir==='BUY'?Number(bull)+Number(breakoutBuy||rejectBuy)+Number(r>55&&r<78)+Number(body>=atr*.18&&closePos>=.65):Number(bear)+Number(breakoutSell||rejectSell)+Number(r<45&&r>22)+Number(body>=atr*.18&&closePos<=.35);
+ if(score<68||confirmations<2)return null;if((dir==='BUY'&&r<32)||(dir==='SELL'&&r>68))return null;
  const swing=dir==='BUY'?Math.min(...series.slice(-12).map(c=>Number(c.low))):Math.max(...series.slice(-12).map(c=>Number(c.high)));
  const risk=Math.max(atr*.80,Math.abs(entry-swing)+atr*.15),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
  const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.35+technical*.65)*100),55,88);
@@ -85,7 +86,7 @@ function independentOpportunity(ctx){
  if(dir==='BUY'&&(breakoutBuy||rejectBuy))reasons.push(breakoutBuy?'rompimento de resistência':'rejeição de suporte');
  if(dir==='SELL'&&(breakoutSell||rejectSell))reasons.push(breakoutSell?'rompimento de suporte':'rejeição de resistência');
  reasons.push(dir==='BUY'?'momentum BUY + EMA20/EMA50':'momentum SELL + EMA20/EMA50');
- return{type:dir,source:'IA',signalKind:'IA',signalTimestamp:new Date(ts).toISOString(),price:entry,tp,sl,rr:1.5,rr1:1.5,atr,rsi:r,trend5:dirs[0]==='BUY'?'ALTA':dirs[0]==='SELL'?'BAIXA':'NEUTRO',trend15:dirs[1]==='BUY'?'ALTA':dirs[1]==='SELL'?'BAIXA':'NEUTRO',trend1:dirs[2]==='BUY'?'ALTA':dirs[2]==='SELL'?'BAIXA':'NEUTRO',confidence:pWin,score,reasons,setupState:'IA_OPORTUNIDADE',ai:{mode:'OPORTUNIDADE IA',score,pWin,samples:hist.length,recommendation:pWin>=70?'FORTE':'FAVORÁVEL',opinion:'A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.',reasons,source:'IA'},aiOpportunity:true,aiModelVersion:MODEL_VERSION};
+ return{type:dir,source:'IA',signalKind:'IA',signalTimestamp:new Date(ts).toISOString(),price:entry,tp,sl,rr:1.5,rr1:1.5,atr,rsi:r,trend1:dirs[0]==='BUY'?'ALTA':dirs[0]==='SELL'?'BAIXA':'NEUTRO',trend5:dirs[1]==='BUY'?'ALTA':dirs[1]==='SELL'?'BAIXA':'NEUTRO',trend15:dirs[2]==='BUY'?'ALTA':dirs[2]==='SELL'?'BAIXA':'NEUTRO',confidence:pWin,score,reasons,setupState:'IA_OPORTUNIDADE',ai:{mode:'OPORTUNIDADE IA',score,pWin,samples:hist.length,recommendation:pWin>=70?'FORTE':'FAVORÁVEL',opinion:'A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.',reasons,source:'IA'},aiOpportunity:true,aiModelVersion:MODEL_VERSION};
 }
 function rrSafe(a){return n(a?.rr1,n(a?.rr,0))}
 function attach(a,ctx){if(!a)return a;if(["BUY","SELL"].includes(up(a.type))){const x=evaluate(a);return{...a,ai:x,aiScore:x.score,aiWinRate:x.pWin,aiOpinion:x.opinion,aiRecommendation:x.recommendation,aiFeatures:x.aiFeatures,aiModelVersion:MODEL_VERSION}}const opp=independentOpportunity(ctx);return{...a,aiOpportunity:opp,ai:opp?.ai||{mode:"OPINIÃO",score:0,pWin:null,samples:resolved().length,recommendation:"SEM OPORTUNIDADE",opinion:"A IA está a analisar o mercado independentemente dos filtros.",reasons:[]},aiModelVersion:MODEL_VERSION}}
