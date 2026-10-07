@@ -1,9 +1,56 @@
 {
-  "exportedAt": "2026-10-07T00:15:26.113Z",
+  "exportedAt": "2026-10-07T00:26:43.967Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 157,
+  "total": 158,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-07T00:25:00.000Z",
+      "price": 4162.243,
+      "tp": 4150.8055925705885,
+      "sl": 4169.867938286275,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.6662552418310879,
+      "rsi": 37.12889045494121,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "NEUTRO",
+      "confidence": 65,
+      "score": 64,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 65,
+        "samples": 157,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-07T00:25:00.000Z",
+      "key": "SELL-2026-10-07T00:25:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-07T00:25:00.000Z",
+      "reentryCount": 0,
+      "beArmed": true,
+      "beTriggeredAt": "2026-10-07T00:26:00.000Z",
+      "beTriggerPrice": 4161.480506171373
+    },
     {
       "type": "BUY",
       "score": 100,
@@ -193,9 +240,11 @@
       "key": "BUY-2026-10-07T00:14:00.000Z",
       "signalKey": "BUY-2026-10-07T00:14:00.000Z",
       "movementKey": "BUY-BREAKOUT-4169.81",
-      "status": "ALERTA",
+      "status": "LOSS",
       "time": "2026-10-07T00:14:00.000Z",
-      "reentryCount": 0
+      "reentryCount": 0,
+      "resolvedAt": "2026-10-07T00:26:00.000Z",
+      "outcomeReason": "SL atingido antes da ativação do BE"
     },
     {
       "type": "SELL",
