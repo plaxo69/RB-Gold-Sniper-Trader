@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-07T12:25:07.598Z",
+  "exportedAt": "2026-10-07T12:26:26.956Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 177,
@@ -46,13 +46,15 @@
       "signalKey": "SELL-2026-10-07T12:22:00.000Z",
       "key": "SELL-2026-10-07T12:22:00.000Z",
       "movementKey": "SELL-STRUCT-0.00-0.00",
-      "status": "ALERTA",
+      "status": "WIN",
       "time": "2026-10-07T12:22:00.000Z",
       "reentryCount": 0,
       "beArmed": true,
       "beTriggeredAt": "2026-10-07T12:23:00.000Z",
       "beTriggerPrice": 4116.065193217665,
-      "beAlerted": true
+      "beAlerted": true,
+      "resolvedAt": "2026-10-07T12:26:00.000Z",
+      "outcomeReason": "TP atingido"
     },
     {
       "type": "SELL",
