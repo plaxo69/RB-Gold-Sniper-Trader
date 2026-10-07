@@ -1,0 +1,1 @@
+function send(res,s,b){return res.status(s).json(b)}module.exports=async function(req,res){if(req.method!=='GET')return send(res,405,{ok:false,error:'Method not allowed'});const key=process.env.VAPID_PUBLIC_KEY;if(!key)return send(res,503,{ok:false,error:'Push ainda não configurado no servidor.'});return send(res,200,{ok:true,publicKey:key})};
