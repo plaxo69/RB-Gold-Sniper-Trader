@@ -1,9 +1,58 @@
 {
-  "exportedAt": "2026-10-07T00:04:44.725Z",
+  "exportedAt": "2026-10-07T00:09:36.683Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 155,
+  "total": 156,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-07T00:08:00.000Z",
+      "price": 4162.822,
+      "tp": 4156.380562665319,
+      "sl": 4167.116291556454,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.195277043026935,
+      "rsi": 27.88456181438592,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "NEUTRO",
+      "confidence": 75,
+      "score": 78,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 78,
+        "pWin": 75,
+        "samples": 155,
+        "recommendation": "FORTE",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-07T00:08:00.000Z",
+      "key": "SELL-2026-10-07T00:08:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-07T00:08:00.000Z",
+      "reentryCount": 0,
+      "beArmed": true,
+      "beTriggeredAt": "2026-10-07T00:09:00.000Z",
+      "beTriggerPrice": 4162.392570844355
+    },
     {
       "type": "BUY",
       "score": 87,
@@ -187,13 +236,15 @@
       "key": "BUY-2026-10-06T23:18:00.000Z",
       "signalKey": "BUY-2026-10-06T23:18:00.000Z",
       "movementKey": "BUY-BREAKOUT-4166.17",
-      "status": "ALERTA",
+      "status": "BE",
       "time": "2026-10-06T23:18:00.000Z",
       "reentryCount": 0,
       "beArmed": true,
       "beTriggeredAt": "2026-10-06T23:19:00.000Z",
       "beTriggerPrice": 4167.075500000001,
-      "beAlerted": true
+      "beAlerted": true,
+      "resolvedAt": "2026-10-07T00:09:00.000Z",
+      "outcomeReason": "Proteção BE atingida; sem TP posterior"
     },
     {
       "type": "SELL",
