@@ -1,6 +1,6 @@
 (()=>{const KEY="rb_gold_sniper_ai_v5",MAX_HISTORY=1000,FILTER_PWIN=.57,FILTER_SCORE=62,MODEL_VERSION="RB-TRADER-PRO-HYBRID-v5";
 const n=(v,d=0)=>Number.isFinite(+v)?+v:d,up=v=>String(v||"").toUpperCase(),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function resolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>["WIN","LOSS","BE"].includes(up(t?.status))).slice(0,MAX_HISTORY):[]}catch{return[]}}
+function resolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS'].includes(up(t?.status))).slice(0,MAX_HISTORY):[]}catch{return[]}}
 function outcome(s){return up(s)==="WIN"?1:up(s)==="LOSS"?0:.5}
 function direction(a){return up(a?.type)==="SELL"?"SELL":"BUY"}
 function features(a){
