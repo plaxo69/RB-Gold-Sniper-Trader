@@ -9,7 +9,7 @@ function out(res,status,body){return res.status(status).json(body)}
 function ts(v){if(v==null)return NaN;if(typeof v==='number')return v<1e12?v*1000:v;const n=Number(v);if(Number.isFinite(n))return n<1e12?n*1000:n;const d=Date.parse(v);return Number.isFinite(d)?d:NaN}
 function keyOf(t){return t?.signalKey||t?.key||((t?.type||'')+'-'+(t?.signalTimestamp||t?.time||''))}
 function movementKey(a){const t=a?.tactical||{},side=a?.type||'WAIT',ev=side==='BUY'?t.buyEvent:t.sellEvent,level=side==='BUY'?t.buyLevel:t.sellLevel;if(ev?.type&&Number.isFinite(+level))return side+'-'+ev.type+'-'+Number(level).toFixed(2);if(Number.isFinite(+level))return side+'-LEVEL-'+Number(level).toFixed(2);return side+'-STRUCT-'+Number(a?.support||0).toFixed(2)+'-'+Number(a?.resistance||0).toFixed(2)}
-function normalize(t){if(!t)return t;const s=String(t.status||'ALERTA').toUpperCase();if(['WIN','LOSS','ALERTA'].includes(s))return{...t,status:s};if(s==='BE')return{...t,status:'LOSS',outcomeReason:t.outcomeReason||'Resultado BE legado convertido para LOSS'};if(s==='EXPIRADA')return{...t,status:'LOSS',outcomeReason:t.outcomeReason||'Resultado EXPIRADA legado convertido para LOSS'};return{...t,status:'ALERTA'}}
+function normalize(t){if(!t)return t;const s=String(t.status||'ALERTA').toUpperCase();if(['WIN','LOSS','ALERTA'].includes(s))return{...t,status:s};if(s==='BE')return{...t,status:'BE',outcomeReason:t.outcomeReason||'Trade fechada em BE'};if(s==='EXPIRADA')return{...t,status:'LOSS',outcomeReason:t.outcomeReason||'Resultado EXPIRADA legado convertido para LOSS'};return{...t,status:'ALERTA'}}
 function readHistory(token){
  return fetch(API+'/repos/'+REPO+'/contents/'+PATH+'?ref='+BRANCH,{headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'RB-TRADER-PRO-MONITOR'}})
  .then(async r=>{if(r.status===404)return{trades:[],sha:null};const d=await r.json();if(!r.ok)throw Error(d.message||'Falha ao ler histórico');const raw=Buffer.from(d.content||'','base64').toString('utf8');let p={};try{p=JSON.parse(raw)}catch{};return{trades:Array.isArray(p)?p:(Array.isArray(p.trades)?p.trades:[]),sha:d.sha||null}})
@@ -66,7 +66,7 @@ async function runMonitor(){
  }
  if(active&&m1.marketState==='open'&&Number.isFinite(m1.price)){
    const entry=Number(active.price),tp=Number(active.tp),dist=Math.abs(tp-entry),fav=active.type==='BUY'?m1.price-entry:entry-m1.price;
-   if(dist>0&&fav>=dist*.50&&!active.beAlerted){active.beAlerted=true;changed=true;result.events.push('BE');await sendPush('RB TRADER PRO — COLOCAR BE AGORA',(active.type==='BUY'?'📈 COMPRA':'📉 VENDA')+' atingiu 50% do TP — colocar SL no preço de entrada','rb-be-'+keyOf(active),gh)}
+   if(dist>0&&fav>=dist*.50){active.status='BE';active.resolvedAt=new Date().toISOString();active.beTriggeredAt=active.beTriggeredAt||active.resolvedAt;active.beTriggerPrice=m1.price;active.outcomeReason='Proteção BE atingida — trade fechada em BE';delete active.beAlerted;delete active.beArmed;changed=true;result.events.push('BE');await sendPush('RB TRADER PRO — BE',(active.type==='BUY'?'📈 COMPRA':'📉 VENDA')+' atingiu a zona de BE — trade fechada em BE','rb-be-'+keyOf(active),gh);active=null}
  }
  if(!active&&m1.marketState==='open'&&m1.realOpenBar===true&&Number(m1.quoteAgeSec)<=15&&m1.stale!==true&&Number(m1.candleAgeSec)<=150){
    global.__RB_HISTORY=trades;
