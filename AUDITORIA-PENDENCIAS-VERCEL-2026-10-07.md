@@ -1,28 +1,40 @@
-# RB TRADER PRO — Auditoria / correções pendentes Vercel
-
-Data: 2026-10-07
+# RB TRADER PRO — Auditoria final 2026-10-07
 
 ## Regras definitivas
-- Resultado final do histórico: WIN ou LOSS apenas.
-- BE não é resultado e não fecha a trade.
-- BE é apenas um alerta manual "COLOCAR BE".
-- O alerta BE só pode ser emitido a partir de 50% do objetivo (TP).
-- Uma trade permanece aberta até TP ou SL.
-- Uma trade aberta continua a bloquear novas trades; depois de TP/SL o bloqueio é libertado.
-- Regras iguais para sinais SNIPER e oportunidades IA.
-- Uma trade por vez.
+- WIN = TP atingido.
+- LOSS = SL atingido.
+- BE = resultado terminal quando a operação atinge pelo menos 50% da distância até TP.
+- Ao atingir BE, a trade fecha como BE e deixa de bloquear novas entradas.
+- BE não move automaticamente o SL.
+- SNIPER e IA têm a mesma gestão.
+- Uma trade aberta bloqueia novas entradas até WIN, LOSS ou BE.
 - M1 + M5 + M15 alinhados é a regra normal dos filtros.
-- A IA pode detetar uma oportunidade independente quando os filtros não a detetam; a IA não deve ficar limitada a esperar por um sinal dos filtros.
-- ADX e Volume/SMA20 são dados de análise, não bloqueadores por si só; se indisponíveis devem aparecer como N/D, não substituir o valor por um bloqueio.
-- A IA deve continuar a mostrar opinião, score e probabilidade quando houver dados suficientes.
+- A IA pode emitir oportunidades independentes.
+- ADX e Volume/SMA20 são dados, não bloqueadores.
+- Dados indisponíveis = N/D.
+- Histórico local/remoto preserva resultados terminais.
+- O monitor servidor verifica TP/SL e BE pelas velas M1.
+- Push é enviado para WIN, LOSS, BE e novas trades.
 
-## Pendências deixadas prontas
-- Resolver trades localmente por TP/SL quando a API/Vercel não estiver disponível.
-- Normalizar resultados BE/EXPIRADA antigos para WIN/LOSS.
-- Remover BE das estatísticas e apresentação do histórico.
-- Manter o alerta de BE sem alteração automática da trade.
-- Garantir que o motor não mantém uma trade bloqueada depois de TP/SL.
-- Preservar a exceção IA e as regras de alinhamento M1/M5/M15.
+## Correções desta auditoria
+1. BE terminal no monitor servidor.
+2. BE terminal no histórico/local.
+3. Ecrã mostra BE explicitamente.
+4. Estatísticas contam BE.
+5. BE local fecha a trade mesmo sem áudio/alertas ativos.
+6. Monitor servidor deteta BE mesmo se o preço já recuou.
+7. Backup criado: BACKUP-FINAL-AUDITORIA-BE-2026-10-07.
 
 ## Vercel
-Estas alterações estão no main e ficam prontas para entrar na próxima publicação. A publicação deve ser validada antes de substituir a versão de produção.
+O projeto está no Hobby. O limite documentado é 100 deployments por 24h e 32 builds por hora. O bloqueio atual foi `api-deployments-free-per-day`. Não fazer novas tentativas enquanto o limite estiver ativo.
+
+Quando libertar:
+- publicar o main uma única vez;
+- confirmar READY;
+- confirmar domínio de produção;
+- testar histórico e BE;
+- testar /api/monitor;
+- testar Push config;
+- confirmar workflow GitHub.
+
+A produção só fica concluída depois destes testes.
