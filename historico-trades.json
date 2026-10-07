@@ -1,9 +1,55 @@
 {
-  "exportedAt": "2026-10-07T05:22:04.823Z",
+  "exportedAt": "2026-10-07T05:22:25.339Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 166,
+  "total": 167,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-07T05:21:00.000Z",
+      "price": 4132.033,
+      "tp": 4126.494641121134,
+      "sl": 4135.725239252578,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.168261683852193,
+      "rsi": 27.668045599432915,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 75,
+      "score": 78,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 78,
+        "pWin": 75,
+        "samples": 166,
+        "recommendation": "FORTE",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-07T05:21:00.000Z",
+      "key": "SELL-2026-10-07T05:21:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-07T05:21:00.000Z",
+      "reentryCount": 1
+    },
     {
       "type": "SELL",
       "source": "IA",
