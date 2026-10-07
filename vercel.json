@@ -1,13 +1,55 @@
 {
   "version": 2,
   "builds": [
-    { "src": "server.js", "use": "@vercel/node" },
-    { "src": "api/export-history.js", "use": "@vercel/node" },
-    { "src": "api/trades.js", "use": "@vercel/node" }
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/export-history.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/trades.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/push-config.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/push-subscribe.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/push-send.js",
+      "use": "@vercel/node"
+    }
   ],
   "routes": [
-    { "src": "/api/export-history", "dest": "api/export-history.js" },
-    { "src": "/api/trades", "dest": "api/trades.js" },
-    { "src": "/(.*)", "dest": "server.js" }
+    {
+      "src": "/api/push-config",
+      "dest": "api/push-config.js"
+    },
+    {
+      "src": "/api/push-subscribe",
+      "dest": "api/push-subscribe.js"
+    },
+    {
+      "src": "/api/push-send",
+      "dest": "api/push-send.js"
+    },
+    {
+      "src": "/api/export-history",
+      "dest": "api/export-history.js"
+    },
+    {
+      "src": "/api/trades",
+      "dest": "api/trades.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
   ]
 }
