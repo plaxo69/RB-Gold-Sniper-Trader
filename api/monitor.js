@@ -64,9 +64,12 @@ async function runMonitor(){
    for(const c of candles){const hi=Number(c.high),lo=Number(c.low);const hitTP=active.type==='BUY'?hi>=tp:lo<=tp;const hitSL=active.type==='BUY'?lo<=sl:hi>=sl;if(hitTP&&hitSL){outcome='LOSS';reason='TP e SL tocados no mesmo candle; resultado conservador = LOSS';when=c.timestamp;break}if(hitTP){outcome='WIN';reason='TP atingido';when=c.timestamp;break}if(hitSL){outcome='LOSS';reason='SL atingido';when=c.timestamp;break}}
    if(outcome){active.status=outcome;active.resolvedAt=when;active.outcomeReason=reason;delete active.beAlerted;changed=true;result.events.push(outcome==='WIN'?'WIN':'LOSS');await sendPush(outcome==='WIN'?'RB TRADER PRO — WIN':'RB TRADER PRO — LOSS',outcome==='WIN'?'🟢 TP atingido — trade fechada com WIN':'🔴 SL atingido — trade fechada com LOSS','rb-result-'+keyOf(active),gh);active=null}
  }
- if(active&&m1.marketState==='open'&&Number.isFinite(m1.price)){
-   const entry=Number(active.price),tp=Number(active.tp),dist=Math.abs(tp-entry),fav=active.type==='BUY'?m1.price-entry:entry-m1.price;
-   if(dist>0&&fav>=dist*.50){active.status='BE';active.resolvedAt=new Date().toISOString();active.beTriggeredAt=active.beTriggeredAt||active.resolvedAt;active.beTriggerPrice=m1.price;active.outcomeReason='Proteção BE atingida — trade fechada em BE';delete active.beAlerted;delete active.beArmed;changed=true;result.events.push('BE');await sendPush('RB TRADER PRO — BE',(active.type==='BUY'?'📈 COMPRA':'📉 VENDA')+' atingiu a zona de BE — trade fechada em BE','rb-be-'+keyOf(active),gh);active=null}
+ if(active){
+   const entry=Number(active.price),tp=Number(active.tp),dist=Math.abs(tp-entry);
+   let beWhen=null,bePrice=null;
+   if(dist>0){for(const c of candles){const hi=Number(c.high),lo=Number(c.low),fav=active.type==='BUY'?hi-entry:entry-lo;if(Number.isFinite(fav)&&fav>=dist*.50){beWhen=c.timestamp;bePrice=active.type==='BUY'?hi:lo;break}}}
+   if(!beWhen&&m1.marketState==='open'&&Number.isFinite(m1.price)){const fav=active.type==='BUY'?m1.price-entry:entry-m1.price;if(dist>0&&fav>=dist*.50){beWhen=new Date().toISOString();bePrice=m1.price}}
+   if(beWhen){active.status='BE';active.resolvedAt=beWhen;active.beTriggeredAt=beWhen;active.beTriggerPrice=bePrice;active.outcomeReason='Proteção BE atingida — trade fechada em BE';delete active.beAlerted;delete active.beArmed;changed=true;result.events.push('BE');await sendPush('RB TRADER PRO — BE',(active.type==='BUY'?'📈 COMPRA':'📉 VENDA')+' atingiu a zona de BE — trade fechada em BE','rb-be-'+keyOf(active),gh);active=null}
  }
  if(!active&&m1.marketState==='open'&&m1.realOpenBar===true&&Number(m1.quoteAgeSec)<=15&&m1.stale!==true&&Number(m1.candleAgeSec)<=150){
    global.__RB_HISTORY=trades;
