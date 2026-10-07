@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-07T02:55:44.685Z",
+  "exportedAt": "2026-10-07T02:56:24.528Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 162,
@@ -49,7 +49,8 @@
       "reentryCount": 1,
       "beArmed": true,
       "beTriggeredAt": "2026-10-07T02:55:00.000Z",
-      "beTriggerPrice": 4145.265172522924
+      "beTriggerPrice": 4145.265172522924,
+      "beAlerted": true
     },
     {
       "type": "SELL",
