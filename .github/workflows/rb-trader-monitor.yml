@@ -1,0 +1,28 @@
+name: RB TRADER PRO — monitor 24/7
+
+on:
+  schedule:
+    - cron: "2-59/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Obter token OIDC do GitHub
+        id: oidc
+        run: |
+          set -e
+          TOKEN=$(curl -fsSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https%3A%2F%2Frb-gold-sniper-trader.vercel.app%2Fapi%2Fmonitor" | python -c "import json,sys; print(json.load(sys.stdin)['value'])")
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+      - name: Executar monitor servidor
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -e
+          curl -fsS --retry 2 --max-time 45             -X POST             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             https://rb-gold-sniper-trader.vercel.app/api/monitor
