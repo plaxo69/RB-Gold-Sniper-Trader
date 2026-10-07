@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-07T17:11:46.433Z",
+  "exportedAt": "2026-10-07T19:03:48.688Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 180,
@@ -189,13 +189,15 @@
       "key": "BUY-2026-10-07T17:09:00.000Z",
       "signalKey": "BUY-2026-10-07T17:09:00.000Z",
       "movementKey": "BUY-BREAKOUT-4118.70",
-      "status": "ALERTA",
+      "status": "BE",
       "time": "2026-10-07T17:09:00.000Z",
       "reentryCount": 0,
       "beArmed": true,
       "beTriggeredAt": "2026-10-07T17:10:00.000Z",
       "beTriggerPrice": 4120.5246,
-      "beAlerted": true
+      "beAlerted": true,
+      "resolvedAt": "2026-10-07T19:03:00.000Z",
+      "outcomeReason": "Proteção BE atingida; sem TP posterior"
     },
     {
       "type": "SELL",
