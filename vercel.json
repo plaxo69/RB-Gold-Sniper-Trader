@@ -24,6 +24,10 @@
     {
       "src": "api/push-send.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "api/monitor.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
@@ -46,6 +50,10 @@
     {
       "src": "/api/trades",
       "dest": "api/trades.js"
+    },
+    {
+      "src": "/api/monitor",
+      "dest": "api/monitor.js"
     },
     {
       "src": "/(.*)",
