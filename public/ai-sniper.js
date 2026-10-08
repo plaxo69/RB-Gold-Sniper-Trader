@@ -80,7 +80,7 @@ function independentOpportunity(ctx){
  const confirmations=dir==='BUY'?Number(bull)+Number(breakoutBuy||rejectBuy)+Number(r>55&&r<78)+Number(body>=atr*.18&&closePos>=.65):Number(bear)+Number(breakoutSell||rejectSell)+Number(r<45&&r>22)+Number(body>=atr*.18&&closePos<=.35);
  if(score<62||confirmations<2)return null;if((dir==='BUY'&&(r<60||r>=70))||(dir==='SELL'&&(r<=30||r>=45)))return null;
  const swing=dir==='BUY'?Math.min(...series.slice(-12).map(c=>Number(c.low))):Math.max(...series.slice(-12).map(c=>Number(c.high)));
- const risk=Math.max(atr*.80,Math.abs(entry-swing)+atr*.15),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
+ const structuralRisk=Math.abs(entry-swing)+atr*.15,maxRisk=atr*1.50;if(!Number.isFinite(structuralRisk)||structuralRisk>maxRisk)return null;const risk=Math.min(maxRisk,Math.max(atr*.80,structuralRisk)),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
  const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.35+technical*.65)*100),55,88);
  const ts=a.timestamp||new Date().toISOString(),reasons=[];reasons.push(tfCount>=3?'M1/M5/M15 alinhados':'2 de 3 timeframes M1/M5/M15 alinhados');
  if(dir==='BUY'&&(breakoutBuy||rejectBuy))reasons.push(breakoutBuy?'rompimento de resistência':'rejeição de suporte');
