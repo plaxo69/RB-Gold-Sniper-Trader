@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-08T01:35:49.737Z",
+  "exportedAt": "2026-10-08T02:13:29.283Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 184,
@@ -44,10 +44,11 @@
       "signalKey": "BUY-2026-10-08T01:11:00.000Z",
       "key": "BUY-2026-10-08T01:11:00.000Z",
       "movementKey": "BUY-STRUCT-0.00-0.00",
-      "status": "ALERTA",
+      "status": "WIN",
       "time": "2026-10-08T01:11:00.000Z",
       "reentryCount": 1,
-      "beAlerted": true
+      "resolvedAt": "2026-10-08T02:13:00.000Z",
+      "outcomeReason": "TP atingido"
     },
     {
       "type": "BUY",
