@@ -82,7 +82,10 @@ async function fetchCandles(timeframe, requestedLimit = 500, from = null, to = n
     high: Number(b.high),
     low: Number(b.low),
     close: Number(b.close),
-    volume: Number(b.volume || 0),
+    volume: Number(Number(b.volume) > 0 ? b.volume : (Number.isFinite(Number(b.tickVolume)) ? b.tickVolume : 0)),
+    tickVolume: Number.isFinite(Number(b.tickVolume)) ? Number(b.tickVolume) : 0,
+    realVolume: Number.isFinite(Number(b.volume)) ? Number(b.volume) : 0,
+    volumeSource: Number(b.volume) > 0 ? 'REAL' : (Number.isFinite(Number(b.tickVolume)) ? 'TICK_VOLUME' : 'UNAVAILABLE'),
     complete: b.isOpen !== true,
     isOpen: b.isOpen === true
   }))).slice(-limit);
