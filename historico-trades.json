@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-08T10:27:29.392Z",
+  "exportedAt": "2026-10-08T10:27:55.328Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 192,
@@ -9965,8 +9965,8 @@
       ],
       "setupState": "ARMADO",
       "armedDirection": "SELL",
-      "formingPrice": 4152.38,
-      "formingRsi": 9.492313192705467,
+      "formingPrice": 4152.807,
+      "formingRsi": 12.72334915838897,
       "tactical": {
         "buy": null,
         "sell": "BREAKDOWN FECHADO",
@@ -10036,14 +10036,14 @@
         "sellScorePass": true
       },
       "ai": {
-        "mode": "OPINIÃO",
-        "score": 80,
-        "pWin": 95,
-        "samples": 116,
-        "directionSamples": 64,
+        "mode": "APRENDIZAGEM",
+        "score": 79,
+        "pWin": 94,
+        "samples": 10,
+        "directionSamples": 6,
         "approved": true,
         "reasons": [
-          "IA aprovou o setup"
+          "aprendizagem/validação em curso"
         ],
         "aiFeatures": {
           "dir": "S",
@@ -10056,14 +10056,14 @@
           "tactical": "SELL",
           "tp2": 0
         },
-        "baseWinRate": 77,
-        "featuresUsed": 9,
-        "validationSamples": 35,
-        "validationAccuracy": 82,
+        "baseWinRate": 75,
+        "featuresUsed": 8,
+        "validationSamples": 3,
+        "validationAccuracy": 33,
         "modelVersion": "RB-TRADER-PRO-STAT-v4"
       },
-      "aiScore": 80,
-      "aiWinRate": 95,
+      "aiScore": 79,
+      "aiWinRate": 94,
       "aiFeatures": {
         "dir": "S",
         "score": 15,
@@ -10082,12 +10082,12 @@
       "time": "2026-10-05T11:49:00.000Z",
       "reentryCount": 0,
       "aiOpinion": {
-        "mode": "OPINIÃO",
-        "score": 80,
-        "pWin": 95,
-        "samples": 116,
+        "mode": "APRENDIZAGEM",
+        "score": 79,
+        "pWin": 94,
+        "samples": 10,
         "reasons": [
-          "IA aprovou o setup"
+          "aprendizagem/validação em curso"
         ],
         "approved": true
       },
@@ -17250,8 +17250,8 @@
       ],
       "setupState": "ARMADO",
       "armedDirection": "SELL",
-      "formingPrice": 4163.498,
-      "formingRsi": 26.976284584978472,
+      "formingPrice": 4163.993,
+      "formingRsi": 27.77545035609505,
       "tactical": {
         "buy": null,
         "sell": "BREAKDOWN FECHADO",
@@ -17318,17 +17318,17 @@
         "sellScorePass": true
       },
       "ai": {
-        "mode": "FILTRO ADAPTATIVO",
-        "score": 68,
-        "pWin": 71,
-        "samples": 71,
-        "directionSamples": 36,
+        "mode": "OBSERVAÇÃO",
+        "score": 43,
+        "pWin": 22,
+        "samples": 8,
+        "directionSamples": 4,
         "approved": true,
         "reasons": [
-          "IA aprovou o setup"
+          "aprendizagem/validação em curso"
         ],
-        "opinion": "FAVORÁVEL",
-        "opinionLevel": "VALIDADO",
+        "opinion": "DESFAVORÁVEL",
+        "opinionLevel": "PROVISÓRIO",
         "aiFeatures": {
           "dir": "S",
           "score": 15,
@@ -17340,14 +17340,14 @@
           "tactical": "SELL",
           "tp2": 0
         },
-        "baseWinRate": 62,
-        "featuresUsed": 9,
-        "validationSamples": 22,
-        "validationAccuracy": 77,
+        "baseWinRate": 38,
+        "featuresUsed": 6,
+        "validationSamples": 8,
+        "validationAccuracy": null,
         "modelVersion": "RB-TRADER-PRO-STAT-v5-ADVISORY"
       },
-      "aiScore": 68,
-      "aiWinRate": 71,
+      "aiScore": 43,
+      "aiWinRate": 22,
       "aiFeatures": {
         "dir": "S",
         "score": 15,
@@ -17408,8 +17408,8 @@
       ],
       "setupState": "ARMADO",
       "armedDirection": "SELL",
-      "formingPrice": 4165.246,
-      "formingRsi": 30.826387542805804,
+      "formingPrice": 4166.45,
+      "formingRsi": 35.205453749453085,
       "tactical": {
         "buy": null,
         "sell": "RETESTE + REJEIÇÃO",
@@ -17476,17 +17476,17 @@
         "sellScorePass": true
       },
       "ai": {
-        "mode": "FILTRO ADAPTATIVO",
-        "score": 67,
-        "pWin": 69,
-        "samples": 70,
-        "directionSamples": 35,
+        "mode": "OBSERVAÇÃO",
+        "score": 43,
+        "pWin": 22,
+        "samples": 8,
+        "directionSamples": 4,
         "approved": true,
         "reasons": [
-          "IA aprovou o setup"
+          "aprendizagem/validação em curso"
         ],
-        "opinion": "FAVORÁVEL",
-        "opinionLevel": "VALIDADO",
+        "opinion": "DESFAVORÁVEL",
+        "opinionLevel": "PROVISÓRIO",
         "aiFeatures": {
           "dir": "S",
           "score": 15,
@@ -17498,14 +17498,14 @@
           "tactical": "SELL",
           "tp2": 0
         },
-        "baseWinRate": 61,
-        "featuresUsed": 9,
-        "validationSamples": 21,
-        "validationAccuracy": 76,
+        "baseWinRate": 38,
+        "featuresUsed": 6,
+        "validationSamples": 8,
+        "validationAccuracy": null,
         "modelVersion": "RB-TRADER-PRO-STAT-v5-ADVISORY"
       },
-      "aiScore": 67,
-      "aiWinRate": 69,
+      "aiScore": 43,
+      "aiWinRate": 22,
       "aiFeatures": {
         "dir": "S",
         "score": 15,
@@ -26339,10 +26339,10 @@
       "asset": "XAUUSD",
       "key": "SELL-2026-09-29T17:38:00.000Z",
       "signalKey": "SELL-2026-09-29T17:38:00.000Z",
-      "status": "LOSS",
+      "status": "WIN",
       "time": "2026-09-29T17:38:00.000Z",
-      "resolvedAt": "2026-09-29T18:00:00.000Z",
-      "outcomeReason": "SL atingido"
+      "resolvedAt": "2026-10-02T15:57:00.000Z",
+      "outcomeReason": "TP atingido"
     },
     {
       "type": "BUY",
@@ -26454,8 +26454,10 @@
       "signalKey": "BUY-2026-09-29T14:18:00.000Z",
       "status": "LOSS",
       "time": "2026-09-29T14:18:00.000Z",
-      "resolvedAt": "2026-09-29T15:22:00.000Z",
-      "outcomeReason": "SL atingido"
+      "resolvedAt": "2026-10-01T19:15:00.000Z",
+      "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
+      "beTrigger": 4177.8,
+      "beAlerted": true
     },
     {
       "type": "BUY",
@@ -26678,10 +26680,10 @@
       "asset": "XAUUSD",
       "key": "BUY-2026-09-29T11:20:00.000Z",
       "signalKey": "BUY-2026-09-29T11:20:00.000Z",
-      "status": "LOSS",
+      "status": "WIN",
       "time": "2026-09-29T11:20:00.000Z",
-      "resolvedAt": "2026-09-29T11:42:00.000Z",
-      "outcomeReason": "SL atingido"
+      "resolvedAt": "2026-10-01T19:02:00.000Z",
+      "outcomeReason": "TP atingido"
     },
     {
       "type": "BUY",
