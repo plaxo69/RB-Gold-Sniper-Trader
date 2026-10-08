@@ -70,12 +70,12 @@ function independentOpportunity(ctx){
  const series=m1.slice(0,-1);if(series.length<80)return null;const a=series.at(-1),prev=series.at(-2),entry=Number(a.close),atr=atrSeries(series,14),r=rsiSeries(series,14),e20=ema(series,20),e50=ema(series,50);if(!Number.isFinite(entry)||!Number.isFinite(atr)||atr<=0||!Number.isFinite(r)||!Number.isFinite(e20)||!Number.isFinite(e50))return null;
  const dirs=[tfDir(m1),tfDir(m5),tfDir(m15)],hi=dirs.filter(x=>x==='BUY').length,lo=dirs.filter(x=>x==='SELL').length;
  const look=series.slice(-21,-1),recentHigh=look.length?Math.max(...look.map(c=>Number(c.high))):NaN,recentLow=look.length?Math.min(...look.map(c=>Number(c.low))):NaN;
- const body=Math.abs(Number(a.close)-Number(a.open||a.close)),range=Math.max(Number(a.high)-Number(a.low),0.0001),closePos=(entry-Number(a.low))/range;
+ const body=Math.abs(Number(a.close)-Number(a.open||a.close)),range=Math.max(Number(a.high)-Number(a.low),0.0001),closePos=(entry-Number(a.low))/range,vols=series.slice(-20).map(c=>Number(c.volume)).filter(Number.isFinite),volNow=Number(a.volume),volAvg=vols.length>=10?vols.reduce((s,v)=>s+v,0)/vols.length:NaN,volStrong=Number.isFinite(volNow)&&Number.isFinite(volAvg)&&volAvg>0&&volNow>volAvg*1.05;
  const upper=Number(a.high)-Math.max(entry,Number(a.open||entry)),lower=Math.min(entry,Number(a.open||entry))-Number(a.low);
  const bull=entry>Number(prev.close)&&entry>e20&&e20>=e50,bear=entry<Number(prev.close)&&entry<e20&&e20<=e50;
  const breakoutBuy=entry>recentHigh,breakoutSell=entry<recentLow,rejectBuy=lower>=body*.9&&closePos>=.60,rejectSell=upper>=body*.9&&closePos<=.40;
- const buyEvidence=(hi>=2?22:0)+(bull?16:0)+(r>55&&r<78?12:0)+(breakoutBuy?18:0)+(rejectBuy?14:0)+(body>=atr*.18?8:0)+(closePos>=.65?6:0);
- const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r<45&&r>22?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0);
+ const buyEvidence=(hi>=2?22:0)+(bull?16:0)+(r>55&&r<78?12:0)+(breakoutBuy?18:0)+(rejectBuy?14:0)+(body>=atr*.18?8:0)+(closePos>=.65?6:0)+(volStrong?6:0);
+ const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r<45&&r>22?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0)+(volStrong?6:0);
  const dir=buyEvidence>=sellEvidence?'BUY':'SELL',score=clamp(Math.max(buyEvidence,sellEvidence),0,100),tfCount=dir==='BUY'?hi:lo;
  const confirmations=dir==='BUY'?Number(bull)+Number(breakoutBuy||rejectBuy)+Number(r>55&&r<78)+Number(body>=atr*.18&&closePos>=.65):Number(bear)+Number(breakoutSell||rejectSell)+Number(r<45&&r>22)+Number(body>=atr*.18&&closePos<=.35);
  if(score<62||confirmations<2)return null;if((dir==='BUY'&&(r<60||r>=70))||(dir==='SELL'&&(r<=30||r>=45)))return null;
