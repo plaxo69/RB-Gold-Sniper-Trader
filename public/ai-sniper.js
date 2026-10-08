@@ -78,7 +78,7 @@ function independentOpportunity(ctx){
  const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r<45&&r>22?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0);
  const dir=buyEvidence>=sellEvidence?'BUY':'SELL',score=clamp(Math.max(buyEvidence,sellEvidence),0,100),tfCount=dir==='BUY'?hi:lo;
  const confirmations=dir==='BUY'?Number(bull)+Number(breakoutBuy||rejectBuy)+Number(r>55&&r<78)+Number(body>=atr*.18&&closePos>=.65):Number(bear)+Number(breakoutSell||rejectSell)+Number(r<45&&r>22)+Number(body>=atr*.18&&closePos<=.35);
- if(score<60||confirmations<2)return null;if((dir==='BUY'&&r<32)||(dir==='SELL'&&r>68))return null;
+ if(score<62||confirmations<2)return null;if((dir==='BUY'&&(r<60||r>=70))||(dir==='SELL'&&(r<=30||r>=45)))return null;
  const swing=dir==='BUY'?Math.min(...series.slice(-12).map(c=>Number(c.low))):Math.max(...series.slice(-12).map(c=>Number(c.high)));
  const risk=Math.max(atr*.80,Math.abs(entry-swing)+atr*.15),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
  const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.35+technical*.65)*100),55,88);
