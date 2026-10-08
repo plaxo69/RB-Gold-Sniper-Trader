@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-08T07:55:22.710Z",
+  "exportedAt": "2026-10-08T07:56:33.208Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 188,
@@ -46,9 +46,13 @@
       "signalKey": "SELL-2026-10-08T07:54:00.000Z",
       "key": "SELL-2026-10-08T07:54:00.000Z",
       "movementKey": "SELL-STRUCT-0.00-0.00",
-      "status": "ALERTA",
+      "status": "BE",
       "time": "2026-10-08T07:54:00.000Z",
-      "reentryCount": 0
+      "reentryCount": 0,
+      "resolvedAt": "2026-10-08T07:56:00.000Z",
+      "beTriggeredAt": "2026-10-08T07:56:00.000Z",
+      "beTriggerPrice": 4119.409,
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
     },
     {
       "type": "SELL",
