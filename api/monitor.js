@@ -58,20 +58,45 @@ async function runMonitor(){
  let activeCandles=[];
  let active=trades.filter(t=>['BUY','SELL'].includes(t.type)&&t.status==='ALERTA').sort((a,b)=>(ts(b.signalTimestamp||b.time)||0)-(ts(a.signalTimestamp||a.time)||0))[0]||null;
  if(active){
-   const created=ts(active.signalTimestamp||active.time);const live=await marketModule.getMarket('1m',2000,Number.isFinite(created)?new Date(created).toISOString():null,new Date().toISOString());
-   const candles=(live.candles||[]).filter(c=>ts(c.timestamp)>created);
+   const created=ts(active.signalTimestamp||active.time);
+   const live=await marketModule.getMarket('1m',2000,Number.isFinite(created)?new Date(created).toISOString():null,new Date().toISOString());
+   const candles=(live.candles||[]).filter(c=>ts(c.timestamp)>created).sort((a,b)=>ts(a.timestamp)-ts(b.timestamp));
    activeCandles=candles;
-   const entry=Number(active.price),sl=Number(active.sl),tp=Number(active.tp);
-   let outcome=null,when=null,reason='';
-   for(const c of candles){const hi=Number(c.high),lo=Number(c.low);const hitTP=active.type==='BUY'?hi>=tp:lo<=tp;const hitSL=active.type==='BUY'?lo<=sl:hi>=sl;if(hitTP&&hitSL){outcome='LOSS';reason='TP e SL tocados no mesmo candle; resultado conservador = LOSS';when=c.timestamp;break}if(hitTP){outcome='WIN';reason='TP atingido';when=c.timestamp;break}if(hitSL){outcome='LOSS';reason='SL atingido';when=c.timestamp;break}}
-   if(outcome){active.status=outcome;active.resolvedAt=when;active.outcomeReason=reason;delete active.beAlerted;changed=true;result.events.push(outcome==='WIN'?'WIN':'LOSS');await sendPush(outcome==='WIN'?'RB TRADER PRO — WIN':'RB TRADER PRO — LOSS',outcome==='WIN'?'🟢 TP atingido — trade fechada com WIN':'🔴 SL atingido — trade fechada com LOSS','rb-result-'+keyOf(active),gh);active=null}
- }
- if(active){
-   const entry=Number(active.price),tp=Number(active.tp),dist=Math.abs(tp-entry);
-   let beWhen=null,bePrice=null;
-   if(dist>0){for(const c of activeCandles){const hi=Number(c.high),lo=Number(c.low),fav=active.type==='BUY'?hi-entry:entry-lo;if(Number.isFinite(fav)&&fav>=dist*.50){beWhen=c.timestamp;bePrice=active.type==='BUY'?hi:lo;break}}}
-   if(!beWhen&&m1.marketState==='open'&&Number.isFinite(m1.price)){const fav=active.type==='BUY'?m1.price-entry:entry-m1.price;if(dist>0&&fav>=dist*.50){beWhen=new Date().toISOString();bePrice=m1.price}}
-   if(beWhen){active.status='BE';active.resolvedAt=beWhen;active.beTriggeredAt=beWhen;active.beTriggerPrice=bePrice;active.outcomeReason='Proteção BE atingida — trade fechada em BE';delete active.beAlerted;delete active.beArmed;changed=true;result.events.push('BE');await sendPush('RB TRADER PRO — BE',(active.type==='BUY'?'📈 COMPRA':'📉 VENDA')+' atingiu a zona de BE — trade fechada em BE','rb-be-'+keyOf(active),gh);active=null}
+   const entry=Number(active.price),sl=Number(active.sl),tp=Number(active.tp),dist=Math.abs(tp-entry);
+   let armed=!!active.beArmed,triggerTs=ts(active.beTriggeredAt),outcome=null,when=null,reason='',newlyArmed=false;
+   for(const c of candles){
+     const ct=ts(c.timestamp),hi=Number(c.high),lo=Number(c.low);
+     if(!Number.isFinite(hi)||!Number.isFinite(lo))continue;
+     const hitTP=active.type==='BUY'?hi>=tp:lo<=tp;
+     const hitSL=active.type==='BUY'?lo<=sl:hi>=sl;
+     const hitEntry=active.type==='BUY'?lo<=entry:hi>=entry;
+     if(armed){
+       if(!Number.isFinite(triggerTs)||ct>triggerTs){
+         if(hitTP){outcome='WIN';reason='TP atingido depois da ativação da proteção BE';when=c.timestamp;break}
+         if(hitEntry){outcome='BE';reason='Preço regressou à entrada depois da ativação da proteção BE';when=c.timestamp;break}
+       }
+       continue;
+     }
+     if(hitTP&&hitSL){outcome='LOSS';reason='TP e SL tocados no mesmo candle; resultado conservador = LOSS';when=c.timestamp;break}
+     if(hitTP){outcome='WIN';reason='TP atingido';when=c.timestamp;break}
+     if(hitSL){outcome='LOSS';reason='SL atingido antes da ativação da proteção BE';when=c.timestamp;break}
+     if(Number.isFinite(dist)&&dist>0){
+       const fav=active.type==='BUY'?hi-entry:entry-lo;
+       if(fav>=dist*.50){armed=true;newlyArmed=true;triggerTs=ct;active.beArmed=true;active.beTriggeredAt=c.timestamp;active.beTriggerPrice=active.type==='BUY'?hi:lo;active.beProtectionPrice=entry;active.outcomeReason='Proteção BE ativada — trade continua aberta até TP, SL ou retorno à entrada'}
+     }
+   }
+   if(!outcome&&!armed&&m1.marketState==='open'&&Number.isFinite(m1.price)&&dist>0){
+     const fav=active.type==='BUY'?m1.price-entry:entry-m1.price;
+     if(fav>=dist*.50){armed=true;newlyArmed=true;active.beArmed=true;active.beTriggeredAt=new Date().toISOString();active.beTriggerPrice=m1.price;active.beProtectionPrice=entry;active.outcomeReason='Proteção BE ativada — trade continua aberta até TP, SL ou retorno à entrada'}
+   }
+   if(outcome){
+     active.status=outcome;active.resolvedAt=when;active.outcomeReason=reason;delete active.beArmed;delete active.beAlerted;changed=true;result.events.push(outcome);
+     await sendPush('RB TRADER PRO — '+outcome,outcome==='WIN'?'🟢 TP atingido — trade fechada com WIN':outcome==='LOSS'?'🔴 SL atingido — trade fechada com LOSS':'🟡 Preço regressou à entrada — trade fechada em BE','rb-result-'+keyOf(active),gh);
+     active=null;
+   }else if(newlyArmed){
+     active.beAlerted=true;changed=true;result.events.push('BE_ACTIVATED');
+     await sendPush('RB TRADER PRO — COLOCAR BE AGORA',(active.type==='BUY'?'📈 COMPRA':'📉 VENDA')+' atingiu 50% do percurso para TP — mover SL para o preço de entrada','rb-be-'+keyOf(active),gh);
+   }
  }
  if(!active&&m1.marketState==='open'&&m1.realOpenBar===true&&Number(m1.quoteAgeSec)<=15&&m1.stale!==true&&Number(m1.candleAgeSec)<=150){
    global.__RB_HISTORY=trades;
