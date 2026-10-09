@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-09T07:32:34.899Z",
+  "exportedAt": "2026-10-09T07:40:33.099Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 232,
@@ -190,9 +190,11 @@
       "key": "BUY-2026-10-09T07:30:00.000Z",
       "signalKey": "BUY-2026-10-09T07:30:00.000Z",
       "movementKey": "BUY-LEVEL-4197.03",
-      "status": "ALERTA",
+      "status": "LOSS",
       "time": "2026-10-09T07:30:00.000Z",
-      "reentryCount": 0
+      "reentryCount": 0,
+      "resolvedAt": "2026-10-09T07:40:00.000Z",
+      "outcomeReason": "SL atingido"
     },
     {
       "type": "BUY",
