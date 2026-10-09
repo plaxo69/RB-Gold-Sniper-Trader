@@ -1,9 +1,53 @@
 {
-  "exportedAt": "2026-10-09T00:01:51.631Z",
+  "exportedAt": "2026-10-09T00:17:32.556Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 218,
+  "total": 219,
   "trades": [
+    {
+      "type": "BUY",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-09T00:16:00.000Z",
+      "price": 4148.285,
+      "tp": 4156.279977665031,
+      "sl": 4142.95501488998,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.9532340668012382,
+      "rsi": 60.18033159567199,
+      "trend1": "ALTA",
+      "trend5": "ALTA",
+      "trend15": "ALTA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum BUY + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 196,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum BUY + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "BUY-2026-10-09T00:16:00.000Z",
+      "key": "BUY-2026-10-09T00:16:00.000Z",
+      "movementKey": "BUY-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-09T00:16:00.000Z",
+      "reentryCount": 2
+    },
     {
       "type": "BUY",
       "source": "IA",
