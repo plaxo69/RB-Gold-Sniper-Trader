@@ -21,7 +21,7 @@ function technical(a,f){
  let s=40;
  s+=f.align*9+f.ema*8+f.structure*10+f.bos*6+f.retest*7+f.rejection*5+f.continuation*5+f.body*4+f.close*4+f.tp2*3;
  if(d==="BUY")s+=r>=60&&r<72?8:r>=72&&r<75?3:r<30?-12:r<40?-7:0;
- else s+=r<=40&&r>28?8:r>20&&r<=28?3:r<=20?-14:r>60?-10:0;
+ else s+=r<40&&r>35?8:r>20&&r<=35?3:r<=20?-14:r>60?-10:0;
  s+=rr>=1.5?7:rr>=1?3:-8;
  if(f.extension)s-=7;if(!f.h1Aligned)s-=10;if((d==="BUY"&&r<30)||(d==="SELL"&&r<=20))s-=8;
  if(score>=65)s+=5;else if(score<55)s-=5;
