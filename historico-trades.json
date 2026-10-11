@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-11T19:59:26.754Z",
+  "exportedAt": "2026-10-11T20:28:04.623Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 235,
@@ -48,7 +48,9 @@
       "time": "2026-10-09T16:56:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-09T17:06:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -96,7 +98,9 @@
       "time": "2026-10-09T09:43:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-09T09:50:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -285,7 +289,9 @@
       "resolvedAt": "2026-10-09T08:13:00.000Z",
       "beTriggeredAt": "2026-10-09T08:13:00.000Z",
       "beTriggerPrice": 4197.531,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -477,7 +483,9 @@
       "time": "2026-10-09T07:30:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-09T07:40:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -672,7 +680,9 @@
       "resolvedAt": "2026-10-09T07:04:00.000Z",
       "beTriggeredAt": "2026-10-09T07:04:00.000Z",
       "beTriggerPrice": 4198.688,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -718,7 +728,9 @@
       "time": "2026-10-09T05:41:00.000Z",
       "reentryCount": 3,
       "resolvedAt": "2026-10-09T06:11:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -768,7 +780,9 @@
       "resolvedAt": "2026-10-09T05:30:00.000Z",
       "beTriggeredAt": "2026-10-09T05:30:00.000Z",
       "beTriggerPrice": 4196.264,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -818,7 +832,9 @@
       "resolvedAt": "2026-10-09T05:30:00.000Z",
       "beTriggeredAt": "2026-10-09T05:30:00.000Z",
       "beTriggerPrice": 4196.264,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -868,7 +884,9 @@
       "resolvedAt": "2026-10-09T05:18:00.000Z",
       "beTriggeredAt": "2026-10-09T05:18:00.000Z",
       "beTriggerPrice": 4190.886,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1057,7 +1075,9 @@
       "resolvedAt": "2026-10-09T04:35:00.000Z",
       "beTriggeredAt": "2026-10-09T04:35:00.000Z",
       "beTriggerPrice": 4185.935,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1105,7 +1125,9 @@
       "resolvedAt": "2026-10-09T04:20:00.000Z",
       "beTriggeredAt": "2026-10-09T04:20:00.000Z",
       "beTriggerPrice": 4182.036,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1153,7 +1175,9 @@
       "time": "2026-10-09T02:54:00.000Z",
       "reentryCount": 7,
       "resolvedAt": "2026-10-09T03:03:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1201,7 +1225,9 @@
       "resolvedAt": "2026-10-09T02:55:00.000Z",
       "beTriggeredAt": "2026-10-09T02:55:00.000Z",
       "beTriggerPrice": 4178.901,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1249,7 +1275,9 @@
       "resolvedAt": "2026-10-09T01:47:00.000Z",
       "beTriggeredAt": "2026-10-09T01:47:00.000Z",
       "beTriggerPrice": 4173.947,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1297,7 +1325,9 @@
       "resolvedAt": "2026-10-09T01:15:00.000Z",
       "beTriggeredAt": "2026-10-09T01:15:00.000Z",
       "beTriggerPrice": 4157.634,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1345,7 +1375,9 @@
       "resolvedAt": "2026-10-09T01:11:00.000Z",
       "beTriggeredAt": "2026-10-09T01:11:00.000Z",
       "beTriggerPrice": 4153.15,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1391,7 +1423,9 @@
       "time": "2026-10-09T00:16:00.000Z",
       "reentryCount": 2,
       "resolvedAt": "2026-10-09T00:24:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1439,7 +1473,9 @@
       "resolvedAt": "2026-10-09T00:00:00.000Z",
       "beTriggeredAt": "2026-10-09T00:00:00.000Z",
       "beTriggerPrice": 4149.483,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1487,7 +1523,9 @@
       "resolvedAt": "2026-10-09T00:00:00.000Z",
       "beTriggeredAt": "2026-10-09T00:00:00.000Z",
       "beTriggerPrice": 4148.796,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1680,7 +1718,9 @@
       "resolvedAt": "2026-10-08T23:55:00.000Z",
       "beTriggeredAt": "2026-10-08T23:55:00.000Z",
       "beTriggerPrice": 4145.378,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1728,7 +1768,9 @@
       "resolvedAt": "2026-10-08T22:41:00.000Z",
       "beTriggeredAt": "2026-10-08T22:41:00.000Z",
       "beTriggerPrice": 4140.377,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1778,7 +1820,9 @@
       "resolvedAt": "2026-10-08T22:25:00.000Z",
       "beTriggeredAt": "2026-10-08T22:25:00.000Z",
       "beTriggerPrice": 4137.383,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -1968,7 +2012,9 @@
       "resolvedAt": "2026-10-08T20:08:00.000Z",
       "beTriggeredAt": "2026-10-08T20:08:00.000Z",
       "beTriggerPrice": 4135.865,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -2014,7 +2060,9 @@
       "time": "2026-10-08T19:38:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-08T19:46:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -2203,7 +2251,9 @@
       "resolvedAt": "2026-10-08T19:39:00.000Z",
       "beTriggeredAt": "2026-10-08T19:39:00.000Z",
       "beTriggerPrice": 4133.319,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -2253,7 +2303,9 @@
       "resolvedAt": "2026-10-08T19:13:00.000Z",
       "beTriggeredAt": "2026-10-08T19:13:00.000Z",
       "beTriggerPrice": 4130.684,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -2299,7 +2351,9 @@
       "time": "2026-10-08T17:22:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-08T17:29:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -2492,7 +2546,9 @@
       "resolvedAt": "2026-10-08T17:17:00.000Z",
       "beTriggeredAt": "2026-10-08T17:17:00.000Z",
       "beTriggerPrice": 4144.009,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -2682,7 +2738,9 @@
       "resolvedAt": "2026-10-08T16:01:00.000Z",
       "beTriggeredAt": "2026-10-08T16:01:00.000Z",
       "beTriggerPrice": 4108.715,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -2732,7 +2790,9 @@
       "resolvedAt": "2026-10-08T15:52:00.000Z",
       "beTriggeredAt": "2026-10-08T15:52:00.000Z",
       "beTriggerPrice": 4112.145,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -2780,7 +2840,9 @@
       "time": "2026-10-08T15:33:00.000Z",
       "reentryCount": 2,
       "resolvedAt": "2026-10-08T15:41:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -2828,7 +2890,9 @@
       "resolvedAt": "2026-10-08T15:31:00.000Z",
       "beTriggeredAt": "2026-10-08T15:31:00.000Z",
       "beTriggerPrice": 4112.79,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -2876,7 +2940,9 @@
       "resolvedAt": "2026-10-08T15:31:00.000Z",
       "beTriggeredAt": "2026-10-08T15:31:00.000Z",
       "beTriggerPrice": 4112.79,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -3070,7 +3136,9 @@
       "resolvedAt": "2026-10-08T15:14:00.000Z",
       "beTriggeredAt": "2026-10-08T15:14:00.000Z",
       "beTriggerPrice": 4115.268,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -3118,7 +3186,9 @@
       "time": "2026-10-08T14:20:00.000Z",
       "reentryCount": 1,
       "resolvedAt": "2026-10-08T15:00:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -3168,7 +3238,9 @@
       "resolvedAt": "2026-10-08T14:21:00.000Z",
       "beTriggeredAt": "2026-10-08T14:21:00.000Z",
       "beTriggerPrice": 4135.683,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -3214,7 +3286,9 @@
       "time": "2026-10-08T12:55:00.000Z",
       "reentryCount": 1,
       "resolvedAt": "2026-10-08T13:05:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -3264,7 +3338,9 @@
       "resolvedAt": "2026-10-08T12:52:00.000Z",
       "beTriggeredAt": "2026-10-08T12:52:00.000Z",
       "beTriggerPrice": 4114.258,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -3451,7 +3527,9 @@
       "time": "2026-10-08T12:25:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-08T12:35:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -3497,7 +3575,9 @@
       "time": "2026-10-08T11:52:00.000Z",
       "reentryCount": 2,
       "resolvedAt": "2026-10-08T12:15:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -3547,7 +3627,9 @@
       "resolvedAt": "2026-10-08T11:40:00.000Z",
       "beTriggeredAt": "2026-10-08T11:40:00.000Z",
       "beTriggerPrice": 4130.559,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -3597,7 +3679,9 @@
       "resolvedAt": "2026-10-08T11:40:00.000Z",
       "beTriggeredAt": "2026-10-08T11:40:00.000Z",
       "beTriggerPrice": 4128.788,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -3785,7 +3869,9 @@
       "time": "2026-10-08T11:05:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-08T11:25:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -3979,7 +4065,9 @@
       "resolvedAt": "2026-10-08T10:34:00.000Z",
       "beTriggeredAt": "2026-10-08T10:34:00.000Z",
       "beTriggerPrice": 4112.447,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -4027,7 +4115,9 @@
       "resolvedAt": "2026-10-08T10:25:00.000Z",
       "beTriggeredAt": "2026-10-08T10:25:00.000Z",
       "beTriggerPrice": 4116.871,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -4075,7 +4165,9 @@
       "time": "2026-10-08T08:09:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-08T10:25:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -4123,7 +4215,9 @@
       "time": "2026-10-08T07:57:00.000Z",
       "reentryCount": 1,
       "resolvedAt": "2026-10-08T08:02:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -4173,7 +4267,9 @@
       "resolvedAt": "2026-10-08T07:56:00.000Z",
       "beTriggeredAt": "2026-10-08T07:56:00.000Z",
       "beTriggerPrice": 4119.409,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -4362,7 +4458,9 @@
       "resolvedAt": "2026-10-08T05:53:00.000Z",
       "beTriggeredAt": "2026-10-08T05:53:00.000Z",
       "beTriggerPrice": 4117.284,
-      "outcomeReason": "Proteção BE atingida — trade fechada em BE"
+      "outcomeReason": "Proteção BE atingida — trade fechada em BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -4408,7 +4506,9 @@
       "time": "2026-10-08T03:37:00.000Z",
       "reentryCount": 3,
       "resolvedAt": "2026-10-08T05:18:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -4456,7 +4556,9 @@
       "time": "2026-10-08T02:12:00.000Z",
       "reentryCount": 2,
       "resolvedAt": "2026-10-08T02:53:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -4502,7 +4604,9 @@
       "time": "2026-10-08T01:11:00.000Z",
       "reentryCount": 1,
       "resolvedAt": "2026-10-08T02:13:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -4548,7 +4652,9 @@
       "time": "2026-10-08T00:49:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-08T01:02:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -4735,7 +4841,9 @@
       "time": "2026-10-07T22:20:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-08T00:50:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -4928,7 +5036,9 @@
       "beTriggeredAt": "2026-10-07T19:04:00.000Z",
       "beTriggerPrice": 4105.110500000001,
       "resolvedAt": "2026-10-07T22:00:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -5123,7 +5233,8 @@
       "beTriggerPrice": 4120.5246,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T19:03:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -5172,7 +5283,9 @@
       "beTriggeredAt": "2026-10-07T12:37:00.000Z",
       "beTriggerPrice": 4079.1229350991707,
       "resolvedAt": "2026-10-07T17:09:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -5222,7 +5335,8 @@
       "beTriggerPrice": 4105.553891621431,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T12:28:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -5274,7 +5388,8 @@
       "beTriggerPrice": 4116.065193217665,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T12:26:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -5464,7 +5579,9 @@
       "beTriggeredAt": "2026-10-07T11:41:00.000Z",
       "beTriggerPrice": 4115.842,
       "resolvedAt": "2026-10-07T11:59:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -5514,7 +5631,8 @@
       "beTriggerPrice": 4114.129446002915,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T10:57:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -5705,7 +5823,8 @@
       "beTriggerPrice": 4118.734100000001,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T10:20:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -5755,7 +5874,8 @@
       "beTriggerPrice": 4123.017843746205,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T09:31:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -5947,7 +6067,8 @@
       "beTriggerPrice": 4130.7622,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T08:54:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -5997,7 +6118,8 @@
       "beTriggerPrice": 4129.080524759174,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T07:28:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6049,7 +6171,8 @@
       "beTriggerPrice": 4132.854485637336,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T07:17:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6097,7 +6220,9 @@
       "time": "2026-10-07T06:06:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-07T06:12:00.000Z",
-      "outcomeReason": "SL atingido antes da ativação do BE"
+      "outcomeReason": "SL atingido antes da ativação do BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6289,7 +6414,8 @@
       "beTriggerPrice": 4133.7957,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T05:59:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6340,7 +6466,9 @@
       "beTriggeredAt": "2026-10-07T05:22:00.000Z",
       "beTriggerPrice": 4131.663776074743,
       "resolvedAt": "2026-10-07T05:37:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6390,7 +6518,8 @@
       "beTriggerPrice": 4138.476764539702,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T05:21:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6586,7 +6715,8 @@
       "beTriggerPrice": 4143.339599999999,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T04:35:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6632,7 +6762,9 @@
       "time": "2026-10-07T03:16:00.000Z",
       "reentryCount": 3,
       "resolvedAt": "2026-10-07T03:26:00.000Z",
-      "outcomeReason": "SL atingido antes da ativação do BE"
+      "outcomeReason": "SL atingido antes da ativação do BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6682,7 +6814,8 @@
       "beTriggerPrice": 4141.375231068154,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T03:14:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6732,7 +6865,8 @@
       "beTriggerPrice": 4145.265172522924,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T03:06:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6781,7 +6915,9 @@
       "beTriggeredAt": "2026-10-07T02:12:00.000Z",
       "beTriggerPrice": 4142.2821842499125,
       "resolvedAt": "2026-10-07T02:34:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -6976,7 +7112,8 @@
       "beTriggerPrice": 4148.7381000000005,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T02:05:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -7026,7 +7163,8 @@
       "beTriggerPrice": 4150.908207088722,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T01:30:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -7076,7 +7214,8 @@
       "beTriggerPrice": 4161.480506171373,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T01:21:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -7271,7 +7410,9 @@
       "time": "2026-10-07T00:14:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-07T00:26:00.000Z",
-      "outcomeReason": "SL atingido antes da ativação do BE"
+      "outcomeReason": "SL atingido antes da ativação do BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -7322,7 +7463,9 @@
       "beTriggeredAt": "2026-10-07T00:09:00.000Z",
       "beTriggerPrice": 4162.392570844355,
       "resolvedAt": "2026-10-07T00:12:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -7515,7 +7658,8 @@
       "beTriggerPrice": 4167.075500000001,
       "beAlerted": true,
       "resolvedAt": "2026-10-07T00:09:00.000Z",
-      "outcomeReason": "Proteção BE atingida; sem TP posterior"
+      "outcomeReason": "Proteção BE atingida; sem TP posterior",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -7697,7 +7841,9 @@
       "beTriggeredAt": "2026-10-06T22:53:00.000Z",
       "beTriggerPrice": 4161.51,
       "resolvedAt": "2026-10-06T22:53:00.000Z",
-      "outcomeReason": "Preço regressou à entrada após ativação do BE"
+      "outcomeReason": "Preço regressou à entrada após ativação do BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -7880,7 +8026,9 @@
       "beTriggeredAt": "2026-10-06T22:52:00.000Z",
       "beTriggerPrice": 4162.3525,
       "resolvedAt": "2026-10-06T22:52:00.000Z",
-      "outcomeReason": "Preço regressou à entrada após ativação do BE"
+      "outcomeReason": "Preço regressou à entrada após ativação do BE",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -8033,7 +8181,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-06T22:41:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -8197,7 +8346,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-06T20:52:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -8360,7 +8510,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-06T19:56:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -8523,7 +8674,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-06T18:14:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -8687,7 +8839,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-06T16:59:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -8848,7 +9001,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-06T15:52:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -8971,7 +9125,8 @@
       "resolvedAt": "2026-10-06T08:59:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4154.9535,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -9094,7 +9249,8 @@
       "resolvedAt": "2026-10-06T08:43:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4153.0425,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -9217,7 +9373,8 @@
       "resolvedAt": "2026-10-06T08:42:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4150.429499999999,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -9387,7 +9544,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-06T08:07:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -9561,7 +9720,8 @@
       "resolvedAt": "2026-10-06T06:16:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4127.955999999999,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -9731,7 +9891,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-06T06:03:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -9903,7 +10065,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-06T04:53:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -10073,7 +10237,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-06T02:35:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -10245,7 +10411,8 @@
       "resolvedAt": "2026-10-06T02:22:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4127.4445,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -10419,7 +10586,8 @@
       "resolvedAt": "2026-10-06T01:53:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4130.018,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -10593,7 +10761,8 @@
       "resolvedAt": "2026-10-06T01:30:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4134.8885,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -10767,7 +10936,8 @@
       "resolvedAt": "2026-10-06T01:26:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4136.8605,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -10942,7 +11112,8 @@
       "resolvedAt": "2026-10-06T01:25:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4138.0045,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -11116,7 +11287,8 @@
       "resolvedAt": "2026-10-06T01:24:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4139.156000000001,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -11288,7 +11460,8 @@
       "resolvedAt": "2026-10-05T23:50:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4134.531999999999,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -11460,7 +11633,8 @@
       "resolvedAt": "2026-10-05T23:47:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4135.592,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -11632,7 +11806,8 @@
       "resolvedAt": "2026-10-05T23:45:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4136.6630000000005,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -11804,7 +11979,8 @@
       "resolvedAt": "2026-10-05T23:42:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4137.5635,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -11978,7 +12154,8 @@
       "resolvedAt": "2026-10-05T23:12:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4138.606,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -12148,7 +12325,8 @@
       "resolvedAt": "2026-10-05T23:07:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4139.1155,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -12322,7 +12500,8 @@
       "resolvedAt": "2026-10-05T22:41:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4145.5605,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -12496,7 +12675,8 @@
       "resolvedAt": "2026-10-06T00:49:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4145.6695,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -12668,7 +12848,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-05T22:03:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -12840,7 +13022,8 @@
       "resolvedAt": "2026-10-05T16:15:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4128.601500000001,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -13012,7 +13195,8 @@
       "resolvedAt": "2026-10-05T15:21:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4132.062,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -13186,7 +13370,8 @@
       "resolvedAt": "2026-10-05T13:45:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4136.477,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -13361,7 +13546,8 @@
       "resolvedAt": "2026-10-05T13:44:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4138.5045,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -13535,7 +13721,8 @@
       "resolvedAt": "2026-10-05T13:43:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4140.0695,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -13707,7 +13894,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-05T13:06:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -13881,7 +14070,8 @@
       "resolvedAt": "2026-10-05T11:53:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4151.147500000001,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -14055,7 +14245,8 @@
       "resolvedAt": "2026-10-05T10:16:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4155.925,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -14229,7 +14420,8 @@
       "resolvedAt": "2026-10-05T09:45:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4157.8145,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -14397,7 +14589,8 @@
       "resolvedAt": "2026-10-05T08:12:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4169.295,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -14572,7 +14765,8 @@
       "resolvedAt": "2026-10-05T07:06:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4157.301000000001,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -14750,7 +14944,8 @@
       "resolvedAt": "2026-10-05T06:11:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4148.338,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -14922,7 +15117,8 @@
       "resolvedAt": "2026-10-02T20:45:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4137.791499999999,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -15096,7 +15292,8 @@
       "resolvedAt": "2026-10-02T19:00:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4147.075999999999,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -15268,7 +15465,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-02T18:58:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -15440,7 +15639,8 @@
       "resolvedAt": "2026-10-02T15:57:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4126.272,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -15606,7 +15806,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-02T15:57:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -15778,7 +15980,8 @@
       "resolvedAt": "2026-10-02T15:25:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4136.9265,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -15952,7 +16155,8 @@
       "resolvedAt": "2026-10-02T15:15:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4140.947,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -16124,7 +16328,8 @@
       "resolvedAt": "2026-10-02T15:07:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4144.9965,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -16296,7 +16501,8 @@
       "resolvedAt": "2026-10-02T15:03:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4149.8715,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -16466,7 +16672,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-02T12:30:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -16640,7 +16848,8 @@
       "resolvedAt": "2026-10-02T10:21:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4167.3585,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -16812,7 +17021,8 @@
       "resolvedAt": "2026-10-02T12:30:00.000Z",
       "outcomeReason": "TP e SL atingidos na mesma vela; ordem intrabar indeterminada",
       "beTrigger": 4197.458499999999,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -16984,7 +17194,8 @@
       "resolvedAt": "2026-10-02T08:07:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4192.555,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -17154,7 +17365,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-02T12:30:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -17324,7 +17537,9 @@
         "approved": true
       },
       "resolvedAt": "2026-10-02T12:30:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -17498,7 +17713,8 @@
       "resolvedAt": "2026-10-02T10:10:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4177.096500000001,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -17666,7 +17882,8 @@
       "resolvedAt": "2026-10-02T04:32:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4191.029,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -17840,7 +18057,8 @@
       "resolvedAt": "2026-10-02T03:31:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4176.3285,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -18008,7 +18226,8 @@
       "resolvedAt": "2026-10-02T01:02:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4151.958500000001,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -18168,7 +18387,8 @@
       "resolvedAt": "2026-10-02T00:57:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4156.964,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -18332,7 +18552,8 @@
       "beAlerted": true,
       "beTrigger": 4159.9805,
       "resolvedAt": "2026-10-02T00:46:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -18496,7 +18717,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:32:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
-      "beTrigger": 4160.3955
+      "beTrigger": 4160.3955,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -18659,7 +18881,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:31:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -18823,7 +19046,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:26:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -18978,7 +19202,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-01T22:58:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -19133,7 +19358,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-01T22:56:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -19287,7 +19513,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-01T22:30:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
-      "beTrigger": 4171.854
+      "beTrigger": 4171.854,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -19443,7 +19670,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-01T19:21:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
-      "beTrigger": 4179.532999999999
+      "beTrigger": 4179.532999999999,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -19600,7 +19828,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-01T18:05:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -19754,7 +19983,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:22:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
-      "beTrigger": 4167.6265
+      "beTrigger": 4167.6265,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -19911,7 +20141,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-01T18:48:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -20064,7 +20295,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-01T17:06:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -20222,7 +20454,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:38:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
-      "beTrigger": 4159.8415
+      "beTrigger": 4159.8415,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -20376,7 +20609,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:31:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
-      "beTrigger": 4161.725
+      "beTrigger": 4161.725,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -20532,7 +20766,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-02T01:02:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
-      "beTrigger": 4151.0605
+      "beTrigger": 4151.0605,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -20683,7 +20918,8 @@
       "reentryCount": 0,
       "beAlerted": true,
       "resolvedAt": "2026-10-01T15:01:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -20835,7 +21071,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:59:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
-      "beTrigger": 4153.9285
+      "beTrigger": 4153.9285,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -20995,7 +21232,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:38:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
-      "beTrigger": 4160.058
+      "beTrigger": 4160.058,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -21153,7 +21391,9 @@
       "time": "2026-10-01T13:39:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T13:40:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -21311,7 +21551,9 @@
       "time": "2026-10-01T13:37:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T13:40:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -21471,7 +21713,8 @@
       "resolvedAt": "2026-10-02T00:26:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4165.4175,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -21629,7 +21872,9 @@
       "time": "2026-10-01T13:28:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T13:38:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -21787,7 +22032,9 @@
       "time": "2026-10-01T13:25:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T13:32:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -21946,7 +22193,9 @@
       "time": "2026-10-01T13:14:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T13:28:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -22104,7 +22353,9 @@
       "time": "2026-10-01T13:13:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T13:17:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -22260,7 +22511,9 @@
       "time": "2026-10-01T12:35:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-02T04:13:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -22416,7 +22669,9 @@
       "time": "2026-10-01T12:31:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-02T04:13:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -22568,7 +22823,9 @@
       "time": "2026-10-01T12:30:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T12:40:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -22726,7 +22983,9 @@
       "time": "2026-10-01T10:46:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T10:54:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -22884,7 +23143,9 @@
       "time": "2026-10-01T10:29:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T10:35:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -23036,7 +23297,9 @@
       "time": "2026-10-01T09:54:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T10:00:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -23194,7 +23457,9 @@
       "time": "2026-10-01T08:17:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-02T00:59:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -23354,7 +23619,9 @@
       "time": "2026-10-01T08:12:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T08:20:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -23510,7 +23777,9 @@
       "time": "2026-10-01T08:11:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T08:19:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -23664,7 +23933,9 @@
       "time": "2026-10-01T07:02:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T07:13:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -23820,7 +24091,9 @@
       "time": "2026-10-01T05:25:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T05:33:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -23978,7 +24251,9 @@
       "time": "2026-10-01T05:22:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T05:33:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -24134,7 +24409,9 @@
       "time": "2026-10-01T05:20:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T05:31:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -24288,7 +24565,9 @@
       "time": "2026-10-01T05:19:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T05:31:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -24444,7 +24723,9 @@
       "time": "2026-10-01T05:13:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T05:26:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -24600,7 +24881,9 @@
       "time": "2026-10-01T05:10:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T05:26:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -24758,7 +25041,9 @@
       "time": "2026-10-01T04:54:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T05:03:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -24917,7 +25202,9 @@
       "time": "2026-10-01T03:08:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T03:43:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -25076,7 +25363,9 @@
       "time": "2026-10-01T03:05:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T03:11:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -25235,7 +25524,9 @@
       "time": "2026-10-01T03:00:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T03:08:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -25393,7 +25684,8 @@
       "resolvedAt": "2026-10-02T01:09:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4139.762999999999,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -25551,7 +25843,9 @@
       "time": "2026-09-30T23:50:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T18:48:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -25705,7 +25999,9 @@
       "time": "2026-09-30T23:24:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T18:48:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -25863,7 +26159,9 @@
       "time": "2026-09-30T23:08:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T00:16:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -26015,7 +26313,9 @@
       "time": "2026-09-30T22:43:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T00:07:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -26170,7 +26470,9 @@
       "time": "2026-09-30T22:06:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-10-01T18:48:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -26327,7 +26629,9 @@
       "time": "2026-09-30T20:28:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-09-30T20:35:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -26479,7 +26783,9 @@
       "time": "2026-09-30T20:22:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-09-30T20:35:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -26637,7 +26943,8 @@
       "resolvedAt": "2026-10-02T01:02:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4149.771000000001,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -26793,7 +27100,8 @@
       "resolvedAt": "2026-10-02T01:02:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4149.4215,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -26945,7 +27253,8 @@
       "resolvedAt": "2026-10-02T01:02:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4149.6365000000005,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -27065,7 +27374,8 @@
       "resolvedAt": "2026-10-02T00:32:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4160.405,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -27179,7 +27489,9 @@
       "time": "2026-09-30T14:59:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-09-30T15:07:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -27293,7 +27605,9 @@
       "time": "2026-09-30T14:35:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-09-30T14:37:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -27409,7 +27723,9 @@
       "time": "2026-09-30T13:31:00.000Z",
       "reentryCount": 0,
       "resolvedAt": "2026-09-30T13:32:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -27521,7 +27837,9 @@
       "status": "LOSS",
       "time": "2026-09-30T12:41:00.000Z",
       "resolvedAt": "2026-09-30T13:45:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -27635,7 +27953,8 @@
       "resolvedAt": "2026-10-02T06:05:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4196.3375,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -27749,7 +28068,8 @@
       "resolvedAt": "2026-10-02T06:04:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4194.4619999999995,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -27859,7 +28179,8 @@
       "resolvedAt": "2026-10-02T06:04:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4194.1905,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -27971,7 +28292,8 @@
       "resolvedAt": "2026-10-01T18:49:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4177.1645,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -28085,7 +28407,9 @@
       "status": "WIN",
       "time": "2026-09-30T10:44:00.000Z",
       "resolvedAt": "2026-09-30T11:20:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -28199,7 +28523,9 @@
       "status": "WIN",
       "time": "2026-09-30T09:20:00.000Z",
       "resolvedAt": "2026-09-30T11:09:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -28313,7 +28639,9 @@
       "status": "WIN",
       "time": "2026-09-30T09:11:00.000Z",
       "resolvedAt": "2026-09-30T11:09:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -28423,7 +28751,9 @@
       "status": "WIN",
       "time": "2026-09-30T09:10:00.000Z",
       "resolvedAt": "2026-09-30T10:51:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -28537,7 +28867,8 @@
       "resolvedAt": "2026-10-02T12:30:00.000Z",
       "outcomeReason": "TP e SL atingidos na mesma vela; ordem intrabar indeterminada",
       "beTrigger": 4205.434499999999,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -28651,7 +28982,9 @@
       "status": "WIN",
       "time": "2026-09-30T06:11:00.000Z",
       "resolvedAt": "2026-09-30T06:53:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -28763,7 +29096,9 @@
       "status": "WIN",
       "time": "2026-09-30T06:10:00.000Z",
       "resolvedAt": "2026-09-30T06:52:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -28875,7 +29210,9 @@
       "status": "WIN",
       "time": "2026-09-30T06:04:00.000Z",
       "resolvedAt": "2026-09-30T06:52:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -28991,7 +29328,8 @@
       "resolvedAt": "2026-10-02T00:16:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4168.597,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -29105,7 +29443,9 @@
       "status": "WIN",
       "time": "2026-09-30T05:12:00.000Z",
       "resolvedAt": "2026-09-30T05:16:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -29219,7 +29559,9 @@
       "status": "WIN",
       "time": "2026-09-30T05:09:00.000Z",
       "resolvedAt": "2026-09-30T05:16:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -29335,7 +29677,8 @@
       "resolvedAt": "2026-10-02T00:13:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4169.7505,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -29452,7 +29795,8 @@
       "resolvedAt": "2026-10-02T00:26:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4164.558999999999,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -29568,7 +29912,8 @@
       "resolvedAt": "2026-10-02T00:16:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4168.698,
-      "beAlerted": true
+      "beAlerted": true,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -29682,7 +30027,9 @@
       "status": "WIN",
       "time": "2026-09-30T01:08:00.000Z",
       "resolvedAt": "2026-09-30T01:30:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -29794,7 +30141,9 @@
       "status": "WIN",
       "time": "2026-09-29T23:14:00.000Z",
       "resolvedAt": "2026-09-29T23:54:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -29908,7 +30257,9 @@
       "status": "WIN",
       "time": "2026-09-29T23:09:00.000Z",
       "resolvedAt": "2026-09-29T23:49:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -30020,7 +30371,9 @@
       "status": "WIN",
       "time": "2026-09-29T23:06:00.000Z",
       "resolvedAt": "2026-09-29T23:47:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -30129,7 +30482,9 @@
       "status": "LOSS",
       "time": "2026-09-29T17:38:00.000Z",
       "resolvedAt": "2026-09-29T18:00:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -30242,7 +30597,9 @@
       "status": "LOSS",
       "time": "2026-09-29T14:18:00.000Z",
       "resolvedAt": "2026-09-29T15:22:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -30355,7 +30712,9 @@
       "status": "WIN",
       "time": "2026-09-29T12:32:00.000Z",
       "resolvedAt": "2026-09-29T14:08:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -30468,7 +30827,9 @@
       "status": "LOSS",
       "time": "2026-09-29T11:20:00.000Z",
       "resolvedAt": "2026-09-29T11:42:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
@@ -30583,7 +30944,9 @@
       "status": "WIN",
       "time": "2026-09-29T10:07:00.000Z",
       "resolvedAt": "2026-09-29T11:15:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -30696,7 +31059,9 @@
       "status": "LOSS",
       "time": "2026-09-29T04:41:00.000Z",
       "resolvedAt": "2026-09-29T05:23:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -30805,7 +31170,9 @@
       "status": "WIN",
       "time": "2026-09-29T04:22:00.000Z",
       "resolvedAt": "2026-09-29T04:35:00.000Z",
-      "outcomeReason": "TP atingido"
+      "outcomeReason": "TP atingido",
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
@@ -30918,7 +31285,9 @@
       "status": "LOSS",
       "time": "2026-09-29T00:25:00.000Z",
       "resolvedAt": "2026-09-29T01:15:00.000Z",
-      "outcomeReason": "SL atingido"
+      "outcomeReason": "SL atingido",
+      "beAlerted": false,
+      "bePushSent": false
     }
   ]
 }
