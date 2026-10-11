@@ -71,7 +71,7 @@ async function runMonitor(){
    let beWhen=null,bePrice=null;
    if(dist>0){for(const c of activeCandles){const hi=Number(c.high),lo=Number(c.low),fav=active.type==='BUY'?hi-entry:entry-lo;if(Number.isFinite(fav)&&fav>=dist*.50){beWhen=c.timestamp;bePrice=active.type==='BUY'?hi:lo;break}}}
    if(!beWhen&&m1.marketState==='open'&&Number.isFinite(m1.price)){const fav=active.type==='BUY'?m1.price-entry:entry-m1.price;if(dist>0&&fav>=dist*.50){beWhen=new Date().toISOString();bePrice=m1.price}}
-   if(beWhen){active.status='BE';active.resolvedAt=beWhen;active.beTriggeredAt=beWhen;active.beTriggerPrice=bePrice;active.outcomeReason='Proteção BE atingida — trade fechada em BE';delete active.beAlerted;delete active.beArmed;changed=true;result.events.push('BE');await sendPush('RB TRADER PRO — BE',(active.type==='BUY'?'📈 COMPRA':'📉 VENDA')+' atingiu a zona de BE — trade fechada em BE','rb-be-'+keyOf(active),gh);active=null}
+   if(beWhen&&!active.bePushSent){active.beAlerted=true;active.bePushSent=true;active.beTriggeredAt=active.beTriggeredAt||beWhen;active.beTriggerPrice=active.beTriggerPrice||bePrice;active.beAlertMessage='Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.';changed=true;result.events.push('BE_ALERT');await sendPush('RB TRADER PRO — ALERTA BE',(active.type==='BUY'?'📈 COMPRA':'📉 VENDA')+' atingiu a zona de proteção BE. Considera mover o SL para a entrada. A trade continua aberta até TP ou SL.','rb-be-'+keyOf(active),gh)}
  }
  if(!active&&m1.marketState==='open'&&m1.realOpenBar===true&&Number(m1.quoteAgeSec)<=15&&m1.stale!==true&&Number(m1.candleAgeSec)<=150){
    global.__RB_HISTORY=trades;
