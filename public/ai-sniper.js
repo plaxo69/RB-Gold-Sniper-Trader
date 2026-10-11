@@ -42,7 +42,7 @@ function opinion(a,ai,f){
  if(f.align<2)warnings.push("alinhamento incompleto");
  if(f.extension)warnings.push("preço já estendido");
  if(d==="BUY"&&r>=72)warnings.push("RSI perto do limite superior");if(d==="BUY"&&r<30)warnings.push("RSI extremamente sobrevendido");
- if(d==="SELL"&&r<=28)warnings.push("RSI perto do limite inferior");if(d==="SELL"&&r<=20)warnings.push("RSI extremamente sobrevendido");
+ if(d==="SELL"&&r<=35)warnings.push("RSI no limite inferior SELL");if(d==="SELL"&&r<=20)warnings.push("RSI extremamente sobrevendido");
  if(rr<1)warnings.push("RR insuficiente");
  if(!f.structure&&!f.bos)warnings.push("estrutura sem confirmação forte");
  const label=ai.pWin>=70&&ai.score>=70&&!warnings.some(x=>x.includes("extremamente"))?"FORTE":ai.pWin>=57&&ai.score>=62?"FAVORÁVEL":ai.pWin>=48?"CAUTELOSA":"DESFAVORÁVEL";
@@ -75,10 +75,10 @@ function independentOpportunity(ctx){
  const bull=entry>Number(prev.close)&&entry>e9&&e9>=e21,bear=entry<Number(prev.close)&&entry<e9&&e9<=e21;
  const breakoutBuy=entry>recentHigh,breakoutSell=entry<recentLow,rejectBuy=lower>=body*.9&&closePos>=.60,rejectSell=upper>=body*.9&&closePos<=.40;
  const buyEvidence=(hi>=2?22:0)+(bull?16:0)+(r>60&&r<75?12:0)+(breakoutBuy?18:0)+(rejectBuy?14:0)+(body>=atr*.18?8:0)+(closePos>=.65?6:0)+(volStrong?6:0);
- const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r<40&&r>20?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0)+(volStrong?6:0);
+ const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r<40&&r>35?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0)+(volStrong?6:0);
  const dir=buyEvidence>=sellEvidence?'BUY':'SELL',score=clamp(Math.max(buyEvidence,sellEvidence),0,100),tfCount=dir==='BUY'?hi:lo;
- const confirmations=dir==='BUY'?Number(bull)+Number(breakoutBuy||rejectBuy)+Number(r>60&&r<75)+Number(body>=atr*.18&&closePos>=.65):Number(bear)+Number(breakoutSell||rejectSell)+Number(r<40&&r>20)+Number(body>=atr*.18&&closePos<=.35);
- if(score<62||confirmations<2)return null;if((dir==='BUY'&&(r<=60||r>=75))||(dir==='SELL'&&(r<=20||r>=40)))return null;
+ const confirmations=dir==='BUY'?Number(bull)+Number(breakoutBuy||rejectBuy)+Number(r>60&&r<75)+Number(body>=atr*.18&&closePos>=.65):Number(bear)+Number(breakoutSell||rejectSell)+Number(r<40&&r>35)+Number(body>=atr*.18&&closePos<=.35);
+ if(score<62||confirmations<2)return null;if((dir==='BUY'&&(r<=60||r>=75))||(dir==='SELL'&&(r<=35||r>=40)))return null;
  const swing=dir==='BUY'?Math.min(...series.slice(-12).map(c=>Number(c.low))):Math.max(...series.slice(-12).map(c=>Number(c.high)));
  const structuralRisk=Math.abs(entry-swing)+atr*.15,maxRisk=atr*1.50;if(!Number.isFinite(structuralRisk)||structuralRisk>maxRisk)return null;const risk=Math.min(maxRisk,Math.max(atr*.80,structuralRisk)),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
  const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.35+technical*.65)*100),55,88);
