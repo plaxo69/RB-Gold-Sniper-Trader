@@ -1,0 +1,20 @@
+name: Audit regression tests
+
+on:
+  pull_request:
+    branches: [main, correcao-filtros-ia-12-outubro-2026]
+  push:
+    branches: [AUDITORIA-LOSS-BE-IA-2026-10-12]
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run regression tests
+        run: npm test
