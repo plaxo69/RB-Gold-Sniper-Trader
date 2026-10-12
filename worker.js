@@ -2,6 +2,18 @@ const REPO = "plaxo69/RB-Gold-Sniper-Trader";
 const HISTORY_PATH = "historico-trades.json";
 const GH_API = "https://api.github.com";
 const MARKET_BASE = "https://biquote.io/api";
+// Partilha a cotação entre os pedidos M1/M5/M15/H1 disparados ao mesmo tempo pelo browser.
+let quoteCache = null;
+let quoteInflight = null;
+const QUOTE_CACHE_MS = 5000;
+async function getSharedQuote() {
+  if (quoteCache && Date.now() - quoteCache.at < QUOTE_CACHE_MS) return quoteCache.value;
+  if (quoteInflight) return quoteInflight;
+  quoteInflight = fetch(`${MARKET_BASE}/XAUUSD?allowStale=true`, {headers:{Accept:"application/json","User-Agent":"RB-Gold-Sniper/5.3"}})
+    .then(async r => { if (!r.ok) throw new Error(`Fornecedor Biquote: cotação HTTP ${r.status}`); const value = await r.json(); quoteCache = {at:Date.now(),value}; return value; })
+    .finally(() => { quoteInflight = null; });
+  return quoteInflight;
+}
 const corsHeaders = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization" };
 const tfConfig = {
   "1m": { interval: "1m", stale: 150 }, "5m": { interval: "5m", stale: 720 },
@@ -45,12 +57,12 @@ async function saveHistory(env, incoming) {
 }
 async function market(tf) {
   const cfg=tfConfig[tf]; if(!cfg) throw new Error("Timeframe inválido");
-  const [barsRes,quoteRes]=await Promise.all([
+  const [barsRes,tick]=await Promise.all([
     fetch(`${MARKET_BASE}/XAUUSD/ohlc?interval=${cfg.interval}&limit=500`,{headers:{Accept:"application/json","User-Agent":"RB-Gold-Sniper/5.3"}}),
-    fetch(`${MARKET_BASE}/XAUUSD?allowStale=true`,{headers:{Accept:"application/json","User-Agent":"RB-Gold-Sniper/5.3"}})
+    getSharedQuote()
   ]);
-  if(!barsRes.ok||!quoteRes.ok) throw new Error("O fornecedor Biquote não respondeu corretamente");
-  const bd=await barsRes.json(), tick=await quoteRes.json();
+  if(!barsRes.ok) throw new Error(`Fornecedor Biquote: candles ${cfg.interval} HTTP ${barsRes.status}`);
+  const bd=await barsRes.json();
   const bars=Array.isArray(bd?.bars)?bd.bars:[];
   const candles=bars.map(b=>({timestamp:new Date(b.openTime).toISOString(),open:Number(b.open),high:Number(b.high),low:Number(b.low),close:Number(b.close),volume:Number(Number(b.volume)>0?b.volume:(Number.isFinite(Number(b.tickVolume))?b.tickVolume:0)),tickVolume:Number.isFinite(Number(b.tickVolume))?Number(b.tickVolume):0,realVolume:Number.isFinite(Number(b.volume))?Number(b.volume):0,volumeSource:Number(b.volume)>0?"REAL":(Number.isFinite(Number(b.tickVolume))?"TICK_VOLUME":"UNAVAILABLE"),complete:b.isOpen!==true,isOpen:b.isOpen===true}))
     .filter(c=>[c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.open>0&&c.high>=Math.max(c.open,c.close)&&c.low<=Math.min(c.open,c.close)&&c.high>=c.low)
