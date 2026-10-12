@@ -14,6 +14,9 @@ Base: exportação `rb-trader-pro-historico-2026-10-12.json` fornecida pelo util
 
 Estes valores são descritivos do histórico exportado; não provam que uma regra isolada causou as perdas nem garantem que um novo filtro melhore o resultado.
 
+- **Confiança registada da IA:** nos 59 resultados decisivos com `aiWinRate` entre 91% e 100%, houve 13 WIN e 46 LOSS (22,0% WIN). Em comparação, a banda 71–80% teve 18 WIN e 14 LOSS (56,3%). Isto é um sinal forte de má calibração da confiança alta no histórico, embora os registos misturem versões e setups.
+- **Reentradas históricas:** com `reentryCount >= 2`, houve 3 WIN e 15 LOSS em 18 resultados decisivos (16,7% WIN). A amostra é pequena e inclui registos de versões anteriores; é motivo para testar um limite mais conservador, não prova suficiente para alterar já a regra atual.
+
 ## Problemas a investigar
 1. **Classificação e proteção BE:** 33 trades aparecem como BE e 66 LOSS têm uma razão que menciona zona de lucro/proteção BE. O histórico não permite concluir que essas 66 devam ser WIN: é necessário reconstruir a sequência de preços por trade. Foi encontrada uma inconsistência real no código: `app-v4.js` marcava a trade como terminal `BE` quando o preço atingia 50% do TP, enquanto `history-v2.js` já implementava BE como alerta sem fechar a trade.
 2. **SELL:** a taxa WIN decisiva de SELL é 12,2 pontos percentuais inferior à de BUY no mesmo export. Manter o intervalo RSI SELL 35–40 definido para a estratégia, mas não apertar nem desativar SELL sem replay de candles e comparação por setup.
