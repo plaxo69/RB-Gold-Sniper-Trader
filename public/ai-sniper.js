@@ -51,7 +51,7 @@ function opinion(a,ai,f){
 }
 function evaluate(a){
  if(!a||!["BUY","SELL"].includes(up(a.type)))return{mode:"WAIT",score:0,pWin:null,samples:0,approved:false,recommendation:"SEM OPINIÃO",opinion:"Sem sinal base.",reasons:["sem sinal base"]};
- const f=features(a),rs=rows(),h=historical(f,rs),tech=technical(a,f),pWin=clamp(Math.round((h.p*.65+(tech/100)*.35)*100),5,95),score=tech;
+ const f=features(a),rs=rows(),h=historical(f,rs),tech=technical(a,f),pWin=clamp(Math.round(h.p*100),5,95),score=tech;
  const op=opinion(a,{pWin,score},f),reasons=[];
  if(h.setupSamples<3)reasons.push("poucos casos históricos do setup");
  if(f.align<2)reasons.push("alinhamento parcial");if(!f.h1Aligned)reasons.push("H1 contra a direção");if((direction(a)==="SELL"&&n(a?.rsi,50)<=20)||(direction(a)==="BUY"&&n(a?.rsi,50)<30))reasons.push("RSI extremo contra a entrada");
@@ -81,7 +81,7 @@ function independentOpportunity(ctx){
  if(score<62||confirmations<2)return null;if((dir==='BUY'&&(r<=60||r>=75))||(dir==='SELL'&&(r<=35||r>=40)))return null;
  const swing=dir==='BUY'?Math.min(...series.slice(-12).map(c=>Number(c.low))):Math.max(...series.slice(-12).map(c=>Number(c.high)));
  const structuralRisk=Math.abs(entry-swing)+atr*.15,maxRisk=atr*1.50;if(!Number.isFinite(structuralRisk)||structuralRisk>maxRisk)return null;const risk=Math.min(maxRisk,Math.max(atr*.80,structuralRisk)),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
- const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.50+technical*.50)*100),5,95);
+ const hist=resolved(),sameDir=hist.filter(t=>direction(t)===dir),rate=arr=>arr.length?(arr.reduce((s,t)=>s+outcome(t.status),0)+4)/(arr.length+8):.5,pDir=rate(sameDir),pBase=rate(hist),pWin=clamp(Math.round((pDir*.70+pBase*.30)*100),5,95);
  const ts=a.timestamp||new Date().toISOString(),reasons=[];reasons.push(tfCount>=3?'M1/M5/M15 alinhados':'2 de 3 timeframes M1/M5/M15 alinhados');
  if(dir==='BUY'&&(breakoutBuy||rejectBuy))reasons.push(breakoutBuy?'rompimento de resistência':'rejeição de suporte');
  if(dir==='SELL'&&(breakoutSell||rejectSell))reasons.push(breakoutSell?'rompimento de suporte':'rejeição de resistência');
