@@ -1,9 +1,53 @@
 {
-  "exportedAt": "2026-10-13T00:26:22.772Z",
+  "exportedAt": "2026-10-13T01:43:07.475Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 245,
+  "total": 246,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T01:40:00.000Z",
+      "price": 4156.438,
+      "tp": 4151.489631905879,
+      "sl": 4159.736912062747,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 2.6594137516527168,
+      "rsi": 42.513937084768024,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 212,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T01:40:00.000Z",
+      "key": "SELL-2026-10-13T01:40:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-13T01:40:00.000Z",
+      "reentryCount": 1
+    },
     {
       "type": "SELL",
       "source": "IA",
@@ -44,13 +88,15 @@
       "signalKey": "SELL-2026-10-13T00:19:00.000Z",
       "key": "SELL-2026-10-13T00:19:00.000Z",
       "movementKey": "SELL-STRUCT-0.00-0.00",
-      "status": "ALERTA",
+      "status": "WIN",
       "time": "2026-10-13T00:19:00.000Z",
       "reentryCount": 0,
       "beAlerted": true,
       "beTriggeredAt": "2026-10-13T00:25:00.000Z",
       "beTriggerPrice": 4163.39,
-      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta."
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-13T00:32:00.000Z",
+      "outcomeReason": "TP atingido"
     },
     {
       "type": "BUY",
