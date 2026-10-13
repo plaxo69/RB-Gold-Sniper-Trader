@@ -1,9 +1,55 @@
 {
-  "exportedAt": "2026-10-13T04:15:24.514Z",
+  "exportedAt": "2026-10-13T06:01:22.726Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 247,
+  "total": 248,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T06:00:00.000Z",
+      "price": 4192.007,
+      "tp": 4188.7897374421755,
+      "sl": 4194.151841705216,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.5922780347735501,
+      "rsi": 43.45666095418232,
+      "trend1": "BAIXA",
+      "trend5": "NEUTRO",
+      "trend15": "ALTA",
+      "confidence": 56,
+      "score": 62,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 62,
+        "pWin": 56,
+        "samples": 214,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T06:00:00.000Z",
+      "key": "SELL-2026-10-13T06:00:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-13T06:00:00.000Z",
+      "reentryCount": 0
+    },
     {
       "type": "BUY",
       "source": "IA",
@@ -44,9 +90,11 @@
       "signalKey": "BUY-2026-10-13T04:12:00.000Z",
       "key": "BUY-2026-10-13T04:12:00.000Z",
       "movementKey": "BUY-STRUCT-0.00-0.00",
-      "status": "ALERTA",
+      "status": "WIN",
       "time": "2026-10-13T04:12:00.000Z",
-      "reentryCount": 0
+      "reentryCount": 0,
+      "resolvedAt": "2026-10-13T04:15:00.000Z",
+      "outcomeReason": "TP atingido"
     },
     {
       "type": "SELL",
