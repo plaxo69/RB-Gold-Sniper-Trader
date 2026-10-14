@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "rb-gold-sniper-trader-preview",
+  "name": "rb-gold-sniper-trader",
   "main": "./worker.js",
   "compatibility_date": "2026-10-12",
   "compatibility_flags": [
