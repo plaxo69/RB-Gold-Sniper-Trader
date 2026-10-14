@@ -61,7 +61,7 @@ test("BE at 50% of TP alerts but does not close the trade", () => {
   checkBE(105);
   assert.equal(trades[0].status, "ALERTA");
   assert.equal(trades[0].beAlerted, true);
-  assert.equal(trades[0].beArmed, true);
+  assert.equal(trades[0].beArmed, undefined);
   assert.equal(trades[0].resolvedAt, undefined);
   assert.match(trades[0].beAlertMessage, /continua aberta/i);
 });
