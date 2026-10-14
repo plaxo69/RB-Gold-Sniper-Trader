@@ -1,0 +1,28 @@
+name: Validate RB Trader JavaScript
+on:
+  pull_request:
+    paths:
+      - "public/**/*.js"
+      - "public/index.html"
+      - ".github/workflows/validate-rb-trader.yml"
+  push:
+    branches:
+      - auditoria-correcao-historico-ia-14-out-2026
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JavaScript syntax
+        run: |
+          node --check public/app-v4.js
+          node --check public/history-ui.js
+          node --check public/history-v2.js
+          node --check public/sniper-v2.js
+          node --check public/ai-sniper.js
+          node --check public/sniper-guard.js
