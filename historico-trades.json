@@ -1,9 +1,55 @@
 {
-  "exportedAt": "2026-10-14T00:55:47.389Z",
+  "exportedAt": "2026-10-14T07:45:13.104Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 255,
+  "total": 256,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-14T07:30:00.000Z",
+      "price": 4145.357,
+      "tp": 4142.11925326785,
+      "sl": 4147.515497821433,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.7699854762237757,
+      "rsi": 42.536008517426545,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 222,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-14T07:30:00.000Z",
+      "key": "SELL-2026-10-14T07:30:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-14T07:30:00.000Z",
+      "reentryCount": 3,
+      "resolvedAt": "2026-10-14T07:33:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
     {
       "type": "SELL",
       "source": "IA",
@@ -46,9 +92,11 @@
       "signalKey": "SELL-2026-10-14T00:54:00.000Z",
       "key": "SELL-2026-10-14T00:54:00.000Z",
       "movementKey": "SELL-STRUCT-0.00-0.00",
-      "status": "ALERTA",
+      "status": "LOSS",
       "time": "2026-10-14T00:54:00.000Z",
-      "reentryCount": 2
+      "reentryCount": 2,
+      "resolvedAt": "2026-10-14T00:55:00.000Z",
+      "outcomeReason": "SL atingido"
     },
     {
       "type": "SELL",
