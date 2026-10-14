@@ -1,4 +1,4 @@
-(()=>{const KEY="rb_gold_sniper_ai_v5",MAX_HISTORY=1000,FILTER_PWIN=.57,FILTER_SCORE=62,MODEL_VERSION="RB-TRADER-PRO-HYBRID-v5";
+(()=>{const KEY="rb_gold_sniper_ai_v5",MAX_HISTORY=1000,FILTER_PWIN=.57,FILTER_SCORE=62,MODEL_VERSION="RB-TRADER-PRO-HYBRID-v7";
 const n=(v,d=0)=>Number.isFinite(+v)?+v:d,up=v=>String(v||"").toUpperCase(),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function resolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS'].includes(up(t?.status))).slice(0,MAX_HISTORY):[]}catch{return[]}}
 function outcome(s){return up(s)==="WIN"?1:up(s)==="LOSS"?0:.5}
@@ -20,19 +20,19 @@ function technical(a,f){
  const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),score=n(a?.score,50),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN);
  let s=40;
  s+=f.align*9+f.ema*8+f.structure*10+f.bos*6+f.retest*7+f.rejection*5+f.continuation*5+f.body*4+f.close*4+f.tp2*3;
- if(d==="BUY")s+=r>=60&&r<72?8:r>=72&&r<75?3:r<30?-12:r<40?-7:0;
- else s+=r<=40&&r>28?8:r>20&&r<=28?3:r<=20?-14:r>60?-10:0;
+ if(d==="BUY")s+=r>60&&r<75?8:r>=75?-8:r<40?-7:0;
+ else s+=r>35&&r<40?8:r<=35?-7:r>=40?-8:0;
  s+=rr>=1.5?7:rr>=1?3:-8;
  if(f.extension)s-=7;if(!f.h1Aligned)s-=10;if((d==="BUY"&&r<30)||(d==="SELL"&&r<=20))s-=8;
- if(score>=65)s+=5;else if(score<55)s-=5;
+ if(score>=65)s+=5;else if(score<55)s-=5;if(Number.isFinite(adx))s+=adx>=22?3:-3;if(Number.isFinite(vol)&&Number.isFinite(volSma))s+=vol>volSma?3:-3;
  return clamp(Math.round(s),0,100)
 }
 function opinion(a,ai,f){
- const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN),trend=f.align===3?"M5/M15/H1 alinhados":f.align===2?"2 timeframes alinhados":"alinhamento parcial";
+ const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN),trend=f.align===3?"M1/M5/M15 alinhados":f.align===2?"2 timeframes alinhados":"alinhamento parcial";
  const positives=[],warnings=[];
  if(f.align>=2)positives.push(trend);
- if(Number.isFinite(adx))positives.push(`ADX ${adx.toFixed(1)}`);
- if(Number.isFinite(vol)&&Number.isFinite(volSma))positives.push(vol>volSma?'volume > SMA20':'volume < SMA20');
+ if(Number.isFinite(adx)){if(adx>=22)positives.push(`ADX ${adx.toFixed(1)} — tendência com força`);else warnings.push(`ADX ${adx.toFixed(1)} abaixo de 22 — tendência menos forte`)}
+ if(Number.isFinite(vol)&&Number.isFinite(volSma)){if(vol>volSma)positives.push('volume > SMA20');else warnings.push('volume abaixo da SMA20 — confirmação mais fraca')}
  if(f.structure||f.bos)positives.push(f.bos?"estrutura BOS/CHOCH confirmada":"estrutura confirmada");
  if(f.retest||f.rejection)positives.push(f.retest?"reteste com confirmação":"rejeição de zona");
  if(f.continuation)positives.push("continuação");
@@ -42,7 +42,7 @@ function opinion(a,ai,f){
  if(f.align<2)warnings.push("alinhamento incompleto");
  if(f.extension)warnings.push("preço já estendido");
  if(d==="BUY"&&r>=72)warnings.push("RSI perto do limite superior");if(d==="BUY"&&r<30)warnings.push("RSI extremamente sobrevendido");
- if(d==="SELL"&&r<=28)warnings.push("RSI perto do limite inferior");if(d==="SELL"&&r<=20)warnings.push("RSI extremamente sobrevendido");
+ if(d==="SELL"&&r>=38&&r<40)warnings.push("RSI perto do limite superior");
  if(rr<1)warnings.push("RR insuficiente");
  if(!f.structure&&!f.bos)warnings.push("estrutura sem confirmação forte");
  const label=ai.pWin>=70&&ai.score>=70&&!warnings.some(x=>x.includes("extremamente"))?"FORTE":ai.pWin>=57&&ai.score>=62?"FAVORÁVEL":ai.pWin>=48?"CAUTELOSA":"DESFAVORÁVEL";
@@ -51,7 +51,7 @@ function opinion(a,ai,f){
 }
 function evaluate(a){
  if(!a||!["BUY","SELL"].includes(up(a.type)))return{mode:"WAIT",score:0,pWin:null,samples:0,approved:false,recommendation:"SEM OPINIÃO",opinion:"Sem sinal base.",reasons:["sem sinal base"]};
- const f=features(a),rs=rows(),h=historical(f,rs),tech=technical(a,f),pWin=clamp(Math.round((h.p*.55+(tech/100)*.45)*100),5,95),score=clamp(Math.round((h.pWin??pWin)*.55+tech*.45),0,100);
+ const f=features(a),rs=rows(),h=historical(f,rs),tech=technical(a,f),pWin=clamp(Math.round(h.p*100),5,95),score=tech;
  const op=opinion(a,{pWin,score},f),reasons=[];
  if(h.setupSamples<3)reasons.push("poucos casos históricos do setup");
  if(f.align<2)reasons.push("alinhamento parcial");if(!f.h1Aligned)reasons.push("H1 contra a direção");if((direction(a)==="SELL"&&n(a?.rsi,50)<=20)||(direction(a)==="BUY"&&n(a?.rsi,50)<30))reasons.push("RSI extremo contra a entrada");
@@ -74,18 +74,18 @@ function independentOpportunity(ctx){
  const upper=Number(a.high)-Math.max(entry,Number(a.open||entry)),lower=Math.min(entry,Number(a.open||entry))-Number(a.low);
  const bull=entry>Number(prev.close)&&entry>e20&&e20>=e50,bear=entry<Number(prev.close)&&entry<e20&&e20<=e50;
  const breakoutBuy=entry>recentHigh,breakoutSell=entry<recentLow,rejectBuy=lower>=body*.9&&closePos>=.60,rejectSell=upper>=body*.9&&closePos<=.40;
- const buyEvidence=(hi>=2?22:0)+(bull?16:0)+(r>55&&r<78?12:0)+(breakoutBuy?18:0)+(rejectBuy?14:0)+(body>=atr*.18?8:0)+(closePos>=.65?6:0)+(volStrong?6:0);
- const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r<45&&r>22?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0)+(volStrong?6:0);
+ const buyEvidence=(hi>=2?22:0)+(bull?16:0)+(r>60&&r<75?12:0)+(breakoutBuy?18:0)+(rejectBuy?14:0)+(body>=atr*.18?8:0)+(closePos>=.65?6:0)+(volStrong?6:0);
+ const sellEvidence=(lo>=2?22:0)+(bear?16:0)+(r>35&&r<40?12:0)+(breakoutSell?18:0)+(rejectSell?14:0)+(body>=atr*.18?8:0)+(closePos<=.35?6:0)+(volStrong?6:0);
  const dir=buyEvidence>=sellEvidence?'BUY':'SELL',score=clamp(Math.max(buyEvidence,sellEvidence),0,100),tfCount=dir==='BUY'?hi:lo;
- const confirmations=dir==='BUY'?Number(bull)+Number(breakoutBuy||rejectBuy)+Number(r>55&&r<78)+Number(body>=atr*.18&&closePos>=.65):Number(bear)+Number(breakoutSell||rejectSell)+Number(r<45&&r>22)+Number(body>=atr*.18&&closePos<=.35);
- if(score<62||confirmations<2)return null;if((dir==='BUY'&&(r<60||r>=70))||(dir==='SELL'&&(r<=30||r>=45)))return null;
+ const confirmations=dir==='BUY'?Number(bull)+Number(breakoutBuy||rejectBuy)+Number(r>60&&r<75)+Number(body>=atr*.18&&closePos>=.65):Number(bear)+Number(breakoutSell||rejectSell)+Number(r>35&&r<40)+Number(body>=atr*.18&&closePos<=.35);
+ if(score<62||confirmations<2)return null;if((dir==='BUY'&&(r<=60||r>=75))||(dir==='SELL'&&(r<=35||r>=40)))return null;
  const swing=dir==='BUY'?Math.min(...series.slice(-12).map(c=>Number(c.low))):Math.max(...series.slice(-12).map(c=>Number(c.high)));
  const structuralRisk=Math.abs(entry-swing)+atr*.15,maxRisk=atr*1.50;if(!Number.isFinite(structuralRisk)||structuralRisk>maxRisk)return null;const risk=Math.min(maxRisk,Math.max(atr*.80,structuralRisk)),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
- const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.35+technical*.65)*100),55,88);
+ const hist=resolved(),sameDir=hist.filter(t=>direction(t)===dir),rate=arr=>arr.length?(arr.reduce((s,t)=>s+outcome(t.status),0)+4)/(arr.length+8):.5,pDir=rate(sameDir),pBase=rate(hist),pWin=clamp(Math.round((pDir*.70+pBase*.30)*100),5,95);
  const ts=a.timestamp||new Date().toISOString(),reasons=[];reasons.push(tfCount>=3?'M1/M5/M15 alinhados':'2 de 3 timeframes M1/M5/M15 alinhados');
  if(dir==='BUY'&&(breakoutBuy||rejectBuy))reasons.push(breakoutBuy?'rompimento de resistência':'rejeição de suporte');
  if(dir==='SELL'&&(breakoutSell||rejectSell))reasons.push(breakoutSell?'rompimento de suporte':'rejeição de resistência');
- reasons.push(dir==='BUY'?'momentum BUY + EMA20/EMA50':'momentum SELL + EMA20/EMA50');
+ reasons.push(dir==='BUY'?'momentum BUY + EMA20/EMA50 + RSI 60–75':'momentum SELL + EMA20/EMA50 + RSI 35–40');
  return{type:dir,source:'IA',signalKind:'IA',signalTimestamp:new Date(ts).toISOString(),price:entry,tp,sl,rr:1.5,rr1:1.5,atr,rsi:r,trend1:dirs[0]==='BUY'?'ALTA':dirs[0]==='SELL'?'BAIXA':'NEUTRO',trend5:dirs[1]==='BUY'?'ALTA':dirs[1]==='SELL'?'BAIXA':'NEUTRO',trend15:dirs[2]==='BUY'?'ALTA':dirs[2]==='SELL'?'BAIXA':'NEUTRO',confidence:pWin,score,reasons,setupState:'IA_OPORTUNIDADE',ai:{mode:'OPORTUNIDADE IA',score,pWin,samples:hist.length,recommendation:pWin>=70?'FORTE':'FAVORÁVEL',opinion:'A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.',reasons,source:'IA'},aiOpportunity:true,aiModelVersion:MODEL_VERSION};
 }
 function rrSafe(a){return n(a?.rr1,n(a?.rr,0))}

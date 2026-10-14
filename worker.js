@@ -47,7 +47,7 @@ async function saveHistory(env, incoming) {
     const k=keyOf(t); if(!k) continue;
     const old=map.get(k);
     if(old && String(old.status||"ALERTA")!=="ALERTA" && String(t.status||"ALERTA")==="ALERTA") continue;
-    map.set(k,t);
+    map.set(k,old?{...old,...t,indicatorSnapshot:t.indicatorSnapshot||old.indicatorSnapshot,indicatorSnapshotVersion:t.indicatorSnapshotVersion||old.indicatorSnapshotVersion}:t);
   }
   const trades=[...map.values()].sort((a,b)=>timeOf(b)-timeOf(a)).slice(0,500);
   const payload={exportedAt:new Date().toISOString(),source:"RB TRADER PRO",formatVersion:2,total:trades.length,trades};
