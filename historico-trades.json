@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-15T23:56:55.125Z",
+  "exportedAt": "2026-10-15T23:59:34.158Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 262,
@@ -111,13 +111,17 @@
       },
       "indicatorSnapshotVersion": 1,
       "movementKey": "SELL-STRUCT-0.00-0.00",
-      "status": "ALERTA",
+      "status": "WIN",
       "time": "2026-10-15T23:55:00.000Z",
       "reentryCount": 9,
       "beAlerted": true,
       "beTriggeredAt": "2026-10-15T23:56:00.000Z",
       "beTriggerPrice": 4156.94,
-      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta."
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-15T23:58:00.000Z",
+      "outcomeReason": "TP atingido",
+      "beArmed": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
