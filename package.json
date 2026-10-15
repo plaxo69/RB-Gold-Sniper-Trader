@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "node --check public/app-v4.js && node --check public/history-ui.js && node --check public/history-v2.js && node --check public/sniper-v2.js && node --check public/ai-sniper.js && node --check public/sniper-guard.js"
   },
   "dependencies": {
     "axios": "^1.12.2",
