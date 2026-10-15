@@ -46,8 +46,23 @@ async function saveHistory(env, incoming) {
   for(const t of [...remote,...incoming]) {
     const k=keyOf(t); if(!k) continue;
     const old=map.get(k);
-    if(old && String(old.status||"ALERTA")!=="ALERTA" && String(t.status||"ALERTA")==="ALERTA") continue;
-    map.set(k,t);
+    if(!old) { map.set(k,t); continue; }
+    const oldStatus=String(old.status||"ALERTA"), nextStatus=String(t.status||"ALERTA");
+    let chosen;
+    if(oldStatus!=="ALERTA" && nextStatus==="ALERTA") chosen=old;
+    else if(oldStatus==="ALERTA" && nextStatus!=="ALERTA") chosen=t;
+    else chosen={...old,...t};
+    map.set(k,{
+      ...chosen,
+      indicatorSnapshot:chosen.indicatorSnapshot||old.indicatorSnapshot||t.indicatorSnapshot,
+      indicatorSnapshotVersion:chosen.indicatorSnapshotVersion||old.indicatorSnapshotVersion||t.indicatorSnapshotVersion,
+      beAlerted:!!(old.beAlerted||t.beAlerted),
+      beArmed:!!(old.beArmed||t.beArmed),
+      bePushSent:!!(old.bePushSent||t.bePushSent),
+      beTriggeredAt:old.beTriggeredAt||t.beTriggeredAt,
+      beTriggerPrice:old.beTriggerPrice!=null?old.beTriggerPrice:t.beTriggerPrice,
+      beAlertMessage:old.beAlertMessage||t.beAlertMessage
+    });
   }
   const trades=[...map.values()].sort((a,b)=>timeOf(b)-timeOf(a)).slice(0,500);
   const payload={exportedAt:new Date().toISOString(),source:"RB TRADER PRO",formatVersion:2,total:trades.length,trades};
