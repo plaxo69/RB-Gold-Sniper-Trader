@@ -35,7 +35,7 @@ async function getHistory(env, limit=1000) {
   const d=await r.json(); if(!r.ok) throw new Error(d.message||"Falha ao ler histórico do GitHub");
   let p={}; try{p=JSON.parse(decodeBase64(d.content));}catch{}
   const trades=Array.isArray(p)?p:(Array.isArray(p.trades)?p.trades:[]);
-  return {ok:true,trades:trades.slice(-limit),total:trades.length,source:"github",branch:"main",exportedAt:p?.exportedAt||null};
+  return {ok:true,trades:trades.slice(-limit),total:trades.length,source:"github",branch,exportedAt:p?.exportedAt||null};
 }
 function keyOf(t){return t?.signalKey||t?.key||((t?.type||"")+"-"+(t?.signalTimestamp||t?.time||""))}
 function timeOf(t){const n=Date.parse(t?.signalTimestamp??t?.time??0);return Number.isFinite(n)?n:0}
@@ -127,7 +127,7 @@ export default {
    }
    if(path==="/api/market"&&request.method==="GET") return json(await market(url.searchParams.get("timeframe")||"1m"));
    if(path==="/api/oanda-reference"&&request.method==="GET") {try{return json({success:true,calibrated:false,offset:0,futures:await yahooQuote("GC=F"),spot:null,source:"Yahoo Finance GC=F — referência"});}catch(e){return json({success:false,calibrated:false,offset:0,error:e.message},502);}}
-   if(path==="/api/ai/opinion"&&request.method==="POST") {try{return json({success:true,...await aiOpinion(await request.json(),env),model:env.OPENAI_MODEL||"gpt-5.6-luna"});}catch(e){return json({success:false,available:Boolean(env.OPENAI_API_KEY),confidence:null,opinion:"NEUTRO",note:e.message},502);}}
+   if(path==="/api/ai/opinion"&&request.method==="POST") {try{return json({success:true,...await aiOpinion(await request.json(),env),model:env.OPENAI_MODEL||"gpt-6-luna"});}catch(e){return json({success:false,available:Boolean(env.OPENAI_API_KEY),confidence:null,opinion:"NEUTRO",note:e.message},502);}}
    if(path==="/api/trades"&&request.method==="GET") {if(!env.GITHUB_TOKEN)return json({ok:false,error:"GITHUB_TOKEN não configurado nos Secrets do Cloudflare."},503);return json(await getHistory(env,Math.min(Math.max(parseInt(url.searchParams.get("limit")||"1000",10)||1000,1),5000)));}
    if(path==="/api/export-history"&&request.method==="POST") {const b=await request.json();if(!Array.isArray(b.trades))return json({ok:false,error:"Formato inválido: trades[] em falta."},400);return json(await saveHistory(env,b.trades));}
    if(path==="/api/push-config"&&request.method==="GET") return json({ok:false,error:"Web Push ainda não foi migrado para Cloudflare; as notificações não estão ativas nesta pré-visualização."},503);
