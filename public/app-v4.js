@@ -1,7 +1,7 @@
 const API_BASE="/api",POLL_MS=10000,KEY="rb_gold_sniper_signals_v1",MAX_M1_AGE_SEC=150,MAX_M1_QUOTE_AGE_SEC=15,REENTRY_COOLDOWN_SEC=300;
 const state={timeframe:"1m",last:null,audio:null,alerts:false,tv:null,feedStale:false,marketClosed:false,lastAlertKey:null,lastSignalTimestamp:null,blockedSignalKey:null};
 const $=id=>document.getElementById(id);
-const money=v=>Number.isFinite(+v)?`${(+v).toFixed(2)}`:"—";
+const money=v=>Number.isFinite(+v)?`$${(+v).toFixed(2)}`:"—";
 const escapeHtml=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const TF_SECONDS={"1m":60,"5m":300,"15m":900,"1h":3600};
 function updateCountdown(){const el=$("candle-countdown");if(!el)return;const sec=TF_SECONDS[state.timeframe]||60;const remain=sec-(Math.floor(Date.now()/1000)%sec);const m=Math.floor(remain/60),s=remain%60;el.textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`}
