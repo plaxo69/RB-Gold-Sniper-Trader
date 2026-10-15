@@ -48,3 +48,9 @@ test('os scripts corrigidos usam versões de cache novas', async () => {
   assert.match(html, /app-v4\.js\?v=14/);
   assert.match(html, /history-ui\.js\?v=6/);
 });
+
+test('o Worker preserva a fotografia ao gravar resultados no GitHub', async () => {
+  const worker = await read('../worker.js');
+  assert.match(worker, /indicatorSnapshot:chosen\.indicatorSnapshot\|\|old\.indicatorSnapshot\|\|t\.indicatorSnapshot/);
+  assert.match(worker, /beAlerted:!!\(old\.beAlerted\|\|t\.beAlerted\)/);
+});
