@@ -1,9 +1,1330 @@
 {
-  "exportedAt": "2026-10-11T21:42:52.671Z",
+  "exportedAt": "2026-10-15T22:53:46.351Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 235,
+  "total": 261,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-15T06:46:00.000Z",
+      "price": 4133.932,
+      "tp": 4130.596417555817,
+      "sl": 4136.155721629455,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.4981441963689839,
+      "rsi": 42.49635028056056,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "NEUTRO",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 227,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-15T06:46:00.000Z",
+      "key": "SELL-2026-10-15T06:46:00.000Z",
+      "indicatorSnapshot": {
+        "capturedAt": "2026-10-15T06:47:14.293Z",
+        "signalTimestamp": "2026-10-15T06:46:00.000Z",
+        "entryPrice": 4133.932,
+        "timeframes": {
+          "M1": "BAIXA",
+          "M5": "BAIXA",
+          "M15": "NEUTRO",
+          "H1": null
+        },
+        "indicators": {
+          "rsi": 42.49635028056056,
+          "formingRsi": null,
+          "atr": 1.4981441963689839,
+          "ema9": null,
+          "ema20": null,
+          "ema21": null,
+          "ema50": null,
+          "ema200": null,
+          "adx14": null,
+          "volume": null,
+          "volumeSma20": null,
+          "volumeRatio": null,
+          "support": null,
+          "resistance": null
+        },
+        "filters": {},
+        "scores": {
+          "confidence": 57,
+          "buy": null,
+          "sell": null,
+          "score": 64
+        },
+        "setup": {
+          "type": "SELL",
+          "source": "IA",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "momentum SELL + EMA20/EMA50"
+          ],
+          "rejectionReasons": [],
+          "tactical": null
+        },
+        "ai": {
+          "mode": "OPORTUNIDADE IA",
+          "score": 64,
+          "pWin": 57,
+          "samples": 227,
+          "recommendation": "FAVORÁVEL",
+          "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "momentum SELL + EMA20/EMA50"
+          ],
+          "source": "IA"
+        },
+        "aiOpportunity": true
+      },
+      "indicatorSnapshotVersion": 1,
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-15T06:46:00.000Z",
+      "reentryCount": 8,
+      "resolvedAt": "2026-10-15T06:47:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-14T15:19:00.000Z",
+      "price": 4087.682,
+      "tp": 4081.3158774948974,
+      "sl": 4091.926081670068,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 3.1005444671221762,
+      "rsi": 44.195234606766306,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 226,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-14T15:19:00.000Z",
+      "key": "SELL-2026-10-14T15:19:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-14T15:19:00.000Z",
+      "reentryCount": 7,
+      "resolvedAt": "2026-10-14T15:23:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-14T12:55:00.000Z",
+      "price": 4101.833,
+      "tp": 4091.647494558858,
+      "sl": 4108.623336960761,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 6.462246405068281,
+      "rsi": 42.02183384853992,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 225,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-14T12:55:00.000Z",
+      "key": "SELL-2026-10-14T12:55:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-14T12:55:00.000Z",
+      "reentryCount": 6,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-14T12:57:00.000Z",
+      "beTriggerPrice": 4095.726,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-14T13:00:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-14T11:40:00.000Z",
+      "price": 4139.001,
+      "tp": 4136.093132330128,
+      "sl": 4140.939578446581,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.330522977211949,
+      "rsi": 43.65173232165074,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 224,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-14T11:40:00.000Z",
+      "key": "SELL-2026-10-14T11:40:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-14T11:40:00.000Z",
+      "reentryCount": 5,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-14T11:48:00.000Z",
+      "beTriggerPrice": 4137.369,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-14T11:58:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-14T09:01:00.000Z",
+      "price": 4143.4,
+      "tp": 4140.9068078718565,
+      "sl": 4145.062128085428,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.4608539028581629,
+      "rsi": 41.863785777086804,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 66,
+      "score": 78,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 78,
+        "pWin": 66,
+        "samples": 223,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-14T09:01:00.000Z",
+      "key": "SELL-2026-10-14T09:01:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-14T09:01:00.000Z",
+      "reentryCount": 4,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-14T09:08:00.000Z",
+      "beTriggerPrice": 4141.83,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-14T09:11:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-14T07:30:00.000Z",
+      "price": 4145.357,
+      "tp": 4142.11925326785,
+      "sl": 4147.515497821433,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.7699854762237757,
+      "rsi": 42.536008517426545,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 222,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-14T07:30:00.000Z",
+      "key": "SELL-2026-10-14T07:30:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-14T07:30:00.000Z",
+      "reentryCount": 3,
+      "resolvedAt": "2026-10-14T07:33:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-14T00:54:00.000Z",
+      "price": 4156.135,
+      "tp": 4153.085856048385,
+      "sl": 4158.167762634411,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.4517508960703247,
+      "rsi": 38.616943851231454,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 66,
+      "score": 78,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 78,
+        "pWin": 66,
+        "samples": 221,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-14T00:54:00.000Z",
+      "key": "SELL-2026-10-14T00:54:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-14T00:54:00.000Z",
+      "reentryCount": 2,
+      "resolvedAt": "2026-10-14T00:55:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T23:33:00.000Z",
+      "price": 4156.004,
+      "tp": 4154.114477615633,
+      "sl": 4157.263681589578,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 0.8512105971799601,
+      "rsi": 39.363486982500675,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 220,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T23:33:00.000Z",
+      "key": "SELL-2026-10-13T23:33:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-13T23:33:00.000Z",
+      "reentryCount": 1,
+      "resolvedAt": "2026-10-13T23:46:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T23:31:00.000Z",
+      "price": 4156.021,
+      "tp": 4154.375634986162,
+      "sl": 4157.117910009224,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 0.8260667281652289,
+      "rsi": 37.784492765917946,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 219,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T23:31:00.000Z",
+      "key": "SELL-2026-10-13T23:31:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-13T23:31:00.000Z",
+      "reentryCount": 0,
+      "resolvedAt": "2026-10-13T23:32:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "BUY",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T19:38:00.000Z",
+      "price": 4165.703,
+      "tp": 4167.800213456546,
+      "sl": 4164.304857695637,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.0076153624216742,
+      "rsi": 61.89447245379273,
+      "trend1": "ALTA",
+      "trend5": "ALTA",
+      "trend15": "NEUTRO",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "momentum BUY + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 218,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "momentum BUY + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "BUY-2026-10-13T19:38:00.000Z",
+      "key": "BUY-2026-10-13T19:38:00.000Z",
+      "movementKey": "BUY-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-13T19:38:00.000Z",
+      "reentryCount": 0,
+      "resolvedAt": "2026-10-13T19:44:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T15:53:00.000Z",
+      "price": 4160.248,
+      "tp": 4158.006651183541,
+      "sl": 4161.742232544305,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.4748836287036677,
+      "rsi": 43.83621482471304,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 217,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T15:53:00.000Z",
+      "key": "SELL-2026-10-13T15:53:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-13T15:53:00.000Z",
+      "reentryCount": 3,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-13T15:54:00.000Z",
+      "beTriggerPrice": 4158.952,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-13T15:55:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T14:28:00.000Z",
+      "price": 4166.417,
+      "tp": 4162.801392237398,
+      "sl": 4168.827405175069,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 2.249367833789426,
+      "rsi": 43.54771462517296,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 216,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T14:28:00.000Z",
+      "key": "SELL-2026-10-13T14:28:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-13T14:28:00.000Z",
+      "reentryCount": 2,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-13T14:29:00.000Z",
+      "beTriggerPrice": 4164.547,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-13T14:30:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T13:15:00.000Z",
+      "price": 4176.806,
+      "tp": 4173.265245194478,
+      "sl": 4179.166503203681,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 2.030021357870548,
+      "rsi": 40.00481911703868,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "NEUTRO",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 215,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T13:15:00.000Z",
+      "key": "SELL-2026-10-13T13:15:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-13T13:15:00.000Z",
+      "reentryCount": 1,
+      "resolvedAt": "2026-10-13T13:17:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T06:00:00.000Z",
+      "price": 4192.007,
+      "tp": 4188.7897374421755,
+      "sl": 4194.151841705216,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.5922780347735501,
+      "rsi": 43.45666095418232,
+      "trend1": "BAIXA",
+      "trend5": "NEUTRO",
+      "trend15": "ALTA",
+      "confidence": 56,
+      "score": 62,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 62,
+        "pWin": 56,
+        "samples": 214,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T06:00:00.000Z",
+      "key": "SELL-2026-10-13T06:00:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-13T06:00:00.000Z",
+      "reentryCount": 0,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-13T06:15:00.000Z",
+      "beTriggerPrice": 4189.985,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-13T06:17:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "BUY",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T04:12:00.000Z",
+      "price": 4188.502,
+      "tp": 4190.704359469191,
+      "sl": 4187.033760353873,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.2882643075131164,
+      "rsi": 61.08415405577481,
+      "trend1": "ALTA",
+      "trend5": "ALTA",
+      "trend15": "ALTA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum BUY + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 213,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum BUY + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "BUY-2026-10-13T04:12:00.000Z",
+      "key": "BUY-2026-10-13T04:12:00.000Z",
+      "movementKey": "BUY-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-13T04:12:00.000Z",
+      "reentryCount": 0,
+      "resolvedAt": "2026-10-13T04:15:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T01:40:00.000Z",
+      "price": 4156.438,
+      "tp": 4151.489631905879,
+      "sl": 4159.736912062747,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 2.6594137516527168,
+      "rsi": 42.513937084768024,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 212,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T01:40:00.000Z",
+      "key": "SELL-2026-10-13T01:40:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-13T01:40:00.000Z",
+      "reentryCount": 1,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-13T01:47:00.000Z",
+      "beTriggerPrice": 4153.402,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-13T01:48:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-13T00:19:00.000Z",
+      "price": 4165.902,
+      "tp": 4161.665605840287,
+      "sl": 4168.726262773142,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 2.0884184876157645,
+      "rsi": 44.06259335383815,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 211,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-13T00:19:00.000Z",
+      "key": "SELL-2026-10-13T00:19:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-13T00:19:00.000Z",
+      "reentryCount": 0,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-13T00:25:00.000Z",
+      "beTriggerPrice": 4163.39,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-13T00:32:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "BUY",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-12T20:22:00.000Z",
+      "price": 4169.964,
+      "tp": 4171.5148319510345,
+      "sl": 4168.930112032644,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 0.7259197823741232,
+      "rsi": 61.98782933330402,
+      "trend1": "ALTA",
+      "trend5": "ALTA",
+      "trend15": "NEUTRO",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "momentum BUY + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 210,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "momentum BUY + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "BUY-2026-10-12T20:22:00.000Z",
+      "key": "BUY-2026-10-12T20:22:00.000Z",
+      "movementKey": "BUY-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-12T20:22:00.000Z",
+      "reentryCount": 0,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-12T20:23:00.000Z",
+      "beTriggerPrice": 4170.798,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-12T20:55:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-12T18:48:00.000Z",
+      "price": 4168.726,
+      "tp": 4166.466578901196,
+      "sl": 4170.232280732535,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.0285382168983563,
+      "rsi": 42.009383320863876,
+      "trend1": "BAIXA",
+      "trend5": "NEUTRO",
+      "trend15": "BAIXA",
+      "confidence": 66,
+      "score": 78,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 78,
+        "pWin": 66,
+        "samples": 209,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-12T18:48:00.000Z",
+      "key": "SELL-2026-10-12T18:48:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-12T18:48:00.000Z",
+      "reentryCount": 7,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-12T18:51:00.000Z",
+      "beTriggerPrice": 4166.613,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-12T19:01:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-12T14:29:00.000Z",
+      "price": 4165.157,
+      "tp": 4162.00988842885,
+      "sl": 4167.255074380767,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 2.387162538445519,
+      "rsi": 43.671636462540796,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 66,
+      "score": 78,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 78,
+        "pWin": 66,
+        "samples": 208,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-12T14:29:00.000Z",
+      "key": "SELL-2026-10-12T14:29:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-12T14:29:00.000Z",
+      "reentryCount": 6,
+      "resolvedAt": "2026-10-12T14:30:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-12T09:52:00.000Z",
+      "price": 4171.133,
+      "tp": 4168.697894713562,
+      "sl": 4172.756403524291,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.3360234952800585,
+      "rsi": 40.515074526627124,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 61,
+      "score": 70,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 70,
+        "pWin": 61,
+        "samples": 207,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-12T09:52:00.000Z",
+      "key": "SELL-2026-10-12T09:52:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-12T09:52:00.000Z",
+      "reentryCount": 5,
+      "resolvedAt": "2026-10-12T09:55:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-12T08:58:00.000Z",
+      "price": 4173.846,
+      "tp": 4171.372824842445,
+      "sl": 4175.494783438369,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.238556255793141,
+      "rsi": 39.62751576994588,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 61,
+      "score": 70,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 70,
+        "pWin": 61,
+        "samples": 206,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-12T08:58:00.000Z",
+      "key": "SELL-2026-10-12T08:58:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-12T08:58:00.000Z",
+      "reentryCount": 4,
+      "resolvedAt": "2026-10-12T09:02:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-12T08:26:00.000Z",
+      "price": 4176.239,
+      "tp": 4173.697990067668,
+      "sl": 4177.933006621553,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.4067108103603931,
+      "rsi": 37.1095806888125,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 70,
+      "score": 84,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 84,
+        "pWin": 70,
+        "samples": 205,
+        "recommendation": "FORTE",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-12T08:26:00.000Z",
+      "key": "SELL-2026-10-12T08:26:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "LOSS",
+      "time": "2026-10-12T08:26:00.000Z",
+      "reentryCount": 3,
+      "resolvedAt": "2026-10-12T08:35:00.000Z",
+      "outcomeReason": "SL atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-12T08:07:00.000Z",
+      "price": 4180.542,
+      "tp": 4177.2264719971445,
+      "sl": 4182.752352001904,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.5223466793582712,
+      "rsi": 42.41838046510767,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "BAIXA",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 204,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-12T08:07:00.000Z",
+      "key": "SELL-2026-10-12T08:07:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-12T08:07:00.000Z",
+      "reentryCount": 2,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-12T08:08:00.000Z",
+      "beTriggerPrice": 4178.861,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-12T08:10:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-12T05:25:00.000Z",
+      "price": 4187.706,
+      "tp": 4185.300122985472,
+      "sl": 4189.309918009686,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.5394533979084382,
+      "rsi": 36.60643091153815,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "NEUTRO",
+      "confidence": 57,
+      "score": 64,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": 57,
+        "samples": 203,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-12T05:25:00.000Z",
+      "key": "SELL-2026-10-12T05:25:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-12T05:25:00.000Z",
+      "reentryCount": 1,
+      "resolvedAt": "2026-10-12T05:27:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-12T04:18:00.000Z",
+      "price": 4199.833,
+      "tp": 4197.106168929937,
+      "sl": 4201.650887380042,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.4192492002778192,
+      "rsi": 40.498623143713736,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "NEUTRO",
+      "confidence": 60,
+      "score": 70,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "momentum SELL + EMA20/EMA50"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 70,
+        "pWin": 60,
+        "samples": 202,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "momentum SELL + EMA20/EMA50"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-12T04:18:00.000Z",
+      "key": "SELL-2026-10-12T04:18:00.000Z",
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "WIN",
+      "time": "2026-10-12T04:18:00.000Z",
+      "reentryCount": 0,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-12T04:22:00.000Z",
+      "beTriggerPrice": 4198.227,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-12T04:38:00.000Z",
+      "outcomeReason": "TP atingido"
+    },
     {
       "type": "BUY",
       "source": "IA",
@@ -50,7 +1371,8 @@
       "resolvedAt": "2026-10-09T17:06:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -100,7 +1422,8 @@
       "resolvedAt": "2026-10-09T09:50:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -291,7 +1614,8 @@
       "beTriggerPrice": 4197.531,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -485,7 +1809,8 @@
       "resolvedAt": "2026-10-09T07:40:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -682,7 +2007,8 @@
       "beTriggerPrice": 4198.688,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -730,7 +2056,8 @@
       "resolvedAt": "2026-10-09T06:11:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -782,7 +2109,8 @@
       "beTriggerPrice": 4196.264,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -834,7 +2162,8 @@
       "beTriggerPrice": 4196.264,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -886,7 +2215,8 @@
       "beTriggerPrice": 4190.886,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1077,7 +2407,8 @@
       "beTriggerPrice": 4185.935,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1127,7 +2458,8 @@
       "beTriggerPrice": 4182.036,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1177,7 +2509,8 @@
       "resolvedAt": "2026-10-09T03:03:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1227,7 +2560,8 @@
       "beTriggerPrice": 4178.901,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1277,7 +2611,8 @@
       "beTriggerPrice": 4173.947,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1327,7 +2662,8 @@
       "beTriggerPrice": 4157.634,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1377,7 +2713,8 @@
       "beTriggerPrice": 4153.15,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1425,7 +2762,8 @@
       "resolvedAt": "2026-10-09T00:24:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1475,7 +2813,8 @@
       "beTriggerPrice": 4149.483,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1525,7 +2864,8 @@
       "beTriggerPrice": 4148.796,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1720,7 +3060,8 @@
       "beTriggerPrice": 4145.378,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1770,7 +3111,8 @@
       "beTriggerPrice": 4140.377,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -1822,7 +3164,8 @@
       "beTriggerPrice": 4137.383,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -2014,7 +3357,8 @@
       "beTriggerPrice": 4135.865,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -2062,7 +3406,8 @@
       "resolvedAt": "2026-10-08T19:46:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -2253,7 +3598,8 @@
       "beTriggerPrice": 4133.319,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -2305,7 +3651,8 @@
       "beTriggerPrice": 4130.684,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -2353,7 +3700,8 @@
       "resolvedAt": "2026-10-08T17:29:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -2548,7 +3896,8 @@
       "beTriggerPrice": 4144.009,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -2740,7 +4089,8 @@
       "beTriggerPrice": 4108.715,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -2792,7 +4142,8 @@
       "beTriggerPrice": 4112.145,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -2842,7 +4193,8 @@
       "resolvedAt": "2026-10-08T15:41:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -2892,7 +4244,8 @@
       "beTriggerPrice": 4112.79,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -2942,7 +4295,8 @@
       "beTriggerPrice": 4112.79,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -3138,7 +4492,8 @@
       "beTriggerPrice": 4115.268,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -3188,7 +4543,8 @@
       "resolvedAt": "2026-10-08T15:00:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -3240,7 +4596,8 @@
       "beTriggerPrice": 4135.683,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -3288,7 +4645,8 @@
       "resolvedAt": "2026-10-08T13:05:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -3340,7 +4698,8 @@
       "beTriggerPrice": 4114.258,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -3529,7 +4888,8 @@
       "resolvedAt": "2026-10-08T12:35:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -3577,7 +4937,8 @@
       "resolvedAt": "2026-10-08T12:15:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -3629,7 +4990,8 @@
       "beTriggerPrice": 4130.559,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -3681,7 +5043,8 @@
       "beTriggerPrice": 4128.788,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -3871,7 +5234,8 @@
       "resolvedAt": "2026-10-08T11:25:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -4067,7 +5431,8 @@
       "beTriggerPrice": 4112.447,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -4117,7 +5482,8 @@
       "beTriggerPrice": 4116.871,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -4167,7 +5533,8 @@
       "resolvedAt": "2026-10-08T10:25:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -4217,7 +5584,8 @@
       "resolvedAt": "2026-10-08T08:02:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -4269,7 +5637,8 @@
       "beTriggerPrice": 4119.409,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -4460,7 +5829,8 @@
       "beTriggerPrice": 4117.284,
       "outcomeReason": "Proteção BE atingida — trade fechada em BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -4508,7 +5878,8 @@
       "resolvedAt": "2026-10-08T05:18:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -4558,7 +5929,8 @@
       "resolvedAt": "2026-10-08T02:53:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -4606,7 +5978,8 @@
       "resolvedAt": "2026-10-08T02:13:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -4654,7 +6027,8 @@
       "resolvedAt": "2026-10-08T01:02:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -4843,7 +6217,8 @@
       "resolvedAt": "2026-10-08T00:50:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -5038,7 +6413,8 @@
       "resolvedAt": "2026-10-07T22:00:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -6222,7 +7598,8 @@
       "resolvedAt": "2026-10-07T06:12:00.000Z",
       "outcomeReason": "SL atingido antes da ativação do BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -6764,7 +8141,8 @@
       "resolvedAt": "2026-10-07T03:26:00.000Z",
       "outcomeReason": "SL atingido antes da ativação do BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -7412,7 +8790,8 @@
       "resolvedAt": "2026-10-07T00:26:00.000Z",
       "outcomeReason": "SL atingido antes da ativação do BE",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -8182,7 +9561,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-06T22:41:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -8347,7 +9727,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-06T20:52:00.000Z",
       "outcomeReason": "SL atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -8511,7 +9892,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-06T19:56:00.000Z",
       "outcomeReason": "SL atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -8675,7 +10057,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-06T18:14:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -8840,7 +10223,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-06T16:59:00.000Z",
       "outcomeReason": "SL atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -9002,7 +10386,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-06T15:52:00.000Z",
       "outcomeReason": "SL atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -9126,7 +10511,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4154.9535,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -9250,7 +10636,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4153.0425,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -9374,7 +10761,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4150.429499999999,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -9546,7 +10934,8 @@
       "resolvedAt": "2026-10-06T08:07:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -9721,7 +11110,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4127.955999999999,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -9893,7 +11283,8 @@
       "resolvedAt": "2026-10-06T06:03:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -10067,7 +11458,8 @@
       "resolvedAt": "2026-10-06T04:53:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -10239,7 +11631,8 @@
       "resolvedAt": "2026-10-06T02:35:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -10412,7 +11805,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4127.4445,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -10587,7 +11981,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4130.018,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -10762,7 +12157,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4134.8885,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -10937,7 +12333,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4136.8605,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -11113,7 +12510,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4138.0045,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -11288,7 +12686,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4139.156000000001,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -11461,7 +12860,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4134.531999999999,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -11634,7 +13034,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4135.592,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -11807,7 +13208,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4136.6630000000005,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -11980,7 +13382,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4137.5635,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -12155,7 +13558,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4138.606,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -12326,7 +13730,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4139.1155,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -12501,7 +13906,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4145.5605,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -12676,7 +14082,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4145.6695,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -12850,7 +14257,8 @@
       "resolvedAt": "2026-10-05T22:03:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -13023,7 +14431,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4128.601500000001,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -13196,7 +14605,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4132.062,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -13371,7 +14781,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4136.477,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -13547,7 +14958,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4138.5045,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -13722,7 +15134,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4140.0695,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -13896,7 +15309,8 @@
       "resolvedAt": "2026-10-05T13:06:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -14071,7 +15485,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4151.147500000001,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -14246,7 +15661,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4155.925,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -14421,7 +15837,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4157.8145,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -14590,7 +16007,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4169.295,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -14766,7 +16184,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4157.301000000001,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -14945,7 +16364,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4148.338,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -15118,7 +16538,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4137.791499999999,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -15293,7 +16714,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4147.075999999999,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -15467,7 +16889,8 @@
       "resolvedAt": "2026-10-02T18:58:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -15640,7 +17063,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4126.272,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -15808,7 +17232,8 @@
       "resolvedAt": "2026-10-02T15:57:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -15981,7 +17406,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4136.9265,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -16156,7 +17582,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4140.947,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -16329,7 +17756,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4144.9965,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -16502,7 +17930,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4149.8715,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -16674,7 +18103,8 @@
       "resolvedAt": "2026-10-02T12:30:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -16849,7 +18279,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4167.3585,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -17022,7 +18453,8 @@
       "outcomeReason": "TP e SL atingidos na mesma vela; ordem intrabar indeterminada",
       "beTrigger": 4197.458499999999,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -17195,7 +18627,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4192.555,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -17367,7 +18800,8 @@
       "resolvedAt": "2026-10-02T12:30:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -17539,7 +18973,8 @@
       "resolvedAt": "2026-10-02T12:30:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -17714,7 +19149,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4177.096500000001,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -17883,7 +19319,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4191.029,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -18058,7 +19495,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4176.3285,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -18227,7 +19665,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4151.958500000001,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -18388,7 +19827,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4156.964,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -18553,7 +19993,8 @@
       "beTrigger": 4159.9805,
       "resolvedAt": "2026-10-02T00:46:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -18718,7 +20159,8 @@
       "resolvedAt": "2026-10-02T00:32:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4160.3955,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -18882,7 +20324,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:31:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -19047,7 +20490,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-02T00:26:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -19203,7 +20647,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-01T22:58:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -19359,7 +20804,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-01T22:56:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -19514,7 +20960,8 @@
       "resolvedAt": "2026-10-01T22:30:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4171.854,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -19671,7 +21118,8 @@
       "resolvedAt": "2026-10-01T19:21:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4179.532999999999,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -19829,7 +21277,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-01T18:05:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -19984,7 +21433,8 @@
       "resolvedAt": "2026-10-02T00:22:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4167.6265,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -20142,7 +21592,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-01T18:48:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -20296,7 +21747,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-01T17:06:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -20455,7 +21907,8 @@
       "resolvedAt": "2026-10-02T00:38:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4159.8415,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -20610,7 +22063,8 @@
       "resolvedAt": "2026-10-02T00:31:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4161.725,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -20767,7 +22221,8 @@
       "resolvedAt": "2026-10-02T01:02:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4151.0605,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -20919,7 +22374,8 @@
       "beAlerted": true,
       "resolvedAt": "2026-10-01T15:01:00.000Z",
       "outcomeReason": "TP atingido",
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -21072,7 +22528,8 @@
       "resolvedAt": "2026-10-02T00:59:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4153.9285,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -21233,7 +22690,8 @@
       "resolvedAt": "2026-10-02T00:38:00.000Z",
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4160.058,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -21393,7 +22851,8 @@
       "resolvedAt": "2026-10-01T13:40:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -21553,7 +23012,8 @@
       "resolvedAt": "2026-10-01T13:40:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -21714,7 +23174,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4165.4175,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -21874,7 +23335,8 @@
       "resolvedAt": "2026-10-01T13:38:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -22034,7 +23496,8 @@
       "resolvedAt": "2026-10-01T13:32:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -22195,7 +23658,8 @@
       "resolvedAt": "2026-10-01T13:28:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -22355,7 +23819,8 @@
       "resolvedAt": "2026-10-01T13:17:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -22513,7 +23978,8 @@
       "resolvedAt": "2026-10-02T04:13:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -22671,7 +24137,8 @@
       "resolvedAt": "2026-10-02T04:13:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -22825,7 +24292,8 @@
       "resolvedAt": "2026-10-01T12:40:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -22985,7 +24453,8 @@
       "resolvedAt": "2026-10-01T10:54:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -23145,7 +24614,8 @@
       "resolvedAt": "2026-10-01T10:35:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -23299,7 +24769,8 @@
       "resolvedAt": "2026-10-01T10:00:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -23459,7 +24930,8 @@
       "resolvedAt": "2026-10-02T00:59:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -23621,7 +25093,8 @@
       "resolvedAt": "2026-10-01T08:20:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -23779,7 +25252,8 @@
       "resolvedAt": "2026-10-01T08:19:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -23935,7 +25409,8 @@
       "resolvedAt": "2026-10-01T07:13:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -24093,7 +25568,8 @@
       "resolvedAt": "2026-10-01T05:33:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -24253,7 +25729,8 @@
       "resolvedAt": "2026-10-01T05:33:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -24411,7 +25888,8 @@
       "resolvedAt": "2026-10-01T05:31:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -24567,7 +26045,8 @@
       "resolvedAt": "2026-10-01T05:31:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -24725,7 +26204,8 @@
       "resolvedAt": "2026-10-01T05:26:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -24883,7 +26363,8 @@
       "resolvedAt": "2026-10-01T05:26:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -25043,7 +26524,8 @@
       "resolvedAt": "2026-10-01T05:03:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -25204,7 +26686,8 @@
       "resolvedAt": "2026-10-01T03:43:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -25365,7 +26848,8 @@
       "resolvedAt": "2026-10-01T03:11:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -25526,7 +27010,8 @@
       "resolvedAt": "2026-10-01T03:08:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -25685,7 +27170,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4139.762999999999,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -25845,7 +27331,8 @@
       "resolvedAt": "2026-10-01T18:48:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -26001,7 +27488,8 @@
       "resolvedAt": "2026-10-01T18:48:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -26161,7 +27649,8 @@
       "resolvedAt": "2026-10-01T00:16:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -26315,7 +27804,8 @@
       "resolvedAt": "2026-10-01T00:07:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -26472,7 +27962,8 @@
       "resolvedAt": "2026-10-01T18:48:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -26631,7 +28122,8 @@
       "resolvedAt": "2026-09-30T20:35:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -26785,7 +28277,8 @@
       "resolvedAt": "2026-09-30T20:35:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -26944,7 +28437,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4149.771000000001,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -27101,7 +28595,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4149.4215,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -27254,7 +28749,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4149.6365000000005,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -27375,7 +28871,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4160.405,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -27491,7 +28988,8 @@
       "resolvedAt": "2026-09-30T15:07:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -27607,7 +29105,8 @@
       "resolvedAt": "2026-09-30T14:37:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -27725,7 +29224,8 @@
       "resolvedAt": "2026-09-30T13:32:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -27839,7 +29339,8 @@
       "resolvedAt": "2026-09-30T13:45:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -27954,7 +29455,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4196.3375,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -28069,7 +29571,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4194.4619999999995,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -28180,7 +29683,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4194.1905,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -28293,7 +29797,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4177.1645,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -28409,7 +29914,8 @@
       "resolvedAt": "2026-09-30T11:20:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -28525,7 +30031,8 @@
       "resolvedAt": "2026-09-30T11:09:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -28641,7 +30148,8 @@
       "resolvedAt": "2026-09-30T11:09:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -28753,7 +30261,8 @@
       "resolvedAt": "2026-09-30T10:51:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -28868,7 +30377,8 @@
       "outcomeReason": "TP e SL atingidos na mesma vela; ordem intrabar indeterminada",
       "beTrigger": 4205.434499999999,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -28984,7 +30494,8 @@
       "resolvedAt": "2026-09-30T06:53:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -29098,7 +30609,8 @@
       "resolvedAt": "2026-09-30T06:52:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -29212,7 +30724,8 @@
       "resolvedAt": "2026-09-30T06:52:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -29329,7 +30842,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4168.597,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -29445,7 +30959,8 @@
       "resolvedAt": "2026-09-30T05:16:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -29561,7 +31076,8 @@
       "resolvedAt": "2026-09-30T05:16:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -29678,7 +31194,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4169.7505,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -29796,7 +31313,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4164.558999999999,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -29913,7 +31431,8 @@
       "outcomeReason": "Zona de lucro atingida — BE considerado antes do SL original",
       "beTrigger": 4168.698,
       "beAlerted": true,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -30029,7 +31548,8 @@
       "resolvedAt": "2026-09-30T01:30:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -30143,7 +31663,8 @@
       "resolvedAt": "2026-09-29T23:54:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -30259,7 +31780,8 @@
       "resolvedAt": "2026-09-29T23:49:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -30373,7 +31895,8 @@
       "resolvedAt": "2026-09-29T23:47:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -30484,7 +32007,8 @@
       "resolvedAt": "2026-09-29T18:00:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -30599,7 +32123,8 @@
       "resolvedAt": "2026-09-29T15:22:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -30714,7 +32239,8 @@
       "resolvedAt": "2026-09-29T14:08:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -30829,7 +32355,8 @@
       "resolvedAt": "2026-09-29T11:42:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "BUY",
@@ -30946,7 +32473,8 @@
       "resolvedAt": "2026-09-29T11:15:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -31061,7 +32589,8 @@
       "resolvedAt": "2026-09-29T05:23:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -31172,7 +32701,8 @@
       "resolvedAt": "2026-09-29T04:35:00.000Z",
       "outcomeReason": "TP atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     },
     {
       "type": "SELL",
@@ -31287,7 +32817,8 @@
       "resolvedAt": "2026-09-29T01:15:00.000Z",
       "outcomeReason": "SL atingido",
       "beAlerted": false,
-      "bePushSent": false
+      "bePushSent": false,
+      "beArmed": false
     }
   ]
 }
