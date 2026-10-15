@@ -1,9 +1,124 @@
 {
-  "exportedAt": "2026-10-15T23:04:13.643Z",
+  "exportedAt": "2026-10-15T23:56:55.125Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 261,
+  "total": 262,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-15T23:55:00.000Z",
+      "price": 4157.952,
+      "tp": 4156.030401401001,
+      "sl": 4159.233065732667,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 0.9271048844442733,
+      "rsi": 35.622664623084816,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "NEUTRO",
+      "confidence": 60,
+      "score": 70,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50",
+        "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 70,
+        "pWin": 60,
+        "samples": 228,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50",
+          "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v5",
+      "signalKey": "SELL-2026-10-15T23:55:00.000Z",
+      "key": "SELL-2026-10-15T23:55:00.000Z",
+      "indicatorSnapshot": {
+        "capturedAt": "2026-10-15T23:56:17.059Z",
+        "signalTimestamp": "2026-10-15T23:55:00.000Z",
+        "entryPrice": 4157.952,
+        "timeframes": {
+          "M1": "BAIXA",
+          "M5": "BAIXA",
+          "M15": "NEUTRO",
+          "H1": null
+        },
+        "indicators": {
+          "rsi": 35.622664623084816,
+          "formingRsi": null,
+          "atr": 0.9271048844442733,
+          "ema9": null,
+          "ema20": null,
+          "ema21": null,
+          "ema50": null,
+          "ema200": null,
+          "adx14": null,
+          "volume": null,
+          "volumeSma20": null,
+          "volumeRatio": null,
+          "support": null,
+          "resistance": null
+        },
+        "filters": {},
+        "scores": {
+          "confidence": 60,
+          "buy": null,
+          "sell": null,
+          "score": 70
+        },
+        "setup": {
+          "type": "SELL",
+          "source": "IA",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "rejeição de resistência",
+            "momentum SELL + EMA20/EMA50",
+            "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+          ],
+          "rejectionReasons": [],
+          "tactical": null
+        },
+        "ai": {
+          "mode": "OPORTUNIDADE IA",
+          "score": 70,
+          "pWin": 60,
+          "samples": 228,
+          "recommendation": "FAVORÁVEL",
+          "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "rejeição de resistência",
+            "momentum SELL + EMA20/EMA50",
+            "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+          ],
+          "source": "IA"
+        },
+        "aiOpportunity": true
+      },
+      "indicatorSnapshotVersion": 1,
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-15T23:55:00.000Z",
+      "reentryCount": 9,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-15T23:56:00.000Z",
+      "beTriggerPrice": 4156.94,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta."
+    },
     {
       "type": "SELL",
       "source": "IA",
