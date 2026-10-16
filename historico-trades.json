@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-16T11:56:35.322Z",
+  "exportedAt": "2026-10-16T11:57:36.512Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 268,
@@ -376,7 +376,10 @@
       "status": "ALERTA",
       "time": "2026-10-16T11:55:00.000Z",
       "createdAt": "2026-10-16T11:56:19.167Z",
-      "reentryCount": 0
+      "reentryCount": 0,
+      "beAlerted": false,
+      "beArmed": false,
+      "bePushSent": false
     },
     {
       "type": "BUY",
