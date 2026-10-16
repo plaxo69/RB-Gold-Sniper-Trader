@@ -1,9 +1,140 @@
 {
-  "exportedAt": "2026-10-16T15:36:20.203Z",
+  "exportedAt": "2026-10-16T15:36:31.878Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 275,
+  "total": 276,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-16T15:35:00.000Z",
+      "price": 4176.361,
+      "tp": 4173.27504971667,
+      "sl": 4178.418300188887,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 2.0020012592400867,
+      "rsi": 39.55847848438059,
+      "trend1": "BAIXA",
+      "trend5": "NEUTRO",
+      "trend15": "NEUTRO",
+      "confidence": 62,
+      "score": 62,
+      "technicalScore": 62,
+      "probabilityStatus": "não calibrada — requer backtest fora da amostra",
+      "historicalWinRate": 42,
+      "aiFeatures": {
+        "technicalScore": 62,
+        "dir": "SELL",
+        "tfCount": 1,
+        "confirmations": 4,
+        "rsi": 39.55847848438059,
+        "adx14": 49.76669121084318,
+        "volume": 185,
+        "volumeSma20": 174.25
+      },
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA20/EMA50",
+        "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 62,
+        "pWin": null,
+        "technicalScore": 62,
+        "historicalWinRate": 42,
+        "samples": 242,
+        "probabilityStatus": "não calibrada — requer backtest fora da amostra",
+        "recommendation": "FAVORÁVEL",
+        "opinion": "Oportunidade identificada por score técnico; ainda não existe probabilidade de vitória calibrada.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA20/EMA50",
+          "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v6",
+      "signalKey": "SELL-2026-10-16T15:35:00.000Z",
+      "key": "SELL-2026-10-16T15:35:00.000Z",
+      "indicatorSnapshot": {
+        "capturedAt": "2026-10-16T15:36:19.565Z",
+        "signalTimestamp": "2026-10-16T15:35:00.000Z",
+        "entryPrice": 4176.361,
+        "timeframes": {
+          "M1": "BAIXA",
+          "M5": "NEUTRO",
+          "M15": "NEUTRO",
+          "H1": null
+        },
+        "indicators": {
+          "rsi": 39.55847848438059,
+          "formingRsi": null,
+          "atr": 2.0020012592400867,
+          "ema9": null,
+          "ema20": null,
+          "ema21": null,
+          "ema50": null,
+          "ema200": null,
+          "adx14": null,
+          "volume": null,
+          "volumeSma20": null,
+          "volumeRatio": null,
+          "support": null,
+          "resistance": null
+        },
+        "filters": {},
+        "scores": {
+          "confidence": 62,
+          "buy": null,
+          "sell": null,
+          "score": 62
+        },
+        "setup": {
+          "type": "SELL",
+          "source": "IA",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "rejeição de resistência",
+            "momentum SELL + EMA20/EMA50",
+            "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+          ],
+          "rejectionReasons": [],
+          "tactical": null
+        },
+        "ai": {
+          "mode": "OPORTUNIDADE IA",
+          "score": 62,
+          "pWin": null,
+          "technicalScore": 62,
+          "historicalWinRate": 42,
+          "samples": 242,
+          "probabilityStatus": "não calibrada — requer backtest fora da amostra",
+          "recommendation": "FAVORÁVEL",
+          "opinion": "Oportunidade identificada por score técnico; ainda não existe probabilidade de vitória calibrada.",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "rejeição de resistência",
+            "momentum SELL + EMA20/EMA50",
+            "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+          ],
+          "source": "IA"
+        },
+        "aiOpportunity": true
+      },
+      "indicatorSnapshotVersion": 1,
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-16T15:35:00.000Z",
+      "createdAt": "2026-10-16T15:36:19.568Z",
+      "reentryCount": 0
+    },
     {
       "type": "SELL",
       "score": 0,
