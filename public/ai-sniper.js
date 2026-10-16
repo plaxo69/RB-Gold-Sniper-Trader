@@ -1,11 +1,11 @@
-(()=>{const KEY="rb_gold_sniper_ai_v5",MAX_HISTORY=1000,FILTER_PWIN=.57,FILTER_SCORE=62,MODEL_VERSION="RB-TRADER-PRO-HYBRID-v5";
-const n=(v,d=0)=>Number.isFinite(+v)?+v:d,up=v=>String(v||"").toUpperCase(),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+(()=>{const KEY="rb_gold_sniper_ai_v5",MAX_HISTORY=1000,FILTER_PWIN=.57,FILTER_SCORE=62,MODEL_VERSION="RB-TRADER-PRO-HYBRID-v6";
+const n=(v,d=0)=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(+v)?+v:d,up=v=>String(v||"").toUpperCase(),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function resolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS'].includes(up(t?.status))).slice(0,MAX_HISTORY):[]}catch{return[]}}
 function outcome(s){return up(s)==="WIN"?1:up(s)==="LOSS"?0:.5}
 function direction(a){return up(a?.type)==="SELL"?"SELL":"BUY"}
 function features(a){
  const f=a?.filters||{},t=a?.tactical||{},d=direction(a),r=n(a?.rsi,50),atr=n(a?.atr,0),price=Math.max(n(a?.price,1),1),rr=n(a?.rr1,n(a?.rr,0)),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN),align=[up(a?.trend5),up(a?.trend15),up(a?.trend1)].filter(x=>x===("BUY"===d?"ALTA":"BAIXA")).length;
- return{dir:d==="SELL"?"S":"B",adx14:Number.isFinite(adx)?Math.round(adx*100)/100:null,volume:Number.isFinite(vol)?vol:null,volumeSma20:Number.isFinite(volSma)?volSma:null,volumeAboveSma:Number.isFinite(vol)&&Number.isFinite(volSma)?vol>volSma:null,score:Math.round(n(a?.score,50)/5)*5,rsiBand:r<30?"EXTREME":r<40?"LOW":r<50?"MIDLOW":r<60?"MID":r<70?"GOOD":"HIGH",atrBand:atr/price<.0005?"LOW":atr/price<.001?"NORMAL":atr/price<.002?"HIGH":"VERY_HIGH",align,h1Aligned:up(a?.trendH1)===(d==="BUY"?"ALTA":"BAIXA")?1:0,ema:(d==="BUY"?!!(f.ema200Buy??f.emaBuy):!!(f.ema200Sell??f.emaSell))?1:0,structure:(d==="BUY"?!!f.structuralConfirmBuy:!!f.structuralConfirmSell)?1:0,bos:(d==="BUY"?!!(t.bosBuy||t.chochBuy):!!(t.bosSell||t.chochSell))?1:0,tactical:t.buy?'BUY':t.sell?'SELL':'NONE',retest:(d==="BUY"?!!f.pullbackRetestBuy:!!f.pullbackRetestSell)?1:0,rejection:(d==="BUY"?!!f.rejectionBuy:!!f.rejectionSell)?1:0,continuation:(d==="BUY"?!!f.continuationBuy:!!f.continuationSell)?1:0,body:f.bodyIsDecisive?1:0,close:d==="BUY"?(n(a?.closeLocation,.5)>=.55?1:0):(n(a?.closeLocation,.5)<=.45?1:0),extension:(d==="BUY"?!!f.extensionBuy:!!f.extensionSell)?1:0,rr:rr>=1.5?"GOOD":rr>=1?"OK":"LOW",tp2:a?.tp2Eligible?1:0}
+ return{dir:d==="SELL"?"S":"B",adx14:Number.isFinite(adx)?Math.round(adx*100)/100:null,volume:Number.isFinite(vol)?vol:null,volumeSma20:Number.isFinite(volSma)?volSma:null,volumeAboveSma:Number.isFinite(vol)&&Number.isFinite(volSma)?vol>volSma:null,score:Math.round(n(a?.score,50)/5)*5,rsiBand:r<30?"EXTREME":r<40?"LOW":r<50?"MIDLOW":r<60?"MID":r<70?"GOOD":"HIGH",atrBand:atr/price<.0005?"LOW":atr/price<.001?"NORMAL":atr/price<.002?"HIGH":"VERY_HIGH",align,h1Aligned:up(a?.trendH1)===(d==="BUY"?"ALTA":"BAIXA")?1:0,ema:(d==="BUY"?!!(f.ema200Buy??f.emaBuy):!!(f.ema200Sell??f.emaSell))?1:0,structure:(d==="BUY"?!!f.structuralConfirmBuy:!!f.structuralConfirmSell)?1:0,bos:(d==="BUY"?!!(t.bosBuy||t.chochBuy):!!(t.bosSell||t.chochSell))?1:0,tactical:t.buy?'BUY':t.sell?'SELL':'NONE',retest:(d==="BUY"?!!(f.buyPullback??f.pullbackRetestBuy):!!(f.sellRetest??f.pullbackRetestSell))?1:0,rejection:(d==="BUY"?!!(f.reversalBuy??f.rejectionBuy):!!(f.reversalSell??f.rejectionSell))?1:0,continuation:(d==="BUY"?!!(f.buyContinuation??f.continuationBuy):!!(f.sellContinuation??f.continuationSell))?1:0,body:f.bodyIsDecisive?1:0,close:d==="BUY"?(n(a?.closeLocation,.5)>=.55?1:0):(n(a?.closeLocation,.5)<=.45?1:0),extension:(d==="BUY"?!!f.extensionBuy:!!f.extensionSell)?1:0,rr:rr>=1.5?"GOOD":rr>=1?"OK":"LOW",tp2:a?.tp2Eligible?1:0}
 }
 function signature(f){return [f.dir,f.align,f.rsiBand,f.ema,f.structure,f.bos,f.tactical,f.retest,f.rejection,f.continuation,f.rr].join("|")}
 function rows(){return resolved().map(t=>({f:t.aiFeatures&&t.aiModelVersion===MODEL_VERSION?t.aiFeatures:features(t),y:outcome(t.status),status:up(t.status)}))}
@@ -28,7 +28,7 @@ function technical(a,f){
  return clamp(Math.round(s),0,100)
 }
 function opinion(a,ai,f){
- const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN),trend=f.align===3?"M5/M15/H1 alinhados":f.align===2?"2 timeframes alinhados":"alinhamento parcial";
+ const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN),trend=f.align===3?"M1/M5/M15 alinhados":f.align===2?"2 de 3 timeframes alinhados":"alinhamento parcial";
  const positives=[],warnings=[];
  if(f.align>=2)positives.push(trend);
  if(Number.isFinite(adx))positives.push(`ADX ${adx.toFixed(1)}`);
@@ -45,20 +45,20 @@ function opinion(a,ai,f){
  if(d==="SELL"&&r<=28)warnings.push("RSI perto do limite inferior");if(d==="SELL"&&r<=20)warnings.push("RSI extremamente sobrevendido");
  if(rr<1)warnings.push("RR insuficiente");
  if(!f.structure&&!f.bos)warnings.push("estrutura sem confirmação forte");
- const label=ai.pWin>=70&&ai.score>=70&&!warnings.some(x=>x.includes("extremamente"))?"FORTE":ai.pWin>=57&&ai.score>=62?"FAVORÁVEL":ai.pWin>=48?"CAUTELOSA":"DESFAVORÁVEL";
+ const label=ai.score>=75&&!warnings.some(x=>x.includes("extremamente"))?"FORTE":ai.score>=62?"FAVORÁVEL":ai.score>=48?"CAUTELOSA":"DESFAVORÁVEL";
  const text=positives.slice(0,3).join(", ")+(warnings.length?" | Atenção: "+warnings.slice(0,2).join(", "):"");
  return{label,text:text||"Sinal técnico válido; IA sem evidência adicional suficiente."}
 }
 function evaluate(a){
  if(!a||!["BUY","SELL"].includes(up(a.type)))return{mode:"WAIT",score:0,pWin:null,samples:0,approved:false,recommendation:"SEM OPINIÃO",opinion:"Sem sinal base.",reasons:["sem sinal base"]};
- const f=features(a),rs=rows(),h=historical(f,rs),tech=technical(a,f),pWin=clamp(Math.round((h.p*.55+(tech/100)*.45)*100),5,95),score=clamp(Math.round((h.pWin??pWin)*.55+tech*.45),0,100);
+ const f=features(a),rs=rows(),h=historical(f,rs),tech=technical(a,f),pWin=null,score=tech;
  const op=opinion(a,{pWin,score},f),reasons=[];
  if(h.setupSamples<3)reasons.push("poucos casos históricos do setup");
  if(f.align<2)reasons.push("alinhamento parcial");if(!f.h1Aligned)reasons.push("H1 contra a direção");if((direction(a)==="SELL"&&n(a?.rsi,50)<=20)||(direction(a)==="BUY"&&n(a?.rsi,50)<30))reasons.push("RSI extremo contra a entrada");
  if(f.extension)reasons.push("extensão elevada");
  if(!f.structure&&!f.bos)reasons.push("estrutura sem confirmação forte");
  if(rrSafe(a)<1)reasons.push("RR abaixo de 1");
- return{mode:"OPINIÃO",score,pWin,samples:rs.length,setupSamples:h.setupSamples,directionSamples:h.directionSamples,approved:pWin>=FILTER_PWIN&&score>=FILTER_SCORE,recommendation:op.label,opinion:op.text,reasons:reasons.length?reasons:["IA considera o setup tecnicamente coerente"],aiFeatures:f,baseWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):50,featuresUsed:Object.keys(f).length,modelVersion:MODEL_VERSION};
+ return{mode:"OPINIÃO",score,technicalScore:tech,pWin,probabilityStatus:"não calibrada — requer backtest fora da amostra",samples:rs.length,setupSamples:h.setupSamples,directionSamples:h.directionSamples,approved:score>=FILTER_SCORE,recommendation:op.label,opinion:op.text,reasons:reasons.length?reasons:["IA considera o setup tecnicamente coerente"],aiFeatures:f,historicalWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):null,featuresUsed:Object.keys(f).length,modelVersion:MODEL_VERSION};
 }
 function candleSeries(xs){return Array.isArray(xs)?xs.filter(c=>Number.isFinite(+c?.close)&&Number.isFinite(+c?.high)&&Number.isFinite(+c?.low)):[]}
 function ema(xs,p){const a=candleSeries(xs);if(a.length<p)return NaN;let e=a.slice(0,p).reduce((s,c)=>s+Number(c.close),0)/p,k=2/(p+1);for(let i=p;i<a.length;i++)e=Number(a[i].close)*k+e*(1-k);return e}
@@ -69,7 +69,7 @@ function tfDir(xs){const a=candleSeries(xs);if(a.length<55)return null;const c=N
 function independentOpportunity(ctx){
  const m1=candleSeries(ctx?.m1),m5=candleSeries(ctx?.m5),m15=candleSeries(ctx?.m15);if(m1.length<80||m5.length<55||m15.length<55)return null;
  const series=m1.slice(0,-1);if(series.length<80)return null;const a=series.at(-1),prev=series.at(-2),entry=Number(a.close),atr=atrSeries(series,14),r=rsiSeries(series,14),adx=adxSeries(series,14),e20=ema(series,20),e50=ema(series,50);if(!Number.isFinite(entry)||!Number.isFinite(atr)||atr<=0||!Number.isFinite(r)||!Number.isFinite(adx)||adx<=22||!Number.isFinite(e20)||!Number.isFinite(e50))return null;
- const dirs=[tfDir(m1),tfDir(m5),tfDir(m15)],hi=dirs.filter(x=>x==='BUY').length,lo=dirs.filter(x=>x==='SELL').length;
+ const dirs=[tfDir(m1.slice(0,-1)),tfDir(m5.slice(0,-1)),tfDir(m15.slice(0,-1))],hi=dirs.filter(x=>x==='BUY').length,lo=dirs.filter(x=>x==='SELL').length;
  const look=series.slice(-21,-1),recentHigh=look.length?Math.max(...look.map(c=>Number(c.high))):NaN,recentLow=look.length?Math.min(...look.map(c=>Number(c.low))):NaN;
  const body=Math.abs(Number(a.close)-Number(a.open||a.close)),range=Math.max(Number(a.high)-Number(a.low),0.0001),closePos=(entry-Number(a.low))/range,vols=series.slice(-20).map(c=>Number(c.volume)).filter(Number.isFinite),volNow=Number(a.volume),volAvg=vols.length>=10?vols.reduce((s,v)=>s+v,0)/vols.length:NaN,volStrong=Number.isFinite(volNow)&&Number.isFinite(volAvg)&&volAvg>0&&volNow>volAvg*1.05;
  const upper=Number(a.high)-Math.max(entry,Number(a.open||entry)),lower=Math.min(entry,Number(a.open||entry))-Number(a.low);
@@ -82,14 +82,27 @@ function independentOpportunity(ctx){
  if(score<62||confirmations<2)return null;if((dir==='BUY'&&(r<=60||r>=75))||(dir==='SELL'&&(r<=35||r>=40)))return null;if(!Number.isFinite(volNow)||!Number.isFinite(volAvg)||volAvg<=0||volNow<=volAvg)return null;
  const swing=dir==='BUY'?Math.min(...series.slice(-12).map(c=>Number(c.low))):Math.max(...series.slice(-12).map(c=>Number(c.high)));
  const structuralRisk=Math.abs(entry-swing)+atr*.15,maxRisk=atr*1.50;if(!Number.isFinite(structuralRisk)||structuralRisk>maxRisk)return null;const risk=Math.min(maxRisk,Math.max(atr*.80,structuralRisk)),sl=dir==='BUY'?entry-risk:entry+risk,tp=dir==='BUY'?entry+risk*1.50:entry-risk*1.50;
- const hist=resolved(),base=hist.length?hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length:.5,technical=score/100,pWin=clamp(Math.round((base*.35+technical*.65)*100),0,88);if(pWin<57)return null;
+ const hist=resolved(),historicalWinRate=hist.length?Math.round(hist.reduce((s,t)=>s+outcome(t.status),0)/hist.length*100):null,technicalScore=score;if(technicalScore<FILTER_SCORE)return null;
  const ts=a.timestamp||new Date().toISOString(),reasons=[];reasons.push(tfCount>=3?'M1/M5/M15 alinhados':'2 de 3 timeframes M1/M5/M15 alinhados');
  if(dir==='BUY'&&(breakoutBuy||rejectBuy))reasons.push(breakoutBuy?'rompimento de resistência':'rejeição de suporte');
  if(dir==='SELL'&&(breakoutSell||rejectSell))reasons.push(breakoutSell?'rompimento de suporte':'rejeição de resistência');
  reasons.push(dir==='BUY'?'momentum BUY + EMA20/EMA50':'momentum SELL + EMA20/EMA50');reasons.push('ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20');
- return{type:dir,source:'IA',signalKind:'IA',signalTimestamp:new Date(ts).toISOString(),price:entry,tp,sl,rr:1.5,rr1:1.5,atr,rsi:r,trend1:dirs[0]==='BUY'?'ALTA':dirs[0]==='SELL'?'BAIXA':'NEUTRO',trend5:dirs[1]==='BUY'?'ALTA':dirs[1]==='SELL'?'BAIXA':'NEUTRO',trend15:dirs[2]==='BUY'?'ALTA':dirs[2]==='SELL'?'BAIXA':'NEUTRO',confidence:pWin,score,reasons,setupState:'IA_OPORTUNIDADE',ai:{mode:'OPORTUNIDADE IA',score,pWin,samples:hist.length,recommendation:pWin>=70?'FORTE':'FAVORÁVEL',opinion:'A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.',reasons,source:'IA'},aiOpportunity:true,aiModelVersion:MODEL_VERSION};
+ return{type:dir,source:'IA',signalKind:'IA',signalTimestamp:new Date(ts).toISOString(),price:entry,tp,sl,rr:1.5,rr1:1.5,atr,rsi:r,trend1:dirs[0]==='BUY'?'ALTA':dirs[0]==='SELL'?'BAIXA':'NEUTRO',trend5:dirs[1]==='BUY'?'ALTA':dirs[1]==='SELL'?'BAIXA':'NEUTRO',trend15:dirs[2]==='BUY'?'ALTA':dirs[2]==='SELL'?'BAIXA':'NEUTRO',confidence:technicalScore,score:technicalScore,technicalScore,probabilityStatus:'não calibrada — requer backtest fora da amostra',historicalWinRate,aiFeatures:{technicalScore,dir,tfCount,confirmations,rsi:r,adx14:adx,volume:volNow,volumeSma20:volAvg},reasons,setupState:'IA_OPORTUNIDADE',ai:{mode:'OPORTUNIDADE IA',score:technicalScore,pWin:null,technicalScore,historicalWinRate,samples:hist.length,probabilityStatus:'não calibrada — requer backtest fora da amostra',recommendation:technicalScore>=75?'FORTE':'FAVORÁVEL',opinion:'Oportunidade identificada por score técnico; ainda não existe probabilidade de vitória calibrada.',reasons,source:'IA'},aiOpportunity:true,aiModelVersion:MODEL_VERSION};
 }
 function rrSafe(a){return n(a?.rr1,n(a?.rr,0))}
 function attach(a,ctx){if(!a)return a;if(["BUY","SELL"].includes(up(a.type))){const x=evaluate(a);return{...a,ai:x,aiScore:x.score,aiWinRate:x.pWin,aiOpinion:x.opinion,aiRecommendation:x.recommendation,aiFeatures:x.aiFeatures,aiModelVersion:MODEL_VERSION}}const opp=independentOpportunity(ctx);return{...a,aiOpportunity:opp,ai:opp?.ai||{mode:"OPINIÃO",score:0,pWin:null,samples:resolved().length,recommendation:"SEM OPORTUNIDADE",opinion:"A IA está a analisar o mercado independentemente dos filtros.",reasons:[]},aiModelVersion:MODEL_VERSION}}
-function learn(){const rs=rows();return{samples:rs.length,baseWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):50,trained:rs.length>0,modelVersion:MODEL_VERSION}}
-window.RBTraderProAI={evaluate,attach,independentOpportunity,learn,features,constants:{FILTER_PWIN,FILTER_SCORE,MAX_HISTORY,KEY,MODEL:MODEL_VERSION}};learn()})();
+function auditHistory(){
+ const trades=resolved(),groups={};
+ const add=(name,key,t)=>{const id=String(key??"indisponível");groups[name]??={};groups[name][id]??={samples:0,wins:0,losses:0};const b=groups[name][id];b.samples++;if(up(t.status)==="WIN")b.wins++;else if(up(t.status)==="LOSS")b.losses++};
+ for(const t of trades){
+  const f=t.aiFeatures&&t.aiModelVersion===MODEL_VERSION?t.aiFeatures:features(t),ts=Date.parse(t.signalTimestamp||t.time||t.createdAt||"");
+  const rsi=n(t.rsi,NaN),adx=n(t.adx14,NaN),confidence=n(t.ai?.score??t.technicalScore??t.confidence,NaN),hour=Number.isFinite(ts)?Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Lisbon",hour:"2-digit",hourCycle:"h23"}).format(new Date(ts))):NaN;
+  const source=up(t.source||t.signalKind||t.ai?.source||"SNIPER"),direction=up(t.type||f.dir),rsiBand=Number.isFinite(rsi)?rsi<35?"RSI<35":rsi<40?"RSI 35-39":rsi<60?"RSI 40-59":rsi<75?"RSI 60-74":"RSI>=75":"indisponível",adxBand=Number.isFinite(adx)?adx<20?"ADX<20":adx<25?"ADX 20-24":"ADX>=25":"indisponível",volume=Number.isFinite(+t.volume)&&Number.isFinite(+t.volumeSma20)?(+t.volume>+t.volumeSma20?"volume>SMA20":"volume<=SMA20"):"volume indisponível",alignment=Number.isFinite(+f.align)?String(f.align)+"/3 alinhados":"alinhamento indisponível",session=Number.isFinite(hour)?hour<8?"Lisboa 00-07":hour<14?"Lisboa 08-13":hour<21?"Lisboa 14-20":"Lisboa 21-23":"hora indisponível",confidenceBand=Number.isFinite(confidence)?confidence<50?"score<50":confidence<62?"score 50-61":confidence<75?"score 62-74":"score>=75":"score indisponível";
+  add("source",source,t);add("direction",direction,t);add("confidenceBand",confidenceBand,t);add("rsiBand",rsiBand,t);add("adxBand",adxBand,t);add("volume",volume,t);add("alignment",alignment,t);add("sessionLisbon",session,t);
+ }
+ const summarize=map=>Object.fromEntries(Object.entries(map).map(([k,v])=>[k,{...v,winRate:v.samples?Math.round(v.wins/v.samples*1000)/10:null}]));
+ const wins=trades.filter(t=>up(t.status)==="WIN").length;
+ return{samples:trades.length,wins,losses:trades.length-wins,winRate:trades.length?Math.round(wins/trades.length*1000)/10:null,bySource:summarize(groups.source||{}),byDirection:summarize(groups.direction||{}),byConfidence:summarize(groups.confidenceBand||{}),byRsiBand:summarize(groups.rsiBand||{}),byAdxBand:summarize(groups.adxBand||{}),byVolume:summarize(groups.volume||{}),byAlignment:summarize(groups.alignment||{}),bySessionLisbon:summarize(groups.sessionLisbon||{}),note:"Análise descritiva do histórico resolvido; não é backtest fora da amostra nem probabilidade calibrada."};
+}
+function learn(){const rs=rows();return{samples:rs.length,baseWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):null,trained:rs.length>0,modelVersion:MODEL_VERSION}}
+window.RBTraderProAI={evaluate,attach,independentOpportunity,learn,auditHistory,features,constants:{FILTER_PWIN,FILTER_SCORE,MAX_HISTORY,KEY,MODEL:MODEL_VERSION}};learn()})();
