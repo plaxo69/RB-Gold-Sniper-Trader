@@ -45,3 +45,8 @@ test('histórico consegue construir fotografia para registos antigos com indicad
   assert.match(ui, /function legacySnapshot\(t\)/);
   assert.match(ui, /t\.indicatorSnapshot\|\|legacySnapshot\(t\)/);
 });
+
+test('build valida Worker com sintaxe de módulo ES', async () => {
+  const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  assert.match(pkg.scripts.build, /--experimental-default-type=module --check worker\.js/);
+});
