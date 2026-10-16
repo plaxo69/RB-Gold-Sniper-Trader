@@ -37,4 +37,5 @@ test('HTML carrega a versão atual do motor Sniper', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
   assert.match(html, /sniper-v2\.js\?v=19/);
   assert.doesNotMatch(html, /sniper-v2\.js\?v=18/);
+  assert.match(html, /history-ui\.js\?v=9/);
 });
