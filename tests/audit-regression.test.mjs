@@ -39,7 +39,7 @@ test('a interface escapa texto dinâmico do histórico e da IA', async () => {
   const ui = await read('../public/history-ui.js');
   assert.match(ui, /escapeHtml\(ai\.opinion\)/);
   assert.match(ui, /escapeHtml\(aiLabel\)/);
-  assert.match(ui, /escapeHtml\(JSON\.stringify\(t\.indicatorSnapshot,null,2\)\)/);
+  assert.match(ui, /escapeHtml\(JSON\.stringify\((s|t\.indicatorSnapshot),null,2\)\)/);
 });
 
 test('os scripts corrigidos usam versões de cache novas', async () => {
