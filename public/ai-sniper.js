@@ -28,7 +28,7 @@ function technical(a,f){
  return clamp(Math.round(s),0,100)
 }
 function opinion(a,ai,f){
- const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN),trend=f.align===3?"M5/M15/H1 alinhados":f.align===2?"2 timeframes alinhados":"alinhamento parcial";
+ const d=direction(a),r=n(a?.rsi,50),rr=n(a?.rr1,n(a?.rr,0)),adx=n(a?.adx14,NaN),vol=n(a?.volume,NaN),volSma=n(a?.volumeSma20,NaN),trend=f.align===3?"M1/M5/M15 alinhados":f.align===2?"2 de 3 timeframes alinhados":"alinhamento parcial";
  const positives=[],warnings=[];
  if(f.align>=2)positives.push(trend);
  if(Number.isFinite(adx))positives.push(`ADX ${adx.toFixed(1)}`);
@@ -45,7 +45,7 @@ function opinion(a,ai,f){
  if(d==="SELL"&&r<=28)warnings.push("RSI perto do limite inferior");if(d==="SELL"&&r<=20)warnings.push("RSI extremamente sobrevendido");
  if(rr<1)warnings.push("RR insuficiente");
  if(!f.structure&&!f.bos)warnings.push("estrutura sem confirmação forte");
- const label=ai.pWin>=70&&ai.score>=70&&!warnings.some(x=>x.includes("extremamente"))?"FORTE":ai.pWin>=57&&ai.score>=62?"FAVORÁVEL":ai.pWin>=48?"CAUTELOSA":"DESFAVORÁVEL";
+ const label=ai.score>=75&&!warnings.some(x=>x.includes("extremamente"))?"FORTE":ai.score>=62?"FAVORÁVEL":ai.score>=48?"CAUTELOSA":"DESFAVORÁVEL";
  const text=positives.slice(0,3).join(", ")+(warnings.length?" | Atenção: "+warnings.slice(0,2).join(", "):"");
  return{label,text:text||"Sinal técnico válido; IA sem evidência adicional suficiente."}
 }
@@ -91,5 +91,18 @@ function independentOpportunity(ctx){
 }
 function rrSafe(a){return n(a?.rr1,n(a?.rr,0))}
 function attach(a,ctx){if(!a)return a;if(["BUY","SELL"].includes(up(a.type))){const x=evaluate(a);return{...a,ai:x,aiScore:x.score,aiWinRate:x.pWin,aiOpinion:x.opinion,aiRecommendation:x.recommendation,aiFeatures:x.aiFeatures,aiModelVersion:MODEL_VERSION}}const opp=independentOpportunity(ctx);return{...a,aiOpportunity:opp,ai:opp?.ai||{mode:"OPINIÃO",score:0,pWin:null,samples:resolved().length,recommendation:"SEM OPORTUNIDADE",opinion:"A IA está a analisar o mercado independentemente dos filtros.",reasons:[]},aiModelVersion:MODEL_VERSION}}
-function learn(){const rs=rows();return{samples:rs.length,baseWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):50,trained:rs.length>0,modelVersion:MODEL_VERSION}}
-window.RBTraderProAI={evaluate,attach,independentOpportunity,learn,features,constants:{FILTER_PWIN,FILTER_SCORE,MAX_HISTORY,KEY,MODEL:MODEL_VERSION}};learn()})();
+function auditHistory(){
+ const trades=resolved(),groups={};
+ const add=(name,key,t)=>{const id=String(key??"indisponível");groups[name]??={};groups[name][id]??={samples:0,wins:0,losses:0};const b=groups[name][id];b.samples++;if(up(t.status)==="WIN")b.wins++;else if(up(t.status)==="LOSS")b.losses++};
+ for(const t of trades){
+  const f=t.aiFeatures&&t.aiModelVersion===MODEL_VERSION?t.aiFeatures:features(t),ts=Date.parse(t.signalTimestamp||t.time||t.createdAt||"");
+  const rsi=n(t.rsi,NaN),adx=n(t.adx14,NaN),hour=Number.isFinite(ts)?Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Lisbon",hour:"2-digit",hourCycle:"h23"}).format(new Date(ts))):NaN;
+  const source=up(t.source||t.signalKind||t.ai?.source||"SNIPER"),direction=up(t.type||f.dir),rsiBand=Number.isFinite(rsi)?rsi<35?"RSI<35":rsi<40?"RSI 35-39":rsi<60?"RSI 40-59":rsi<75?"RSI 60-74":"RSI>=75":"indisponível",adxBand=Number.isFinite(adx)?adx<20?"ADX<20":adx<25?"ADX 20-24":"ADX>=25":"indisponível",volume=Number.isFinite(+t.volume)&&Number.isFinite(+t.volumeSma20)?(+t.volume>+t.volumeSma20?"volume>SMA20":"volume<=SMA20"):"volume indisponível",alignment=Number.isFinite(+f.align)?String(f.align)+"/3 alinhados":"alinhamento indisponível",session=Number.isFinite(hour)?hour<8?"Lisboa 00-07":hour<14?"Lisboa 08-13":hour<21?"Lisboa 14-20":"Lisboa 21-23":"hora indisponível";
+  add("source",source,t);add("direction",direction,t);add("rsiBand",rsiBand,t);add("adxBand",adxBand,t);add("volume",volume,t);add("alignment",alignment,t);add("sessionLisbon",session,t);
+ }
+ const summarize=map=>Object.fromEntries(Object.entries(map).map(([k,v])=>[k,{...v,winRate:v.samples?Math.round(v.wins/v.samples*1000)/10:null}]));
+ const wins=trades.filter(t=>up(t.status)==="WIN").length;
+ return{samples:trades.length,wins,losses:trades.length-wins,winRate:trades.length?Math.round(wins/trades.length*1000)/10:null,bySource:summarize(groups.source||{}),byDirection:summarize(groups.direction||{}),byRsiBand:summarize(groups.rsiBand||{}),byAdxBand:summarize(groups.adxBand||{}),byVolume:summarize(groups.volume||{}),byAlignment:summarize(groups.alignment||{}),bySessionLisbon:summarize(groups.sessionLisbon||{}),note:"Análise descritiva do histórico resolvido; não é backtest fora da amostra nem probabilidade calibrada."};
+}
+function learn(){const rs=rows();return{samples:rs.length,baseWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):null,trained:rs.length>0,modelVersion:MODEL_VERSION}}
+window.RBTraderProAI={evaluate,attach,independentOpportunity,learn,auditHistory,features,constants:{FILTER_PWIN,FILTER_SCORE,MAX_HISTORY,KEY,MODEL:MODEL_VERSION}};learn()})();
