@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-16T10:52:35.639Z",
+  "exportedAt": "2026-10-16T10:55:35.671Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 266,
@@ -373,16 +373,18 @@
       "indicatorSnapshotVersion": 1,
       "key": "SELL-2026-10-16T10:49:00.000Z",
       "signalKey": "SELL-2026-10-16T10:49:00.000Z",
-      "status": "ALERTA",
+      "status": "WIN",
       "time": "2026-10-16T10:49:00.000Z",
       "createdAt": "2026-10-16T10:50:18.597Z",
       "reentryCount": 0,
       "beAlerted": true,
-      "beArmed": false,
       "bePushSent": false,
       "beTriggeredAt": "2026-10-16T10:50:00.000Z",
       "beTriggerPrice": 4177.126,
-      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta."
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta.",
+      "resolvedAt": "2026-10-16T10:54:00.000Z",
+      "outcomeReason": "TP atingido",
+      "beArmed": false
     },
     {
       "type": "BUY",
