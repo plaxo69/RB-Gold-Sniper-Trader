@@ -46,6 +46,20 @@ test('histórico consegue construir fotografia para registos antigos com indicad
   assert.match(ui, /t\.indicatorSnapshot\|\|legacySnapshot\(t\)/);
 });
 
+test('cache do histórico inclui a versão atual da sincronização', async () => {
+  const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
+  assert.match(html, /history-v2\.js\?v=9/);
+});
+
+test('sincronização preserva o primeiro resultado final em conflitos', async () => {
+  const history = await readFile(new URL('../public/history-v2.js', import.meta.url), 'utf8');
+  const ui = await readFile(new URL('../public/history-ui.js', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../worker.js', import.meta.url), 'utf8');
+  assert.match(history, /chosen\.status=prev\.status/);
+  assert.match(ui, /chosen\.status=prev\.status/);
+  assert.match(worker, /chosen\.status=old\.status/);
+});
+
 test('build valida Worker com sintaxe de módulo ES', async () => {
   const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
   assert.match(pkg.scripts.build, /--experimental-default-type=module --check worker\.js/);
