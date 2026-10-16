@@ -178,3 +178,30 @@ test('breakdown SELL não usa o máximo distante do histórico como stop', () =>
   assert.ok(Math.abs(result.price-result.sl)/result.atr<=1.5);
   assert.equal(result.rr,2);
 });
+
+
+test('motor aceita reversão BUY com RSI 30–50 e rejeição no suporte', () => {
+  const main=syntheticCandles(230,i=>{const close=2000+Math.sin(i*.45)*2;return{open:close-.15,close,high:close+.45,low:close-.45};});
+  const j=main.length-2, support=Math.min(...main.slice(j-20,j).map(x=>x.low));
+  main[j]={...main[j],open:support+.2,low:support-.5,close:support+1,high:support+1.1,volume:180};
+  main[j+1]={...main[j+1],open:main[j].close,low:main[j].close-.1,high:main[j].close+.1,close:main[j].close,volume:180};
+  const tf=syntheticCandles(70,i=>{const close=2000+Math.sin(i*.45)*2;return{open:close-.15,close,high:close+.45,low:close-.45};});
+  const result=sniper.analyze(main,tf,tf,[]);
+  assert.equal(result.type,'BUY');
+  assert.equal(result.tactical.buy,'REVERSÃO + REJEIÇÃO NO SUPORTE');
+  assert.ok(result.rsi>=30&&result.rsi<=50);
+  assert.ok(Math.abs(result.price-result.sl)/result.atr<=1.5);
+});
+
+test('motor aceita reversão SELL com RSI 67–72 e rejeição na resistência', () => {
+  const main=syntheticCandles(230,i=>{const close=2000+i*.15+Math.sin(i*.5)*1.5;return{open:close-.1,close,high:close+.35,low:close-.35};});
+  const j=main.length-2, resistance=Math.max(...main.slice(j-20,j).map(x=>x.high));
+  main[j]={...main[j],open:resistance,high:resistance+.45,low:resistance-.5,close:resistance-.35,volume:150};
+  main[j+1]={...main[j+1],open:main[j].close,high:main[j].close+.1,low:main[j].close-.1,close:main[j].close,volume:150};
+  const tf=syntheticCandles(70,i=>{const close=2000+i*.15+Math.sin(i*.5)*1.5;return{open:close-.1,close,high:close+.35,low:close-.35};});
+  const result=sniper.analyze(main,tf,tf,[]);
+  assert.equal(result.type,'SELL');
+  assert.equal(result.tactical.sell,'REVERSÃO + REJEIÇÃO NA RESISTÊNCIA');
+  assert.ok(result.rsi>=67&&result.rsi<=72);
+  assert.ok(Math.abs(result.price-result.sl)/result.atr<=1.5);
+});
