@@ -86,6 +86,9 @@ test("independent AI uses closed candles for timeframe direction", () => {
 });
 
 test("history does not render null probability as 0% and shows technical score instead", () => {
-  assert.match(read("public/history-ui.js"), /ai\.pWin!==null&&ai\.pWin!==undefined/);
-  assert.match(read("public/history-ui.js"), /score técnico/);
+  const ui = read("public/history-ui.js");
+  assert.match(ui, /ai\.probabilityStatus==="calibrated"/);
+  assert.match(ui, /ai\.pWin!==null&&ai\.pWin!==undefined/);
+  assert.doesNotMatch(ui, /t\.aiWinRate/);
+  assert.match(ui, /score técnico/);
 });
