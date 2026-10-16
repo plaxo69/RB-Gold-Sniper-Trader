@@ -35,10 +35,19 @@ test('alvos mantêm RR 1:2 e 1:3 quando não há zona impeditiva', () => {
   assert.equal(result.tp2, 106);
 });
 
+test('motor limita breakouts tardios e aplica filtro de extensão', async () => {
+  const source = await readFile(new URL('../public/sniper-v2.js', import.meta.url), 'utf8');
+  assert.match(source, /maxBreakAtr:1\.25/);
+  assert.match(source, /maxRetestExtensionAtr:1\.5/);
+  assert.match(source, /buySetup=atrOK&&extensionBuy/);
+  assert.match(source, /sellSetup=atrOK&&extensionSell/);
+  assert.match(source, /tb\.direct&&directBuyQuality&&closeQualityBuy/);
+});
+
 test('HTML carrega a versão atual do motor Sniper', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
-  assert.match(html, /sniper-v2\.js\?v=20/);
-  assert.doesNotMatch(html, /sniper-v2\.js\?v=19/);
+  assert.match(html, /sniper-v2\.js\?v=21/);
+  assert.doesNotMatch(html, /sniper-v2\.js\?v=20/);
   assert.match(html, /history-ui\.js\?v=10/);
 });
 
@@ -87,6 +96,15 @@ test('TP e SL no mesmo candle é LOSS conservador para BUY e SELL', () => {
   assert.match(buy.reason, /mesmo candle/);
   assert.equal(sell.result, 'LOSS');
   assert.match(sell.reason, /mesmo candle/);
+});
+
+test('ordena candles por timestamp antes de resolver TP/SL', () => {
+  const result = outcome('BUY', 98, 104, [
+    {timestamp:'2026-10-16T10:02:00Z',high:105,low:99},
+    {timestamp:'2026-10-16T10:01:00Z',high:103,low:97}
+  ]);
+  assert.equal(result.result, 'LOSS');
+  assert.equal(result.when, '2026-10-16T10:01:00Z');
 });
 
 test('não inventa resultado se nenhum alvo for atingido', () => {
