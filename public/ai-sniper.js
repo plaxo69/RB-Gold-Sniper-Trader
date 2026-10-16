@@ -40,12 +40,12 @@ function opinion(a,ai,f){
  if(f.body&&f.close)positives.push("vela com boa força");
  if(rr>=1.5)positives.push("RR favorável");
  if(f.align<2)warnings.push("alinhamento incompleto");
- if(f.extension)warnings.push("preço já estendido");
+ if(!f.extension)warnings.push("preço estendido ou filtro indisponível");
  if(d==="BUY"&&r>=72)warnings.push("RSI perto do limite superior");if(d==="BUY"&&r<30)warnings.push("RSI extremamente sobrevendido");
  if(d==="SELL"&&r<=28)warnings.push("RSI perto do limite inferior");if(d==="SELL"&&r<=20)warnings.push("RSI extremamente sobrevendido");
  if(rr<1)warnings.push("RR insuficiente");
  if(!f.structure&&!f.bos)warnings.push("estrutura sem confirmação forte");
- const label=ai.score>=75&&!warnings.some(x=>x.includes("extremamente"))?"FORTE":ai.score>=62?"FAVORÁVEL":ai.score>=48?"CAUTELOSA":"DESFAVORÁVEL";
+ const coreFiltersPass=f.align===3&&f.ema===1&&f.extension===1&&Number.isFinite(adx)&&adx>22&&Number.isFinite(vol)&&Number.isFinite(volSma)&&vol>volSma;const label=ai.score>=75&&coreFiltersPass&&warnings.length===0?"FORTE":ai.score>=62&&coreFiltersPass?"FAVORÁVEL":ai.score>=48?"CAUTELOSA":"DESFAVORÁVEL";
  const text=positives.slice(0,3).join(", ")+(warnings.length?" | Atenção: "+warnings.slice(0,2).join(", "):"");
  return{label,text:text||"Sinal técnico válido; IA sem evidência adicional suficiente."}
 }
@@ -55,7 +55,7 @@ function evaluate(a){
  const op=opinion(a,{pWin,score},f),reasons=[];
  if(h.setupSamples<3)reasons.push("poucos casos históricos do setup");
  if(f.align<2)reasons.push("alinhamento parcial");if(!f.h1Aligned)reasons.push("H1 contra a direção");if((direction(a)==="SELL"&&n(a?.rsi,50)<=20)||(direction(a)==="BUY"&&n(a?.rsi,50)<30))reasons.push("RSI extremo contra a entrada");
- if(f.extension)reasons.push("extensão elevada");
+ if(!f.extension)reasons.push("extensão elevada ou filtro indisponível");
  if(!f.structure&&!f.bos)reasons.push("estrutura sem confirmação forte");
  if(rrSafe(a)<1)reasons.push("RR abaixo de 1");
  return{mode:"OPINIÃO",score,technicalScore:tech,pWin,probabilityStatus:"não calibrada — requer backtest fora da amostra",samples:rs.length,setupSamples:h.setupSamples,directionSamples:h.directionSamples,approved:score>=FILTER_SCORE,recommendation:op.label,opinion:op.text,reasons:reasons.length?reasons:["IA considera o setup tecnicamente coerente"],aiFeatures:f,historicalWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):null,featuresUsed:Object.keys(f).length,modelVersion:MODEL_VERSION};
