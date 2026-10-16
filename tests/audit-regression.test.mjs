@@ -45,8 +45,8 @@ test('a interface escapa texto dinâmico do histórico e da IA', async () => {
 test('os scripts corrigidos usam versões de cache novas', async () => {
   const html = await read('../public/index.html');
   assert.match(html, /history-v2\.js\?v=8/);
-  assert.match(html, /app-v4\.js\?v=15/);
-  assert.match(html, /history-ui\.js\?v=7/);
+  assert.match(html, /app-v4\.js\?v=16/);
+  assert.match(html, /history-ui\.js\?v=8/);
   assert.match(html, /sniper-v2\.js\?v=18/);
   assert.match(html, /ai-sniper\.js\?v=11/);
 });
