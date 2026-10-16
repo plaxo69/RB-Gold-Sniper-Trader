@@ -40,13 +40,13 @@ test('motor limita breakouts tardios e aplica filtro de extensão', async () => 
   assert.match(source, /maxBreakAtr:1\.25/);
   assert.match(source, /maxRetestExtensionAtr:1\.5/);
   assert.match(source, /buySetup=atrOK&&adxOK&&volumeOK&&buyTF&&emaBuy&&extensionBuy/);
-  assert.match(source, /sellSetup=atrOK&&extensionSell/);
+  assert.match(source, /sellSetup=atrOK&&adxOK&&volumeOK&&sellTF&&emaSell&&extensionSell/);
   assert.match(source, /tb\.direct&&directBuyQuality&&closeQualityBuy/);
 });
 
 test('HTML carrega a versão atual do motor Sniper', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
-  assert.match(html, /sniper-v2\.js\?v=21/);
+  assert.match(html, /sniper-v2\.js\?v=22/);
   assert.doesNotMatch(html, /sniper-v2\.js\?v=20/);
   assert.match(html, /history-ui\.js\?v=10/);
 });
