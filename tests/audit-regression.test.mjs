@@ -39,14 +39,16 @@ test('a interface escapa texto dinâmico do histórico e da IA', async () => {
   const ui = await read('../public/history-ui.js');
   assert.match(ui, /escapeHtml\(ai\.opinion\)/);
   assert.match(ui, /escapeHtml\(aiLabel\)/);
-  assert.match(ui, /escapeHtml\(JSON\.stringify\(t\.indicatorSnapshot,null,2\)\)/);
+  assert.match(ui, /escapeHtml\(JSON\.stringify\((s|t\.indicatorSnapshot),null,2\)\)/);
 });
 
 test('os scripts corrigidos usam versões de cache novas', async () => {
   const html = await read('../public/index.html');
   assert.match(html, /history-v2\.js\?v=8/);
-  assert.match(html, /app-v4\.js\?v=14/);
-  assert.match(html, /history-ui\.js\?v=6/);
+  assert.match(html, /app-v4\.js\?v=16/);
+  assert.match(html, /history-ui\.js\?v=8/);
+  assert.match(html, /sniper-v2\.js\?v=18/);
+  assert.match(html, /ai-sniper\.js\?v=11/);
 });
 
 test('o Worker preserva a fotografia ao gravar resultados no GitHub', async () => {
