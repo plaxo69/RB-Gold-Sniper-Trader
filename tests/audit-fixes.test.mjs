@@ -50,7 +50,7 @@ test('histórico consegue construir fotografia para registos antigos com indicad
 
 test('cache do histórico inclui a versão atual da sincronização', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
-  assert.match(html, /history-v2\.js\?v=9/);
+  assert.match(html, /history-v2\\.js\\?v=10/);
 });
 
 test('sincronização preserva o primeiro resultado final em conflitos', async () => {
