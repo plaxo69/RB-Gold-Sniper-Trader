@@ -37,8 +37,8 @@ test('alvos mantêm RR 1:2 e 1:3 quando não há zona impeditiva', () => {
 
 test('HTML carrega a versão atual do motor Sniper', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
-  assert.match(html, /sniper-v2\.js\?v=19/);
-  assert.doesNotMatch(html, /sniper-v2\.js\?v=18/);
+  assert.match(html, /sniper-v2\.js\?v=20/);
+  assert.doesNotMatch(html, /sniper-v2\.js\?v=19/);
   assert.match(html, /history-ui\.js\?v=10/);
 });
 
