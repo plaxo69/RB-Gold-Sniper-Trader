@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-16T18:27:51.718Z",
+  "exportedAt": "2026-10-16T18:28:35.223Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 280,
@@ -366,7 +366,11 @@
       "status": "ALERTA",
       "time": "2026-10-16T18:20:00.000Z",
       "createdAt": "2026-10-16T18:21:19.783Z",
-      "reentryCount": 0
+      "reentryCount": 0,
+      "beAlerted": true,
+      "beTriggeredAt": "2026-10-16T18:28:00.000Z",
+      "beTriggerPrice": 4159.465,
+      "beAlertMessage": "Zona BE atingida — considerar mover SL para a entrada; trade continua aberta."
     },
     {
       "type": "BUY",
