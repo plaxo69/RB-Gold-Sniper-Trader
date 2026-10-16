@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 await import('../public/sniper-v2.js');
+await import('../public/trade-outcome.js');
+const outcome = globalThis.RBTradeOutcome.resolveTradeOutcome;
 const sniper = globalThis.RBGoldSniper;
 
 test('RSI neutro quando os preços não variam', () => {
@@ -63,4 +65,30 @@ test('sincronização preserva o primeiro resultado final em conflitos', async (
 test('build valida Worker com sintaxe de módulo ES', async () => {
   const pkg = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
   assert.match(pkg.scripts.build, /--experimental-default-type=module --check worker\.js/);
+});
+
+
+test('BUY: TP atingido primeiro fecha em WIN', () => {
+  const result = outcome('BUY', 98, 104, [{timestamp:'2026-10-16T10:01:00Z',high:103,low:99},{timestamp:'2026-10-16T10:02:00Z',high:105,low:99}]);
+  assert.equal(result.result, 'WIN');
+  assert.equal(result.when, '2026-10-16T10:02:00Z');
+});
+
+test('SELL: SL atingido primeiro fecha em LOSS', () => {
+  const result = outcome('SELL', 102, 96, [{timestamp:'2026-10-16T10:01:00Z',high:103,low:99}]);
+  assert.equal(result.result, 'LOSS');
+  assert.equal(result.reason, 'SL atingido');
+});
+
+test('TP e SL no mesmo candle é LOSS conservador para BUY e SELL', () => {
+  const buy = outcome('BUY', 98, 104, [{timestamp:'c1',high:105,low:97}]);
+  const sell = outcome('SELL', 102, 96, [{timestamp:'c2',high:103,low:95}]);
+  assert.equal(buy.result, 'LOSS');
+  assert.match(buy.reason, /mesmo candle/);
+  assert.equal(sell.result, 'LOSS');
+  assert.match(sell.reason, /mesmo candle/);
+});
+
+test('não inventa resultado se nenhum alvo for atingido', () => {
+  assert.equal(outcome('BUY', 98, 104, [{high:103,low:99}]), null);
 });
