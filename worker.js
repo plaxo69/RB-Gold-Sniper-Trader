@@ -55,7 +55,7 @@ async function saveHistory(env, incoming) {
     let chosen;
     if(oldStatus!=="ALERTA" && nextStatus==="ALERTA") chosen=old;
     else if(oldStatus==="ALERTA" && nextStatus!=="ALERTA") chosen=t;
-    else chosen={...old,...t};
+    else {chosen={...old,...t};if(oldStatus!=="ALERTA"&&nextStatus!=="ALERTA"){chosen.status=old.status;chosen.resolvedAt=old.resolvedAt||t.resolvedAt;chosen.outcomeReason=old.outcomeReason||t.outcomeReason;}}
     map.set(k,{
       ...chosen,
       indicatorSnapshot:chosen.indicatorSnapshot||old.indicatorSnapshot||t.indicatorSnapshot,
