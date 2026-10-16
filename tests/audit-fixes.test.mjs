@@ -111,3 +111,36 @@ test('alvos de BUY ficam acima da entrada com RR 1:2 e 1:3', () => {
   assert.equal(result.rr1, 2);
   assert.equal(result.rr2, 3);
 });
+
+
+test('reversão BUY exige toque no suporte e rejeição bullish', () => {
+  const candle = {open:100.1, low:99.5, high:101, close:100.8};
+  const result = sniper.zoneReversal([candle], 'BUY', {support:100, resistance:110}, 1, candle);
+  assert.equal(result.touched, true);
+  assert.equal(result.rejection, true);
+  assert.equal(result.ok, true);
+});
+
+test('reversão SELL exige toque na resistência e rejeição bearish', () => {
+  const candle = {open:100.8, low:99, high:101.5, close:100.1};
+  const result = sniper.zoneReversal([candle], 'SELL', {support:90, resistance:101}, 1, candle);
+  assert.equal(result.touched, true);
+  assert.equal(result.rejection, true);
+  assert.equal(result.ok, true);
+});
+
+test('breakout BUY exige fecho acima da resistência após fecho anterior abaixo', () => {
+  const prev = {open:99, low:98.8, high:99.5, close:99};
+  const candle = {open:99.2, low:99.1, high:101.5, close:101.2};
+  const result = sniper.tactical([prev,candle], 'BUY', {support:90,resistance:100}, 1, candle, prev);
+  assert.equal(result.direct, true);
+  assert.equal(result.level, 100);
+});
+
+test('breakdown SELL exige fecho abaixo do suporte após fecho anterior acima', () => {
+  const prev = {open:101, low:100.5, high:101.5, close:101};
+  const candle = {open:100.8, low:98.5, high:100.9, close:98.8};
+  const result = sniper.tactical([prev,candle], 'SELL', {support:100,resistance:110}, 1, candle, prev);
+  assert.equal(result.direct, true);
+  assert.equal(result.level, 100);
+});
