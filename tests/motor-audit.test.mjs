@@ -84,3 +84,8 @@ test("Sniper emits movement key and close location; app enforces cooldown and re
 test("independent AI uses closed candles for timeframe direction", () => {
   assert.match(aiSource, /tfDir\(m1\.slice\(0,-1\)\),tfDir\(m5\.slice\(0,-1\)\),tfDir\(m15\.slice\(0,-1\)\)/);
 });
+
+test("history does not render null probability as 0% and shows technical score instead", () => {
+  assert.match(read("public/history-ui.js"), /ai\.pWin!==null&&ai\.pWin!==undefined/);
+  assert.match(read("public/history-ui.js"), /score técnico/);
+});
