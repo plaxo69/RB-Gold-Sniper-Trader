@@ -92,3 +92,22 @@ test('TP e SL no mesmo candle é LOSS conservador para BUY e SELL', () => {
 test('não inventa resultado se nenhum alvo for atingido', () => {
   assert.equal(outcome('BUY', 98, 104, [{high:103,low:99}]), null);
 });
+
+
+test('alvos de SELL ficam abaixo da entrada com RR 1:2 e 1:3', () => {
+  const result = sniper.makeTargets(100, 102, 'SELL', {}, 1, {}, {}, 90);
+  assert.equal(result.blockedByZone, false);
+  assert.equal(result.tp1, 96);
+  assert.equal(result.tp2, 94);
+  assert.equal(result.rr1, 2);
+  assert.equal(result.rr2, 3);
+  assert.ok(result.tp1 < 100 && result.tp2 < result.tp1);
+});
+
+test('alvos de BUY ficam acima da entrada com RR 1:2 e 1:3', () => {
+  const result = sniper.makeTargets(100, 98, 'BUY', {}, 1, {}, {}, 110);
+  assert.equal(result.blockedByZone, false);
+  assert.ok(result.tp1 > 100 && result.tp2 > result.tp1);
+  assert.equal(result.rr1, 2);
+  assert.equal(result.rr2, 3);
+});
