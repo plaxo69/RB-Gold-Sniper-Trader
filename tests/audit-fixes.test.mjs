@@ -144,3 +144,37 @@ test('breakdown SELL exige fecho abaixo do suporte após fecho anterior acima', 
   assert.equal(result.direct, true);
   assert.equal(result.level, 100);
 });
+
+
+function syntheticCandles(n, fn) {
+  return Array.from({length:n},(_,i)=>{
+    const c=fn(i);
+    return {timestamp:new Date(Date.UTC(2026,9,16,0,i)).toISOString(),open:c.open,high:c.high,low:c.low,close:c.close,volume:100+(i%7)*10};
+  });
+}
+
+test('breakout BUY não usa o mínimo distante do histórico como stop', () => {
+  const main=syntheticCandles(230,i=>{const close=2000+Math.sin(i*.45)*2;return{open:close-.1,close,high:close+.4,low:close-.4};});
+  const j=main.length-2, resistance=Math.max(...main.slice(j-20,j).map(x=>x.high));
+  main[j]={timestamp:main[j].timestamp,open:resistance-.1,low:resistance-.2,high:resistance+.8,close:resistance+.65,volume:180};
+  main[j+1]={timestamp:main[j+1].timestamp,open:main[j].close,low:main[j].close-.1,high:main[j].close+.1,close:main[j].close,volume:180};
+  const tf=syntheticCandles(70,i=>{const close=2000+Math.sin(i*.45)*2;return{open:close-.1,close,high:close+.4,low:close-.4};});
+  const result=sniper.analyze(main,tf,tf,[]);
+  assert.equal(result.type,'BUY');
+  assert.equal(result.tactical.buy,'BREAKOUT FECHADO');
+  assert.ok(Math.abs(result.price-result.sl)/result.atr<=1.5);
+  assert.equal(result.rr,2);
+});
+
+test('breakdown SELL não usa o máximo distante do histórico como stop', () => {
+  const main=syntheticCandles(230,i=>{const close=2000+Math.sin(i*.45)*2;return{open:close+.1,close,high:close+.4,low:close-.4};});
+  const j=main.length-2, support=Math.min(...main.slice(j-20,j).map(x=>x.low));
+  main[j]={timestamp:main[j].timestamp,open:support+.1,low:support-.8,high:support+.2,close:support-.65,volume:180};
+  main[j+1]={timestamp:main[j+1].timestamp,open:main[j].close,low:main[j].close-.1,high:main[j].close+.1,close:main[j].close,volume:180};
+  const tf=syntheticCandles(70,i=>{const close=2000+Math.sin(i*.45)*2;return{open:close+.1,close,high:close+.4,low:close-.4};});
+  const result=sniper.analyze(main,tf,tf,[]);
+  assert.equal(result.type,'SELL');
+  assert.equal(result.tactical.sell,'BREAKDOWN FECHADO');
+  assert.ok(Math.abs(result.price-result.sl)/result.atr<=1.5);
+  assert.equal(result.rr,2);
+});
