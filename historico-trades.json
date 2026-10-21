@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-21T11:06:57.413Z",
+  "exportedAt": "2026-10-21T11:07:57.705Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 292,
@@ -126,10 +126,12 @@
       },
       "indicatorSnapshotVersion": 1,
       "movementKey": "BUY-STRUCT-0.00-0.00",
-      "status": "ALERTA",
+      "status": "LOSS",
       "time": "2026-10-21T11:01:00.000Z",
       "createdAt": "2026-10-21T11:02:56.231Z",
-      "reentryCount": 0
+      "reentryCount": 0,
+      "resolvedAt": "2026-10-21T11:07:00.000Z",
+      "outcomeReason": "SL atingido"
     },
     {
       "type": "SELL",
