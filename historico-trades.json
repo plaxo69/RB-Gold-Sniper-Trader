@@ -1,9 +1,136 @@
 {
-  "exportedAt": "2026-10-21T11:01:57.258Z",
+  "exportedAt": "2026-10-21T11:02:57.393Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 291,
+  "total": 292,
   "trades": [
+    {
+      "type": "BUY",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-21T11:01:00.000Z",
+      "price": 4127.947,
+      "tp": 4131.2651390265455,
+      "sl": 4125.7349073156365,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 1.4872845624187623,
+      "rsi": 63.70851772730917,
+      "trend1": "ALTA",
+      "trend5": "ALTA",
+      "trend15": "ALTA",
+      "confidence": 64,
+      "score": 64,
+      "technicalScore": 64,
+      "probabilityStatus": "não calibrada — requer backtest fora da amostra",
+      "historicalWinRate": 43,
+      "aiFeatures": {
+        "technicalScore": 64,
+        "dir": "BUY",
+        "tfCount": 3,
+        "confirmations": 2,
+        "rsi": 63.70851772730917,
+        "adx14": 38.4542338874572,
+        "volume": 127,
+        "volumeSma20": 103.55
+      },
+      "reasons": [
+        "M1/M5/M15 alinhados",
+        "momentum BUY + EMA20/EMA50",
+        "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 64,
+        "pWin": null,
+        "technicalScore": 64,
+        "historicalWinRate": 43,
+        "samples": 258,
+        "probabilityStatus": "não calibrada — requer backtest fora da amostra",
+        "recommendation": "FAVORÁVEL",
+        "opinion": "Oportunidade identificada por score técnico; ainda não existe probabilidade de vitória calibrada.",
+        "reasons": [
+          "M1/M5/M15 alinhados",
+          "momentum BUY + EMA20/EMA50",
+          "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v6",
+      "signalKey": "BUY-2026-10-21T11:01:00.000Z",
+      "key": "BUY-2026-10-21T11:01:00.000Z",
+      "indicatorSnapshot": {
+        "capturedAt": "2026-10-21T11:02:56.225Z",
+        "signalTimestamp": "2026-10-21T11:01:00.000Z",
+        "entryPrice": 4127.947,
+        "timeframes": {
+          "M1": "ALTA",
+          "M5": "ALTA",
+          "M15": "ALTA",
+          "H1": null
+        },
+        "indicators": {
+          "rsi": 63.70851772730917,
+          "formingRsi": null,
+          "atr": 1.4872845624187623,
+          "ema9": null,
+          "ema20": null,
+          "ema21": null,
+          "ema50": null,
+          "ema200": null,
+          "adx14": null,
+          "volume": null,
+          "volumeSma20": null,
+          "volumeRatio": null,
+          "support": null,
+          "resistance": null
+        },
+        "filters": {},
+        "scores": {
+          "confidence": 64,
+          "buy": null,
+          "sell": null,
+          "score": 64
+        },
+        "setup": {
+          "type": "BUY",
+          "source": "IA",
+          "reasons": [
+            "M1/M5/M15 alinhados",
+            "momentum BUY + EMA20/EMA50",
+            "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+          ],
+          "rejectionReasons": [],
+          "tactical": null
+        },
+        "ai": {
+          "mode": "OPORTUNIDADE IA",
+          "score": 64,
+          "pWin": null,
+          "technicalScore": 64,
+          "historicalWinRate": 43,
+          "samples": 258,
+          "probabilityStatus": "não calibrada — requer backtest fora da amostra",
+          "recommendation": "FAVORÁVEL",
+          "opinion": "Oportunidade identificada por score técnico; ainda não existe probabilidade de vitória calibrada.",
+          "reasons": [
+            "M1/M5/M15 alinhados",
+            "momentum BUY + EMA20/EMA50",
+            "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+          ],
+          "source": "IA"
+        },
+        "aiOpportunity": true
+      },
+      "indicatorSnapshotVersion": 1,
+      "movementKey": "BUY-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-21T11:01:00.000Z",
+      "createdAt": "2026-10-21T11:02:56.231Z",
+      "reentryCount": 0
+    },
     {
       "type": "SELL",
       "score": 0,
