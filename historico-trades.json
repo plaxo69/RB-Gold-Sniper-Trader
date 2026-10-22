@@ -1,9 +1,140 @@
 {
-  "exportedAt": "2026-10-22T06:25:00.256Z",
+  "exportedAt": "2026-10-22T06:26:00.214Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 299,
+  "total": 300,
   "trades": [
+    {
+      "type": "BUY",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-10-22T06:24:00.000Z",
+      "price": 4098.695,
+      "tp": 4102.374990680082,
+      "sl": 4096.241672879944,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 2.7355141337024995,
+      "rsi": 61.492413823962096,
+      "trend1": "ALTA",
+      "trend5": "NEUTRO",
+      "trend15": "BAIXA",
+      "confidence": 62,
+      "score": 62,
+      "technicalScore": 62,
+      "probabilityStatus": "não calibrada — requer backtest fora da amostra",
+      "historicalWinRate": 42,
+      "aiFeatures": {
+        "technicalScore": 62,
+        "dir": "BUY",
+        "tfCount": 1,
+        "confirmations": 4,
+        "rsi": 61.492413823962096,
+        "adx14": 57.21071190679812,
+        "volume": 189,
+        "volumeSma20": 176.15
+      },
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "rejeição de suporte",
+        "momentum BUY + EMA20/EMA50",
+        "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 62,
+        "pWin": null,
+        "technicalScore": 62,
+        "historicalWinRate": 42,
+        "samples": 266,
+        "probabilityStatus": "não calibrada — requer backtest fora da amostra",
+        "recommendation": "FAVORÁVEL",
+        "opinion": "Oportunidade identificada por score técnico; ainda não existe probabilidade de vitória calibrada.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "rejeição de suporte",
+          "momentum BUY + EMA20/EMA50",
+          "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v6",
+      "signalKey": "BUY-2026-10-22T06:24:00.000Z",
+      "key": "BUY-2026-10-22T06:24:00.000Z",
+      "indicatorSnapshot": {
+        "capturedAt": "2026-10-22T06:25:59.328Z",
+        "signalTimestamp": "2026-10-22T06:24:00.000Z",
+        "entryPrice": 4098.695,
+        "timeframes": {
+          "M1": "ALTA",
+          "M5": "NEUTRO",
+          "M15": "BAIXA",
+          "H1": null
+        },
+        "indicators": {
+          "rsi": 61.492413823962096,
+          "formingRsi": null,
+          "atr": 2.7355141337024995,
+          "ema9": null,
+          "ema20": null,
+          "ema21": null,
+          "ema50": null,
+          "ema200": null,
+          "adx14": null,
+          "volume": null,
+          "volumeSma20": null,
+          "volumeRatio": null,
+          "support": null,
+          "resistance": null
+        },
+        "filters": {},
+        "scores": {
+          "confidence": 62,
+          "buy": null,
+          "sell": null,
+          "score": 62
+        },
+        "setup": {
+          "type": "BUY",
+          "source": "IA",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "rejeição de suporte",
+            "momentum BUY + EMA20/EMA50",
+            "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+          ],
+          "rejectionReasons": [],
+          "tactical": null
+        },
+        "ai": {
+          "mode": "OPORTUNIDADE IA",
+          "score": 62,
+          "pWin": null,
+          "technicalScore": 62,
+          "historicalWinRate": 42,
+          "samples": 266,
+          "probabilityStatus": "não calibrada — requer backtest fora da amostra",
+          "recommendation": "FAVORÁVEL",
+          "opinion": "Oportunidade identificada por score técnico; ainda não existe probabilidade de vitória calibrada.",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "rejeição de suporte",
+            "momentum BUY + EMA20/EMA50",
+            "ADX(14) > 22, RSI dentro dos limites e volume acima da SMA20"
+          ],
+          "source": "IA"
+        },
+        "aiOpportunity": true
+      },
+      "indicatorSnapshotVersion": 1,
+      "movementKey": "BUY-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-10-22T06:24:00.000Z",
+      "createdAt": "2026-10-22T06:25:59.334Z",
+      "reentryCount": 0
+    },
     {
       "type": "SELL",
       "score": 0,
