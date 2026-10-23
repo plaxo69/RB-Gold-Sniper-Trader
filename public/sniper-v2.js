@@ -1,5 +1,5 @@
 (function(root){
-const C={period:20,minHistory:205,minRR:2,minBodyAtr:.10,maxExtAtr:3.2,maxBreakAtr:1.25,maxRetestExtensionAtr:1.5,zoneAtr:.35,retestAtr:.55,reversalWickBody:.85,tacticalLookback:12,minTFAligned:3,minRiskAtr:.45,maxRiskAtr:1.50,minCloseLocation:.55,minBreakAtr:.15,tp2MinBodyAtr:1.15,tp2MinClose:.72,buyScoreMin:55,sellScoreMax:45};
+const C={period:20,minHistory:205,minRR:2,minBodyAtr:.10,maxExtAtr:3.2,maxEntryExtensionAtr:1.5,maxBreakAtr:1.25,maxRetestExtensionAtr:1.5,zoneAtr:.35,retestAtr:.55,reversalWickBody:.85,tacticalLookback:12,minTFAligned:3,minRiskAtr:.45,maxRiskAtr:1.50,minCloseLocation:.55,minBreakAtr:.15,tp2MinBodyAtr:1.15,tp2MinClose:.72,buyScoreMin:55,sellScoreMax:45};
 const sma=(v,p)=>v.length<p?null:v.slice(-p).reduce((a,b)=>a+b,0)/p;
 function ema(v,p){if(v.length<p)return null;const k=2/(p+1);let x=v[0];for(let i=1;i<v.length;i++)x=v[i]*k+x*(1-k);return x}
 function rsi(v,p=14){if(v.length<p+1)return null;let g=0,l=0;for(let i=v.length-p;i<v.length;i++){const d=v[i]-v[i-1];if(d>=0)g+=d;else l-=d}return l===0?(g===0?50:100):100-100/(1+g/l)}
