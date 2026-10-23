@@ -26,7 +26,7 @@ test("malformed or unreadable history blocks writes instead of silently resettin
 test("entry extension is capped at 1.5 ATR from EMA20", () => {
   assert.match(sniper, /maxEntryExtensionAtr:1\.5/);
   assert.match(sniper, /extensionBuy=entry>=e20&&\(entry-e20\)\/Math\.max\(A,1e-9\)<=C\.maxEntryExtensionAtr/);
-  assert.match(sniper, /extensionSell=\(e20-entry\)\/Math\.max\(A,1e-9\)<=C\.maxEntryExtensionAtr/);
+  assert.match(sniper, /extensionSell=entry<=e20&&\(e20-entry\)\/Math\.max\(A,1e-9\)<=C\.maxEntryExtensionAtr/);
 });
 
 test("EMA20 pullback setups require a closed confirmation candle and bounded continuation", () => {
