@@ -28,14 +28,30 @@ async function github(path, env, init={}) {
   if (!env.GITHUB_TOKEN) throw new Error("GITHUB_TOKEN não configurado nos Secrets do Cloudflare.");
   return fetch(`${GH_API}/repos/${REPO}/contents/${path}`, { ...init, headers: { Authorization:`Bearer ${env.GITHUB_TOKEN}`, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28", "User-Agent":"RB-TRADER-PRO-CLOUDFLARE", ...(init.headers||{}) } });
 }
+async function readHistoryDocument(d, env) {
+  let raw = typeof d?.content === "string" ? d.content : "";
+  if (raw.trim()) {
+    raw = decodeBase64(raw);
+  } else {
+    if (!d?.download_url) throw new Error("O GitHub não devolveu o conteúdo do histórico; gravação bloqueada para proteger os dados existentes.");
+    const response = await fetch(d.download_url, {headers:{Authorization:`Bearer ${env.GITHUB_TOKEN}`,Accept:"application/vnd.github.raw", "User-Agent":"RB-TRADER-PRO-CLOUDFLARE"}});
+    if (!response.ok) throw new Error(`Não foi possível ler o histórico raw do GitHub (HTTP ${response.status}); gravação bloqueada.`);
+    raw = await response.text();
+  }
+  let payload;
+  try { payload = JSON.parse(raw); }
+  catch { throw new Error("O ficheiro de histórico do GitHub não é JSON válido; gravação bloqueada para evitar perda de operações."); }
+  const trades = Array.isArray(payload) ? payload : payload?.trades;
+  if (!Array.isArray(trades)) throw new Error("Formato do histórico inválido; gravação bloqueada para proteger as operações existentes.");
+  return {payload, trades};
+}
 async function getHistory(env, limit=1000) {
   const branch = historyBranch(env);
   const r = await github(`${HISTORY_PATH}?ref=${encodeURIComponent(branch)}`, env);
   if(r.status===404) return {ok:true,trades:[],total:0,source:"github",branch};
   const d=await r.json(); if(!r.ok) throw new Error(d.message||"Falha ao ler histórico do GitHub");
-  let p={}; try{p=JSON.parse(decodeBase64(d.content));}catch{}
-  const trades=Array.isArray(p)?p:(Array.isArray(p.trades)?p.trades:[]);
-  return {ok:true,trades:trades.slice(-limit),total:trades.length,source:"github",branch,exportedAt:p?.exportedAt||null};
+  const {payload, trades} = await readHistoryDocument(d, env);
+  return {ok:true,trades:trades.slice(-limit),total:trades.length,source:"github",branch,exportedAt:payload?.exportedAt||null};
 }
 function keyOf(t){return t?.signalKey||t?.key||((t?.type||"")+"-"+(t?.signalTimestamp||t?.time||""))}
 function timeOf(t){const n=Date.parse(t?.signalTimestamp??t?.time??0);return Number.isFinite(n)?n:0}
@@ -44,7 +60,7 @@ async function saveHistory(env, incoming) {
   const path=`${HISTORY_PATH}?ref=${encodeURIComponent(branch)}`;
   const existing=await github(path,env);
   let sha=null, remote=[];
-  if(existing.ok){const d=await existing.json();sha=d.sha||null;try{const p=JSON.parse(decodeBase64(d.content));remote=Array.isArray(p.trades)?p.trades:Array.isArray(p)?p:[];}catch{}}
+  if(existing.ok){const d=await existing.json();sha=d.sha||null;const parsed=await readHistoryDocument(d,env);remote=parsed.trades;}
   else if(existing.status!==404){const d=await existing.json().catch(()=>({}));throw new Error(d.message||"Não foi possível consultar o histórico");}
   const map=new Map();
   for(const t of [...remote,...incoming]) {
