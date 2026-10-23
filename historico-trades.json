@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-10-23T04:38:03.656Z",
+  "exportedAt": "2026-10-23T04:38:19.146Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 304,
@@ -373,10 +373,12 @@
       "indicatorSnapshotVersion": 1,
       "key": "SELL-2026-10-23T04:33:00.000Z",
       "signalKey": "SELL-2026-10-23T04:33:00.000Z",
-      "status": "ALERTA",
+      "status": "LOSS",
       "time": "2026-10-23T04:33:00.000Z",
       "createdAt": "2026-10-23T04:34:02.851Z",
-      "reentryCount": 0
+      "reentryCount": 0,
+      "resolvedAt": "2026-10-23T04:37:00.000Z",
+      "outcomeReason": "SL atingido"
     },
     {
       "type": "SELL",
