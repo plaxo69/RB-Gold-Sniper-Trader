@@ -47,7 +47,7 @@ test('os scripts corrigidos usam versões de cache novas', async () => {
   assert.match(html, /history-v2\.js\?v=10/);
   assert.match(html, /app-v4\.js\?v=16/);
   assert.match(html, /history-ui\.js\?v=10/);
-  assert.match(html, /sniper-v2\.js\?v=22/);
+  assert.match(html, /sniper-v2\.js\?v=23/);
   assert.match(html, /ai-sniper\.js\?v=12/);
 });
 
