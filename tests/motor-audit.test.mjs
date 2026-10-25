@@ -5,6 +5,9 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 
+await import('../public/sniper-v2.js');
+const sniper = globalThis.RBGoldSniper;
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (path) => readFileSync(resolve(root, path), "utf8");
 const aiSource = read("public/ai-sniper.js");
@@ -91,4 +94,19 @@ test("history does not render null probability as 0% and shows technical score i
   assert.match(ui, /ai\.pWin!==null&&ai\.pWin!==undefined/);
   assert.doesNotMatch(ui, /t\.aiWinRate/);
   assert.match(ui, /score técnico/);
+});
+
+
+test('volumeStats rejeita volume em falta na última vela e não reutiliza uma vela antiga', () => {
+  const candles = Array.from({ length: 20 }, (_, i) => ({ volume: 100 + i }));
+  candles[19].volume = null;
+  assert.deepEqual(sniper.volumeStats(candles), { volume: null, sma20: null, ratio: null });
+});
+
+test('volumeStats calcula a média apenas quando as 20 velas têm volume válido', () => {
+  const candles = Array.from({ length: 20 }, (_, i) => ({ volume: i + 1 }));
+  const result = sniper.volumeStats(candles);
+  assert.equal(result.volume, 20);
+  assert.equal(result.sma20, 10.5);
+  assert.equal(result.ratio, 20 / 10.5);
 });
