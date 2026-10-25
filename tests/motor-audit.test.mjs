@@ -5,6 +5,9 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 
+await import('../public/sniper-v2.js');
+const sniper = globalThis.RBGoldSniper;
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (path) => readFileSync(resolve(root, path), "utf8");
 const aiSource = read("public/ai-sniper.js");
