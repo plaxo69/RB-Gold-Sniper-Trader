@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -48,4 +49,27 @@ test("SELL technical score is side-relative and the UI calls it a technical scor
   assert.match(sniper, /confidence:outType==='WAIT'\?0:\(outType==='SELL'\?100-score:score\)/);
   assert.match(ai, /a\?\.technicalScore\?\?a\?\.confidence\?\?a\?\.score/);
   assert.match(app, /score técnico \$\{active\.confidence\}\/100/);
+});
+
+test("EMA20 pullback confirmation requires explicit wick rejection in both directions", () => {
+  const sandbox = {};
+  vm.runInNewContext(sniper, sandbox);
+  const confirm = sandbox.RBGoldSniper.emaPullbackConfirmation;
+  const prevE20 = 100, e20 = 100, atr = 2;
+  const buyPrev = { open: 101, close: 99.8, low: 99.5, high: 101.2 };
+  const buyRejected = { open: 100.2, close: 101.5, low: 98.5, high: 101.7 };
+  const buyNoRejection = { open: 100, close: 102, low: 99.9, high: 102.1 };
+  const sellPrev = { open: 99, close: 100.2, low: 98.8, high: 100.5 };
+  const sellRejected = { open: 99.8, close: 98.5, low: 98.3, high: 101.5 };
+  const sellNoRejection = { open: 100, close: 98, low: 97.9, high: 100.1 };
+  assert.equal(confirm(buyPrev, buyRejected, prevE20, e20, atr, "BUY"), true);
+  assert.equal(confirm(sellPrev, sellRejected, prevE20, e20, atr, "SELL"), true);
+  assert.equal(confirm(buyPrev, buyNoRejection, prevE20, e20, atr, "BUY"), false);
+  assert.equal(confirm(sellPrev, sellNoRejection, prevE20, e20, atr, "SELL"), false);
+  assert.equal(confirm(buyPrev, { ...buyRejected, open: 102, close: 101 }, prevE20, e20, atr, "BUY"), false);
+  assert.equal(confirm(null, buyRejected, prevE20, e20, atr, "BUY"), false);
+});
+
+test("signal candle is selected from closed candles, excluding the currently forming candle", () => {
+  assert.match(sniper, /const closed=main\.slice\(0,-1\),sig=closed\.at\(-1\),prev=closed\.at\(-2\),forming=main\.at\(-1\)/);
 });
