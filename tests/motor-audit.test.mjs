@@ -110,3 +110,32 @@ test('volumeStats calcula a média apenas quando as 20 velas têm volume válido
   assert.equal(result.sma20, 10.5);
   assert.equal(result.ratio, 20 / 10.5);
 });
+
+
+test("BE só fecha depois de ativar aos 50% e regressar à entrada num candle posterior", async () => {
+  const source = read("public/trade-outcome.js");
+  const context = {};
+  vm.runInNewContext(source, context);
+  const resolve = context.RBTradeOutcome.resolveTradeOutcome;
+  const buy = resolve("BUY", 98, 106, [
+    { timestamp: "2026-01-01T00:01:00Z", high: 104, low: 102 },
+    { timestamp: "2026-01-01T00:02:00Z", high: 103, low: 100 },
+  ], 100);
+  assert.equal(buy.result, "BE");
+  assert.equal(buy.beArmedAt, "2026-01-01T00:01:00Z");
+  const sell = resolve("SELL", 102, 94, [
+    { timestamp: "2026-01-01T00:01:00Z", high: 98, low: 96 },
+    { timestamp: "2026-01-01T00:02:00Z", high: 100, low: 97 },
+  ], 100);
+  assert.equal(sell.result, "BE");
+});
+
+test("BE não é ativado e nem fecha no mesmo candle do movimento favorável", () => {
+  const context = {};
+  vm.runInNewContext(read("public/trade-outcome.js"), context);
+  const resolve = context.RBTradeOutcome.resolveTradeOutcome;
+  const sameCandle = resolve("BUY", 98, 106, [
+    { timestamp: "2026-01-01T00:01:00Z", high: 104, low: 100 },
+  ], 100);
+  assert.equal(sameCandle, null);
+});
