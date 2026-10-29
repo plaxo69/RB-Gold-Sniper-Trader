@@ -61,10 +61,10 @@ async function runMonitor(){
    const created=ts(active.signalTimestamp||active.time);const live=await marketModule.getMarket('1m',2000,Number.isFinite(created)?new Date(created).toISOString():null,new Date().toISOString());
    const candles=(live.candles||[]).filter(c=>ts(c.timestamp)>created);
    activeCandles=candles;
-   const entry=Number(active.price),sl=Number(active.sl),tp=Number(active.tp);
-   let outcome=null,when=null,reason='';
-   for(const c of candles){const hi=Number(c.high),lo=Number(c.low);const hitTP=active.type==='BUY'?hi>=tp:lo<=tp;const hitSL=active.type==='BUY'?lo<=sl:hi>=sl;if(hitTP&&hitSL){outcome='LOSS';reason='TP e SL tocados no mesmo candle; resultado conservador = LOSS';when=c.timestamp;break}if(hitTP){outcome='WIN';reason='TP atingido';when=c.timestamp;break}if(hitSL){outcome='LOSS';reason='SL atingido';when=c.timestamp;break}}
-   if(outcome){active.status=outcome;active.resolvedAt=when;active.outcomeReason=reason;delete active.beAlerted;changed=true;result.events.push(outcome==='WIN'?'WIN':'LOSS');await sendPush(outcome==='WIN'?'RB TRADER PRO — WIN':'RB TRADER PRO — LOSS',outcome==='WIN'?'🟢 TP atingido — trade fechada com WIN':'🔴 SL atingido — trade fechada com LOSS','rb-result-'+keyOf(active),gh);active=null}
+   const entry=Number(active.price),sl=Number(active.sl),tp=Number(active.tp),dist=Math.abs(tp-entry);
+   let outcome=null,when=null,reason='',bePrice=null;
+   for(const c of candles){const hi=Number(c.high),lo=Number(c.low);const hitTP=active.type==='BUY'?hi>=tp:lo<=tp;const hitSL=active.type==='BUY'?lo<=sl:hi>=sl;const favorable=active.type==='BUY'?hi-entry:entry-lo;const hitBE=dist>0&&Number.isFinite(favorable)&&favorable>=dist*.50;if(hitTP&&hitSL){outcome='LOSS';reason='TP e SL tocados no mesmo candle; resultado conservador = LOSS';when=c.timestamp;break}if(hitTP){outcome='WIN';reason='TP atingido';when=c.timestamp;break}if(hitSL){outcome='LOSS';reason='SL atingido';when=c.timestamp;break}if(hitBE){outcome='BE';reason='Proteção BE atingida após movimento favorável de 50% da distância ao TP';when=c.timestamp;bePrice=active.type==='BUY'?hi:lo;break}}
+   if(outcome){active.status=outcome;active.resolvedAt=when;active.outcomeReason=reason;if(outcome==='BE'){active.beTriggeredAt=when;active.beTriggerPrice=bePrice;active.beAlerted=true}delete active.bePushSent;changed=true;result.events.push(outcome);const title='RB TRADER PRO — '+outcome;const body=outcome==='WIN'?'🟢 TP atingido — trade fechada com WIN':outcome==='LOSS'?'🔴 SL atingido — trade fechada com LOSS':'🟡 Proteção BE atingida — operação registada como Break Even';await sendPush(title,body,'rb-result-'+keyOf(active),gh);active=null}
  }
  if(active){
    const entry=Number(active.price),tp=Number(active.tp),dist=Math.abs(tp-entry);
