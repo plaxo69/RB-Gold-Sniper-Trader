@@ -228,7 +228,15 @@ test("history archives closed OHLCV candles across polls and resolves BE from th
     { timestamp: "2026-01-01T00:01:00Z", open: 100, high: 104, low: 102, close: 103, volume: 12 },
     { timestamp: "2026-01-01T00:02:00Z", open: 103, high: 103, low: 102, close: 102.5, volume: 10 }
   ];
-  context.RBResolveTrades(first);
+  const m5First = [
+    { timestamp: "2026-01-01T00:05:00Z", open: 100, high: 101, low: 99, close: 100.5, volume: 50 },
+    { timestamp: "2026-01-01T00:10:00Z", open: 100.5, high: 101, low: 100, close: 100.2, volume: 40 }
+  ];
+  const m15First = [
+    { timestamp: "2026-01-01T00:15:00Z", open: 100, high: 102, low: 99, close: 101, volume: 150 },
+    { timestamp: "2026-01-01T00:30:00Z", open: 101, high: 102, low: 100, close: 101.5, volume: 120 }
+  ];
+  context.RBResolveTrades({ M1: first, M5: m5First, M15: m15First });
   let trade = JSON.parse(store.get("rb_gold_sniper_signals_v1"))[0];
   assert.equal(trade.status, "ALERTA");
   assert.equal(trade.replayCandles.length, 1);
@@ -237,11 +245,15 @@ test("history archives closed OHLCV candles across polls and resolves BE from th
     { timestamp: "2026-01-01T00:02:00Z", open: 103, high: 103, low: 100, close: 100.5, volume: 15 },
     { timestamp: "2026-01-01T00:03:00Z", open: 100.5, high: 101, low: 100.2, close: 100.8, volume: 8 }
   ];
-  context.RBResolveTrades(second);
+  const m5Second = [...m5First.slice(0,1), { timestamp: "2026-01-01T00:10:00Z", open: 100.5, high: 102, low: 100, close: 101, volume: 45 }, { timestamp: "2026-01-01T00:15:00Z", open: 101, high: 102, low: 100.5, close: 101.5, volume: 30 }];
+  const m15Second = [...m15First.slice(0,1), { timestamp: "2026-01-01T00:30:00Z", open: 101, high: 103, low: 100, close: 102, volume: 130 }, { timestamp: "2026-01-01T00:45:00Z", open: 102, high: 103, low: 101, close: 102.5, volume: 90 }];
+  context.RBResolveTrades({ M1: second, M5: m5Second, M15: m15Second });
   trade = JSON.parse(store.get("rb_gold_sniper_signals_v1"))[0];
   assert.equal(trade.status, "BE");
   assert.equal(trade.beExitPrice, 100);
   assert.equal(trade.replayCandles.length, 2);
   assert.equal(trade.replayCandles[0].volume, 12);
   assert.equal(trade.replayCandles[1].low, 100);
+  assert.equal(trade.replayCandlesM5.length, 2);
+  assert.equal(trade.replayCandlesM15.length, 2);
 });
