@@ -26,6 +26,52 @@ function keyOf(t) {
   return t?.signalKey || t?.key || ((t?.type || '') + '-' + (t?.signalTimestamp || t?.time || ''));
 }
 
+function normalizeTradeRecord(trade) {
+  if (!trade || typeof trade !== 'object') return trade;
+  const type = String(trade.type || 'WAIT').toUpperCase();
+  const normalizedType = ['BUY', 'SELL', 'WAIT'].includes(type) ? type : 'WAIT';
+  const status = String(trade.status || 'ALERTA').toUpperCase();
+  const normalizedStatus = ['WIN', 'LOSS', 'ALERTA', 'BE'].includes(status) ? status : 'ALERTA';
+
+  return {
+    ...trade,
+    type: normalizedType,
+    status: normalizedStatus,
+    signalKey: trade.signalKey || trade.key || `${normalizedType}-${trade.signalTimestamp || trade.time || new Date().toISOString()}`,
+    signalTimestamp: trade.signalTimestamp || trade.time || null,
+    price: trade.price != null ? Number(trade.price) : null,
+    tp: trade.tp != null ? Number(trade.tp) : null,
+    sl: trade.sl != null ? Number(trade.sl) : null,
+    source: trade.source || 'UNKNOWN',
+    signalKind: trade.signalKind || trade.source || 'SNIPER'
+  };
+}
+
+function normalizeSignal(signal) {
+  if (!signal || typeof signal !== 'object') return null;
+  const type = String(signal.type || 'WAIT').toUpperCase();
+  const normalizedType = ['BUY', 'SELL', 'WAIT'].includes(type) ? type : 'WAIT';
+
+  const normalized = {
+    ...signal,
+    type: normalizedType,
+    status: 'ALERTA',
+    signalKey: signal.signalKey || signal.key || `${normalizedType}-${signal.signalTimestamp || signal.time || new Date().toISOString()}`,
+    signalTimestamp: signal.signalTimestamp || signal.time || new Date().toISOString(),
+    source: signal.source || 'UNKNOWN',
+    signalKind: signal.signalKind || signal.source || 'SNIPER',
+    price: signal.price != null ? Number(signal.price) : null,
+    tp: signal.tp != null ? Number(signal.tp) : null,
+    sl: signal.sl != null ? Number(signal.sl) : null,
+    rr: signal.rr != null ? Number(signal.rr) : (signal.rr1 != null ? Number(signal.rr1) : null),
+    aiScore: signal.aiScore != null ? Number(signal.aiScore) : null,
+    aiWinRate: signal.aiWinRate != null ? Number(signal.aiWinRate) : null,
+    __schemaVersion: 2
+  };
+
+  return normalized;
+}
+
 function movementKey(a) {
   const t = a?.tactical || {};
   const side = a?.type || 'WAIT';
@@ -37,10 +83,11 @@ function movementKey(a) {
 
 function normalize(t) {
   if (!t) return t;
-  const s = String(t.status || 'ALERTA').toUpperCase();
-  if (['WIN', 'LOSS', 'ALERTA'].includes(s)) return { ...t, status: s };
-  if (s === 'BE') return { ...t, status: 'BE', outcomeReason: t.outcomeReason || 'Break Even' };
-  return { ...t, status: 'ALERTA' };
+  const safeTrade = normalizeTradeRecord(t);
+  const s = String(safeTrade.status || 'ALERTA').toUpperCase();
+  if (['WIN', 'LOSS', 'ALERTA'].includes(s)) return { ...safeTrade, status: s };
+  if (s === 'BE') return { ...safeTrade, status: 'BE', outcomeReason: safeTrade.outcomeReason || 'Break Even' };
+  return { ...safeTrade, status: 'ALERTA' };
 }
 
 function safeParseJson(raw, fallback = null) {
@@ -72,7 +119,6 @@ async function readHistory(token) {
     if (!parsed) {
       throw new Error('Histórico GitHub em JSON inválido. Operação cancelada para evitar sobrescrever dados vazios.');
     }
-
     const trades = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.trades) ? parsed.trades : []);
     return { trades: trades.map(normalize), sha: contentData.sha || null };
   }
@@ -105,7 +151,7 @@ async function writeHistory(token, trades, sha, message) {
     source: 'RB TRADER PRO',
     formatVersion: 2,
     total: Array.isArray(trades) ? trades.length : 0,
-    trades: Array.isArray(trades) ? trades : []
+    trades: Array.isArray(trades) ? trades.map(normalizeTradeRecord) : []
   };
 
   const body = {
@@ -321,8 +367,8 @@ async function runMonitor() {
     global.__RB_HISTORY = trades;
     const base = global.RBGoldSniper && global.RBGoldSniper.analyze ? global.RBGoldSniper.analyze(m1.candles, m5.candles, m15.candles, h1.candles) : null;
     const a = base && global.RBTraderProAI ? global.RBTraderProAI.attach(base, { m1: m1.candles, m5: m5.candles, m15: m15.candles, h1: h1.candles }) : null;
-    let signal = a;
-    if (signal?.type === 'WAIT' && signal?.aiOpportunity) signal = signal.aiOpportunity;
+    let signal = a ? normalizeSignal(a) : null;
+    if (signal?.type === 'WAIT' && signal?.aiOpportunity) signal = normalizeSignal(signal.aiOpportunity);
     if (signal && ['BUY', 'SELL'].includes(signal.type)) {
       const k = (signal.source === 'IA' ? 'IA-' : '') + signal.type + '-' + signal.signalTimestamp;
       const exists = trades.some((t) => keyOf(t) === k || t.signalKey === k);
@@ -377,3 +423,4 @@ module.exports = async function (req, res) {
 module.exports.runMonitor = runMonitor;
 module.exports.verifyGitHubOIDC = verifyGitHubOIDC;
 module.exports.readHistory = readHistory;
+module.exports.normalizeSignal = normalizeSignal;
