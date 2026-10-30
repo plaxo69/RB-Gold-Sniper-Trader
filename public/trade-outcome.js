@@ -18,7 +18,7 @@
       if (hitSL) return {result:'LOSS', when:candle.timestamp||null, reason:'SL atingido'};
       if (hasEntry && distance>0 && !beArmed) {
         const favorable=type==='BUY'?high-Number(entry):Number(entry)-low;
-        if (favorable>=distance*.50) {beArmed=true;beArmedAt=candle.timestamp||null;beTriggerPrice=type==='BUY'?high:low;continue}
+        if (favorable>=distance*.50) {beArmed=true;beArmedAt=candle.timestamp||null;beTriggerPrice=Number(entry)+(Number(tp)-Number(entry))*.50;continue}
       }
       if (beArmed) {
         const returned=type==='BUY'?low<=Number(entry):high>=Number(entry);
