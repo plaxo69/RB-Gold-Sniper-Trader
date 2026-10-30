@@ -139,3 +139,18 @@ test("BE não é ativado e nem fecha no mesmo candle do movimento favorável", (
   ], 100);
   assert.equal(sameCandle, null);
 });
+
+
+test("IA exclui BE legado sem prova de retorno à entrada e mantém BE validado neutro", () => {
+  const ai = loadAI([
+    { status: "BE", type: "BUY", price: 100, beTriggeredAt: "2026-01-01T00:02:00Z", beTriggerPrice: 104 },
+    { status: "BE", type: "SELL", price: 100, beArmedAt: "2026-01-01T00:01:00Z", beTriggeredAt: "2026-01-01T00:02:00Z", beExitPrice: 100 },
+    { status: "WIN", type: "BUY", price: 100, tp: 104, sl: 98 }
+  ]);
+  const report = ai.auditHistory();
+  assert.equal(report.unverifiedBes, 1);
+  assert.equal(report.bes, 1);
+  assert.equal(report.samples, 2);
+  assert.equal(report.winRate, 100);
+  assert.equal(ai.learn().samples, 2);
+});
