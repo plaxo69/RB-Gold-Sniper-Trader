@@ -45,10 +45,10 @@ test('a interface escapa texto dinâmico do histórico e da IA', async () => {
 test('os scripts corrigidos usam versões de cache novas', async () => {
   const html = await read('../public/index.html');
   assert.match(html, /history-v2\.js\?v=11/);
-  assert.match(html, /app-v4\.js\?v=16/);
+  assert.match(html, /app-v4\.js\?v=17/);
   assert.match(html, /history-ui\.js\?v=11/);
   assert.match(html, /sniper-v2\.js\?v=23/);
-  assert.match(html, /ai-sniper\.js\?v=12/);
+  assert.match(html, /ai-sniper\.js\?v=13/);
 });
 
 test('o Worker preserva a fotografia ao gravar resultados no GitHub', async () => {
