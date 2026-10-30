@@ -6,10 +6,11 @@ const axios = require("axios");
 const BASE = "https://biquote.io/api";
 const SYMBOL = "XAUUSD";
 const TF = {
-  "1m": { interval: "1m", stale: 150, limit: 500 },
-  "5m": { interval: "5m", stale: 720, limit: 500 },
-  "15m": { interval: "15m", stale: 1500, limit: 500 },
-  "1h": { interval: "1h", stale: 5400, limit: 500 }
+  "1m": { interval: "1m", stale: 150, limit: 500, aggregateBy: 1 },
+  "3m": { interval: "1m", stale: 300, limit: 500, aggregateBy: 3, aggregated: true },
+  "5m": { interval: "5m", stale: 720, limit: 500, aggregateBy: 1 },
+  "15m": { interval: "15m", stale: 1500, limit: 500, aggregateBy: 1 },
+  "1h": { interval: "1h", stale: 5400, limit: 500, aggregateBy: 1 }
 };
 const cache = new Map();
 const inflight = new Map();
@@ -31,6 +32,33 @@ function clean(a) {
   return a.filter(valid)
     .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
     .filter((c, i, s) => i === 0 || c.timestamp !== s[i - 1].timestamp);
+}
+function aggregateBars(bars, size) {
+  const groupSize = Math.max(1, Number(size) || 1);
+  if (groupSize <= 1 || !Array.isArray(bars)) return bars;
+
+  const out = [];
+  for (let i = 0; i < bars.length; i += groupSize) {
+    const slice = bars.slice(i, i + groupSize);
+    if (!slice.length) continue;
+    const first = slice[0];
+    const last = slice[slice.length - 1];
+    const highs = slice.map(b => Number(b.high));
+    const lows = slice.map(b => Number(b.low));
+    const volumes = slice.map(b => Number(b.volume ?? b.tickVolume ?? 0));
+
+    out.push({
+      openTime: first.openTime,
+      open: Number(first.open),
+      high: Math.max(...highs),
+      low: Math.min(...lows),
+      close: Number(last.close),
+      volume: volumes.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0),
+      tickVolume: volumes.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0),
+      isOpen: slice.some(b => b.isOpen === true)
+    });
+  }
+  return out;
 }
 async function request(path, params = {}) {
   return axios.get(`${BASE}/${path}`, {
@@ -66,14 +94,24 @@ async function fetchCandles(timeframe, requestedLimit = 500, from = null, to = n
   const limit = Math.min(2000, Math.max(60, Number(requestedLimit) || cfg.limit));
   if (!cfg) throw new Error("Timeframe inválido");
 
-  // One shared live quote is used by all timeframes in the same server instance.
-  // This avoids four identical quote calls every 10 seconds from the browser.
+  const rawInterval = cfg.interval;
+  const aggregateBy = Math.max(1, Number(cfg.aggregateBy) || 1);
+
   const [br, tick] = await Promise.all([
-    request(`${SYMBOL}/ohlc`, { interval: cfg.interval, limit: Math.min(limit, 1000), ...(from ? { from } : {}), ...(to ? { to } : {}) }),
+    request(`${SYMBOL}/ohlc`, {
+      interval: rawInterval,
+      limit: Math.min(limit * aggregateBy, 1000),
+      ...(from ? { from } : {}),
+      ...(to ? { to } : {})
+    }),
     getQuote()
   ]);
 
-  const bars = Array.isArray(br.data?.bars) ? br.data.bars : [];
+  let bars = Array.isArray(br.data?.bars) ? br.data.bars : [];
+  if (aggregateBy > 1) {
+    bars = aggregateBars(bars, aggregateBy);
+  }
+
   if (!bars.length) throw new Error("Biquote não devolveu candles XAUUSD");
 
   const candles = clean(bars.map(b => ({
@@ -138,7 +176,7 @@ async function fetchCandles(timeframe, requestedLimit = 500, from = null, to = n
     realOpenBar,
     liveM1: timeframe === "1m" && realOpenBar && quoteFresh && !stale,
     oandaLive: false,
-    feedNotice: "XAUUSD/MT5 com candle OHLC real; M1 usa apenas o candle aberto oficial do feed; nenhum candle é inventado; M5/M15/H1 permanecem oficiais; TradingView mostra OANDA:XAUUSD"
+    feedNotice: "XAUUSD/MT5 com candle OHLC real; M1 usa apenas o candle aberto oficial do feed; M3 é agregado a partir do feed 1m; M5/M15/H1 permanecem oficiais; TradingView mostra OANDA:XAUUSD"
   };
 }
 
