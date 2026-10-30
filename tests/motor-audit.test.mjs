@@ -156,10 +156,27 @@ test("IA exclui BE legado sem prova de retorno à entrada e mantém BE validado 
 });
 
 
-test("filter UI presents EMA, ATR and RSI separately with actual values", () => { assert.match(appSource, /metricBox\\('EMA \\(valores reais\\)'/); assert.match(appSource, /metricBox\\('ATR \\(14\\)'/); assert.match(appSource, /metricBox\\('RSI \\(14\\)'/); assert.match(appSource, /metric\\(a\\.ema9\\)/); assert.match(appSource, /metric\\(a\\.ema21\\)/); assert.match(appSource, /metric\\(a\\.atr,4\\)/); assert.match(appSource, /metric\\(a\\.rsi\\)/); assert.doesNotMatch(appSource, /box\\('EMA \\/ RSI \\/ ATR'/); });
+test("filter UI presents EMA, ATR and RSI separately with actual values", () => {
+  assert.ok(appSource.includes("metricBox('EMA (valores reais)'"));
+  assert.ok(appSource.includes("metricBox('ATR (14)'"));
+  assert.ok(appSource.includes("metricBox('RSI (14)'"));
+  assert.ok(appSource.includes("metric(a.ema9)"));
+  assert.ok(appSource.includes("metric(a.ema21)"));
+  assert.ok(appSource.includes("metric(a.atr,4)"));
+  assert.ok(appSource.includes("metric(a.rsi)"));
+  assert.equal(appSource.includes("box('EMA / RSI / ATR'"), false);
+});
 
-test("app win rate excludes BE from the WIN/LOSS denominator", () => { assert.match(appSource, /decided\\?\\(\\(w\\/decided\\*100\\)/); });
+test("app win rate excludes BE from the WIN/LOSS denominator", () => {
+  assert.ok(appSource.includes("rate.textContent=decided?((w/decided*100).toFixed(1)+'%'):'—'"));
+});
 
-test("history merge preserves complete BE activation and exit metadata", () => { const source=read("public/history-v2.js"); for(const field of ["beArmedAt","beTriggeredAt","beTriggerPrice","beExitPrice","beTriggerPriceAt"]) assert.match(source,new RegExp(field+":prev\\.")); });
+test("history merge preserves complete BE activation and exit metadata", () => {
+  const source=read("public/history-v2.js");
+  for (const field of ["beArmedAt","beTriggeredAt","beTriggerPrice","beExitPrice","beTriggerPriceAt"]) assert.ok(source.includes(field+":prev."));
+});
 
-test("BE alert stores the exact 50 percent threshold", () => { assert.match(appSource, /beTriggerPrice=entry\\+\\(t\\.type===/); assert.match(appSource, /beArmedAt=new Date/); });
+test("BE alert stores the exact 50 percent threshold", () => {
+  assert.ok(appSource.includes('beTriggerPrice=entry+(t.type==="BUY"?1:-1)*trigger'));
+  assert.ok(appSource.includes("beArmedAt=new Date().toISOString()"));
+});
