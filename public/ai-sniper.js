@@ -1,6 +1,8 @@
 (()=>{const KEY="rb_gold_sniper_ai_v5",MAX_HISTORY=1000,FILTER_PWIN=.57,FILTER_SCORE=62,MODEL_VERSION="RB-TRADER-PRO-HYBRID-v6";
 const n=(v,d=0)=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(+v)?+v:d,up=v=>String(v||"").toUpperCase(),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function resolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS'].includes(up(t?.status))).slice(0,MAX_HISTORY):[]}catch{return[]}}
+function rawResolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS','BE'].includes(up(t?.status))).slice(0,MAX_HISTORY):[]}catch{return[]}}
+function verifiedBE(t){const entry=n(t?.price,NaN),exit=n(t?.beExitPrice,NaN);return up(t?.status)==="BE"&&t?.beArmedAt!=null&&t?.beTriggeredAt!=null&&Number.isFinite(entry)&&Number.isFinite(exit)&&Math.abs(exit-entry)<=0.000001}
+function resolved(){return rawResolved().filter(t=>up(t.status)!=="BE"||verifiedBE(t))}
 function outcome(s){return up(s)==="WIN"?1:up(s)==="LOSS"?0:.5}
 function direction(a){return up(a?.type)==="SELL"?"SELL":"BUY"}
 function features(a){
@@ -92,17 +94,17 @@ function independentOpportunity(ctx){
 function rrSafe(a){return n(a?.rr1,n(a?.rr,0))}
 function attach(a,ctx){if(!a)return a;if(["BUY","SELL"].includes(up(a.type))){const x=evaluate(a);return{...a,ai:x,aiScore:x.score,aiWinRate:x.pWin,aiOpinion:x.opinion,aiRecommendation:x.recommendation,aiFeatures:x.aiFeatures,aiModelVersion:MODEL_VERSION}}const opp=independentOpportunity(ctx);return{...a,aiOpportunity:opp,ai:opp?.ai||{mode:"OPINIÃO",score:0,pWin:null,samples:resolved().length,recommendation:"SEM OPORTUNIDADE",opinion:"A IA está a analisar o mercado independentemente dos filtros.",reasons:[]},aiModelVersion:MODEL_VERSION}}
 function auditHistory(){
- const trades=resolved(),groups={};
- const add=(name,key,t)=>{const id=String(key??"indisponível");groups[name]??={};groups[name][id]??={samples:0,wins:0,losses:0};const b=groups[name][id];b.samples++;if(up(t.status)==="WIN")b.wins++;else if(up(t.status)==="LOSS")b.losses++};
+ const raw=rawResolved(),trades=resolved(),unverifiedBes=raw.filter(t=>up(t.status)==="BE"&&!verifiedBE(t)).length,groups={};
+ const add=(name,key,t)=>{const id=String(key??"indisponível");groups[name]??={};groups[name][id]??={samples:0,wins:0,losses:0,bes:0};const b=groups[name][id];b.samples++;if(up(t.status)==="WIN")b.wins++;else if(up(t.status)==="LOSS")b.losses++;else if(up(t.status)==="BE")b.bes++};
  for(const t of trades){
   const f=t.aiFeatures&&t.aiModelVersion===MODEL_VERSION?t.aiFeatures:features(t),ts=Date.parse(t.signalTimestamp||t.time||t.createdAt||"");
   const rsi=n(t.rsi,NaN),adx=n(t.adx14,NaN),confidence=n(t.ai?.score??t.technicalScore??t.confidence,NaN),hour=Number.isFinite(ts)?Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Lisbon",hour:"2-digit",hourCycle:"h23"}).format(new Date(ts))):NaN;
   const source=up(t.source||t.signalKind||t.ai?.source||"SNIPER"),direction=up(t.type||f.dir),rsiBand=Number.isFinite(rsi)?rsi<35?"RSI<35":rsi<40?"RSI 35-39":rsi<60?"RSI 40-59":rsi<75?"RSI 60-74":"RSI>=75":"indisponível",adxBand=Number.isFinite(adx)?adx<20?"ADX<20":adx<25?"ADX 20-24":"ADX>=25":"indisponível",volume=Number.isFinite(+t.volume)&&Number.isFinite(+t.volumeSma20)?(+t.volume>+t.volumeSma20?"volume>SMA20":"volume<=SMA20"):"volume indisponível",alignment=Number.isFinite(+f.align)?String(f.align)+"/3 alinhados":"alinhamento indisponível",session=Number.isFinite(hour)?hour<8?"Lisboa 00-07":hour<14?"Lisboa 08-13":hour<21?"Lisboa 14-20":"Lisboa 21-23":"hora indisponível",confidenceBand=Number.isFinite(confidence)?confidence<50?"score<50":confidence<62?"score 50-61":confidence<75?"score 62-74":"score>=75":"score indisponível";
   add("source",source,t);add("direction",direction,t);add("confidenceBand",confidenceBand,t);add("rsiBand",rsiBand,t);add("adxBand",adxBand,t);add("volume",volume,t);add("alignment",alignment,t);add("sessionLisbon",session,t);
  }
- const summarize=map=>Object.fromEntries(Object.entries(map).map(([k,v])=>[k,{...v,winRate:v.samples?Math.round(v.wins/v.samples*1000)/10:null}]));
- const wins=trades.filter(t=>up(t.status)==="WIN").length;
- return{samples:trades.length,wins,losses:trades.length-wins,winRate:trades.length?Math.round(wins/trades.length*1000)/10:null,bySource:summarize(groups.source||{}),byDirection:summarize(groups.direction||{}),byConfidence:summarize(groups.confidenceBand||{}),byRsiBand:summarize(groups.rsiBand||{}),byAdxBand:summarize(groups.adxBand||{}),byVolume:summarize(groups.volume||{}),byAlignment:summarize(groups.alignment||{}),bySessionLisbon:summarize(groups.sessionLisbon||{}),note:"Análise descritiva do histórico resolvido; não é backtest fora da amostra nem probabilidade calibrada."};
+ const summarize=map=>Object.fromEntries(Object.entries(map).map(([k,v])=>{const decided=v.wins+v.losses;return[k,{...v,winRate:decided?Math.round(v.wins/decided*1000)/10:null,neutralRate:v.samples?Math.round(v.bes/v.samples*1000)/10:null}]}));
+ const wins=trades.filter(t=>up(t.status)==="WIN").length,losses=trades.filter(t=>up(t.status)==="LOSS").length,bes=trades.filter(t=>up(t.status)==="BE").length,decided=wins+losses;
+ return{samples:trades.length,wins,losses,bes,unverifiedBes,winRate:decided?Math.round(wins/decided*1000)/10:null,neutralRate:trades.length?Math.round(bes/trades.length*1000)/10:null,bySource:summarize(groups.source||{}),byDirection:summarize(groups.direction||{}),byConfidence:summarize(groups.confidenceBand||{}),byRsiBand:summarize(groups.rsiBand||{}),byAdxBand:summarize(groups.adxBand||{}),byVolume:summarize(groups.volume||{}),byAlignment:summarize(groups.alignment||{}),bySessionLisbon:summarize(groups.sessionLisbon||{}),note:"Análise descritiva; BE validado é neutro. BE legado sem prova de retorno à entrada é excluído da amostra. não é backtest fora da amostra nem probabilidade calibrada."};
 }
-function learn(){const rs=rows();return{samples:rs.length,baseWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):null,trained:rs.length>0,modelVersion:MODEL_VERSION}}
+function learn(){const rs=rows(),wins=rs.filter(r=>r.status==="WIN").length,losses=rs.filter(r=>r.status==="LOSS").length,bes=rs.filter(r=>r.status==="BE").length,decided=wins+losses;return{samples:rs.length,wins,losses,bes,baseWinRate:decided?Math.round(wins/decided*100):null,neutralRate:rs.length?Math.round(bes/rs.length*100):null,trained:rs.length>0,modelVersion:MODEL_VERSION}}
 window.RBTraderProAI={evaluate,attach,independentOpportunity,learn,auditHistory,features,constants:{FILTER_PWIN,FILTER_SCORE,MAX_HISTORY,KEY,MODEL:MODEL_VERSION}};learn()})();

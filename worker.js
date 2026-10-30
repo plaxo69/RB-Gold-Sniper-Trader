@@ -39,6 +39,7 @@ async function getHistory(env, limit=1000) {
 }
 function keyOf(t){return t?.signalKey||t?.key||((t?.type||"")+"-"+(t?.signalTimestamp||t?.time||""))}
 function timeOf(t){const n=Date.parse(t?.signalTimestamp??t?.time??0);return Number.isFinite(n)?n:0}
+function mergeReplayCandles(a,b){const map=new Map();for(const c of [...(Array.isArray(a)?a:[]),...(Array.isArray(b)?b:[])]){const n=Date.parse(c?.timestamp);if(Number.isFinite(n))map.set(n,c)}return [...map.entries()].sort((x,y)=>x[0]-y[0]).slice(-500).map(x=>x[1])}
 async function saveHistory(env, incoming) {
   const branch=historyBranch(env);
   const path=`${HISTORY_PATH}?ref=${encodeURIComponent(branch)}`;
@@ -63,8 +64,15 @@ async function saveHistory(env, incoming) {
       beAlerted:!!(old.beAlerted||t.beAlerted),
       beArmed:!!(old.beArmed||t.beArmed),
       bePushSent:!!(old.bePushSent||t.bePushSent),
+      beArmedAt:old.beArmedAt||t.beArmedAt,
       beTriggeredAt:old.beTriggeredAt||t.beTriggeredAt,
       beTriggerPrice:old.beTriggerPrice!=null?old.beTriggerPrice:t.beTriggerPrice,
+      beExitPrice:old.beExitPrice!=null?old.beExitPrice:t.beExitPrice,
+      beTriggerPriceAt:old.beTriggerPriceAt||t.beTriggerPriceAt,
+      beReturnedAt:old.beReturnedAt||t.beReturnedAt,
+      replayCandles:mergeReplayCandles(old.replayCandles,t.replayCandles),
+      replayCandlesM5:mergeReplayCandles(old.replayCandlesM5,t.replayCandlesM5),
+      replayCandlesM15:mergeReplayCandles(old.replayCandlesM15,t.replayCandlesM15),
       beAlertMessage:old.beAlertMessage||t.beAlertMessage
     });
   }
