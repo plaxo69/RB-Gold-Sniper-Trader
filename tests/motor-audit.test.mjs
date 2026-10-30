@@ -153,6 +153,8 @@ test("IA exclui BE legado sem prova de retorno à entrada e mantém BE validado 
   assert.equal(report.samples, 2);
   assert.equal(report.winRate, 100);
   assert.equal(ai.learn().samples, 2);
+  assert.equal(ai.learn().baseWinRate, 100);
+  assert.equal(ai.learn().neutralRate, 50);
 });
 
 
@@ -180,3 +182,6 @@ test("BE alert stores the exact 50 percent threshold", () => {
   assert.ok(appSource.includes('beTriggerPrice=entry+(t.type==="BUY"?1:-1)*trigger'));
   assert.ok(appSource.includes("beArmedAt=new Date().toISOString()"));
 });
+
+
+test("history UI merge keeps BE activation and exit metadata", () => { const source=read("public/history-ui.js"); for (const field of ["beArmedAt","beTriggeredAt","beTriggerPrice","beExitPrice","beTriggerPriceAt","beReturnedAt"]) assert.ok(source.includes(field+":prev.")); });
