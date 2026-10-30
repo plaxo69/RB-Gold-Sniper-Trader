@@ -48,7 +48,7 @@ test('HTML carrega a versão atual do motor Sniper', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
   assert.match(html, /sniper-v2\.js\?v=23/);
   assert.doesNotMatch(html, /sniper-v2\.js\?v=20/);
-  assert.match(html, /history-ui\.js\?v=11/);
+  assert.match(html, /history-ui\.js\?v=12/);
 });
 
 test('histórico consegue construir fotografia para registos antigos com indicadores guardados', async () => {
@@ -59,7 +59,7 @@ test('histórico consegue construir fotografia para registos antigos com indicad
 
 test('cache do histórico inclui a versão atual da sincronização', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
-  assert.match(html, /history-v2\.js\?v=11/);
+  assert.match(html, /history-v2\.js\?v=12/);
 });
 
 test('sincronização preserva o primeiro resultado final em conflitos', async () => {
