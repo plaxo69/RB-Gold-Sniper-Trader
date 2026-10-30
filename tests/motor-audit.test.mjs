@@ -181,6 +181,7 @@ test("history merge preserves complete BE activation and exit metadata", () => {
 test("BE alert stores the exact 50 percent threshold", () => {
   assert.ok(appSource.includes('beTriggerPrice=entry+(t.type==="BUY"?1:-1)*trigger'));
   assert.ok(appSource.includes("beArmedAt=new Date().toISOString()"));
+  assert.ok(appSource.includes("const trigger=tpDistance*0.50"));
 });
 
 
