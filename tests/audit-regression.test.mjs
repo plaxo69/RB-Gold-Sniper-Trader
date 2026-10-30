@@ -55,4 +55,5 @@ test('o Worker preserva a fotografia ao gravar resultados no GitHub', async () =
   const worker = await read('../worker.js');
   assert.match(worker, /indicatorSnapshot:chosen\.indicatorSnapshot\|\|old\.indicatorSnapshot\|\|t\.indicatorSnapshot/);
   assert.match(worker, /beAlerted:!!\(old\.beAlerted\|\|t\.beAlerted\)/);
+  for (const field of ["beArmedAt","beTriggeredAt","beTriggerPrice","beExitPrice","beTriggerPriceAt","beReturnedAt","replayCandles","replayCandlesM5","replayCandlesM15"]) assert.ok(worker.includes(field+":mergeReplayCandles") || worker.includes(field+":old."));
 });
