@@ -12,52 +12,86 @@ function toNumber(value, fallback = null) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function safeParseJson(str, fallback = null) {
+  if (typeof str !== 'string' || !str.trim()) return fallback;
+  try {
+    return JSON.parse(str);
+  } catch (error) {
+    return fallback;
+  }
+}
+
 function normalizeTrade(trade) {
   if (!trade || typeof trade !== 'object') return null;
   const type = String(trade.type || '').toUpperCase();
+  const normalizedType = ['BUY', 'SELL'].includes(type) ? type : trade.type || 'UNKNOWN';
+  const status = String(trade.status || 'ALERTA').toUpperCase();
+
   return {
     ...trade,
-    type: ['BUY', 'SELL'].includes(type) ? type : trade.type,
-    status: String(trade.status || 'ALERTA').toUpperCase(),
+    type: normalizedType,
+    status: ['WIN', 'LOSS', 'ALERTA', 'BE'].includes(status) ? status : 'ALERTA',
     price: toNumber(trade.price, null),
     tp: toNumber(trade.tp, null),
     sl: toNumber(trade.sl, null),
     signalTimestamp: trade.signalTimestamp || trade.time || null,
-    signalKey: trade.signalKey || trade.key || `${type}-${trade.signalTimestamp || trade.time || Date.now()}`
+    signalKey: trade.signalKey || trade.key || `${normalizedType}-${trade.signalTimestamp || trade.time || Date.now()}`
   };
 }
 
 function parseHistoryPayload(payload) {
-  if (Array.isArray(payload)) return { trades: payload.map(normalizeTrade).filter(Boolean), sha: null, exportedAt: null };
-  if (payload && Array.isArray(payload.trades)) return { trades: payload.trades.map(normalizeTrade).filter(Boolean), sha: payload.sha || null, exportedAt: payload.exportedAt || null };
-  return { trades: [], sha: payload?.sha || null, exportedAt: payload?.exportedAt || null };
+  if (Array.isArray(payload)) {
+    return { trades: payload.map(normalizeTrade).filter(Boolean), sha: null, exportedAt: null };
+  }
+
+  if (payload && Array.isArray(payload.trades)) {
+    return {
+      trades: payload.trades.map(normalizeTrade).filter(Boolean),
+      sha: payload.sha || null,
+      exportedAt: payload.exportedAt || null
+    };
+  }
+
+  return {
+    trades: [],
+    sha: payload?.sha || null,
+    exportedAt: payload?.exportedAt || null
+  };
 }
 
 async function readHistoryFromGitHub() {
-  const r = await fetch(`${API}/repos/${REPO}/contents/${PATH}?ref=${BRANCH}`, {
-    headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN || ''}`,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      'User-Agent': 'RB-TRADER-PRO'
-    }
-  });
+  const headers = {
+    Authorization: `Bearer ${process.env.GITHUB_TOKEN || ''}`,
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': 'RB-TRADER-PRO'
+  };
 
+  const r = await fetch(`${API}/repos/${REPO}/contents/${PATH}?ref=${BRANCH}`, { headers });
   if (r.status === 404) return { trades: [], sha: null, exportedAt: null };
+
   const data = await r.json();
   if (!r.ok) throw new Error(data?.message || 'Falha ao ler histórico do GitHub.');
 
   if (data?.content) {
     const raw = Buffer.from(data.content, 'base64').toString('utf8');
-    const parsed = JSON.parse(raw);
+    const parsed = safeParseJson(raw, null);
+    if (!parsed) {
+      return { trades: [], sha: data.sha || null, exportedAt: null, parseError: 'JSON inválido no GitHub.' };
+    }
     return { ...parseHistoryPayload(parsed), sha: data.sha || null, exportedAt: parsed?.exportedAt || null };
   }
 
   const rawUrl = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${PATH}`;
   const rawRes = await fetch(rawUrl, { headers: { 'User-Agent': 'RB-TRADER-PRO' } });
-  if (!rawRes.ok) return { trades: [], sha: null, exportedAt: null };
-  const rawBody = await rawRes.text();
-  const parsed = JSON.parse(rawBody);
+  if (!rawRes.ok) return { trades: [], sha: data?.sha || null, exportedAt: null };
+
+  const rawText = await rawRes.text();
+  const parsed = safeParseJson(rawText, null);
+  if (!parsed) {
+    return { trades: [], sha: data?.sha || null, exportedAt: null, parseError: 'JSON inválido em raw.githubusercontent.com.' };
+  }
+
   return { ...parseHistoryPayload(parsed), sha: data?.sha || null, exportedAt: parsed?.exportedAt || null };
 }
 
@@ -69,8 +103,8 @@ async function writeHistoryToGitHub(trades, sha) {
     exportedAt: new Date().toISOString(),
     source: 'RB TRADER PRO',
     formatVersion: 2,
-    total: trades.length,
-    trades
+    total: Array.isArray(trades) ? trades.length : 0,
+    trades: Array.isArray(trades) ? trades : []
   };
 
   const body = {
@@ -135,9 +169,14 @@ async function getTradesList(limit = 1000) {
 }
 
 async function resolveTrades() {
-  const { trades, sha } = await readHistoryFromGitHub();
+  const history = await readHistoryFromGitHub();
+  const trades = Array.isArray(history.trades) ? history.trades : [];
   const market = await require('./market').getMarket('1m');
-  const currentPrice = Number(market?.price ?? market?.last?.close ?? market?.candles?.at(-1)?.close);
+  const currentPrice = Number(market?.price ?? market?.last?.close ?? market?.candles?.at(-1)?.close ?? NaN);
+
+  if (!Number.isFinite(currentPrice)) {
+    return { ok: true, resolved: 0, updated: false, price: null, trades };
+  }
 
   let resolved = 0;
   const next = trades.map((trade) => {
@@ -160,7 +199,7 @@ async function resolveTrades() {
   });
 
   if (resolved > 0) {
-    await writeHistoryToGitHub(next, sha);
+    await writeHistoryToGitHub(next, history.sha);
   }
 
   return {
