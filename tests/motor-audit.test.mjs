@@ -186,3 +186,24 @@ test("BE alert stores the exact 50 percent threshold", () => {
 
 
 test("history UI merge keeps BE activation and exit metadata", () => { const source=read("public/history-ui.js"); for (const field of ["beArmedAt","beTriggeredAt","beTriggerPrice","beExitPrice","beTriggerPriceAt","beReturnedAt"]) assert.ok(source.includes(field+":prev.")); });
+
+
+test("render do filtro mostra os valores numéricos reais em três cartões separados", () => {
+  const nodes = new Map();
+  const document = {
+    getElementById(id) { if (!nodes.has(id)) nodes.set(id, { textContent: "", innerHTML: "", className: "" }); return nodes.get(id); },
+    querySelector() { return null; },
+    addEventListener() {}
+  };
+  const context = { document, window: {}, localStorage: { getItem: () => "[]" }, console };
+  vm.runInNewContext(appSource, context, { filename: "public/app-v4.js" });
+  context.render({
+    type: "WAIT", price: 4010.5, rsi: 42.56, formingRsi: 44.3, atr: 1.2345,
+    ema9: 4011.2, ema20: 4012.0, ema21: 4012.4, ema50: 4013.5, ema200: 4015.0,
+    trend5: "ALTA", trend15: "BAIXA", trendH1: "ALTA", rejectionReasons: [],
+    filters: { marketIsTradable: true, buyReversalRSI: true, buyMomentumRSI: false, sellReversalRSI: false, sellMomentumRSI: true }
+  });
+  const html = nodes.get("filter-status").innerHTML;
+  for (const value of ["EMA (valores reais)", "4011.20", "4012.40", "ATR (14)", "1.2345", "RSI (14)", "42.56", "44.30"]) assert.ok(html.includes(value), value);
+  assert.equal((html.match(/filter-metric-values/g) || []).length, 3);
+});
