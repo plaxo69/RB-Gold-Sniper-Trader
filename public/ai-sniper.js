@@ -1,7 +1,7 @@
 (()=>{const KEY="rb_gold_sniper_ai_v5",MAX_HISTORY=1000,FILTER_PWIN=.57,FILTER_SCORE=62,MODEL_VERSION="RB-TRADER-PRO-HYBRID-v6";
 const n=(v,d=0)=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(+v)?+v:d,up=v=>String(v||"").toUpperCase(),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function rawResolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS','BE'].includes(up(t?.status))).slice(0,MAX_HISTORY):[]}catch{return[]}}
-function verifiedBE(t){return up(t?.status)==="BE"&&t?.beArmedAt!=null&&t?.beTriggeredAt!=null&&t?.beExitPrice!=null&&Number.isFinite(Number(t?.beExitPrice))}
+function verifiedBE(t){const entry=n(t?.price,NaN),exit=n(t?.beExitPrice,NaN);return up(t?.status)==="BE"&&t?.beArmedAt!=null&&t?.beTriggeredAt!=null&&Number.isFinite(entry)&&Number.isFinite(exit)&&Math.abs(exit-entry)<=0.000001}
 function resolved(){return rawResolved().filter(t=>up(t.status)!=="BE"||verifiedBE(t))}
 function outcome(s){return up(s)==="WIN"?1:up(s)==="LOSS"?0:.5}
 function direction(a){return up(a?.type)==="SELL"?"SELL":"BUY"}
