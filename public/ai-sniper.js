@@ -1,6 +1,6 @@
 (()=>{const KEY="rb_gold_sniper_ai_v5",MAX_HISTORY=1000,FILTER_PWIN=.57,FILTER_SCORE=62,MODEL_VERSION="RB-TRADER-PRO-HYBRID-v6";
 const n=(v,d=0)=>v!==null&&v!==undefined&&v!==""&&Number.isFinite(+v)?+v:d,up=v=>String(v||"").toUpperCase(),clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function resolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS','BE'].includes(up(t?.status))).slice(0,MAX_HISTORY):[]}catch{return[]}}
+function rawResolved(){try{const x=JSON.parse(localStorage.getItem("rb_gold_sniper_signals_v1")||"[]");return Array.isArray(x)?x.filter(t=>['WIN','LOSS','BE'].includes(up(t?.status))).slice(0,MAX_HISTORY):[]}catch{return[]}}\nfunction verifiedBE(t){return up(t?.status)==="BE"&&t?.beArmedAt!=null&&t?.beTriggeredAt!=null&&Number.isFinite(Number(t?.beExitPrice))}\nfunction resolved(){return rawResolved().filter(t=>up(t.status)!=="BE"||verifiedBE(t))}
 function outcome(s){return up(s)==="WIN"?1:up(s)==="LOSS"?0:.5}
 function direction(a){return up(a?.type)==="SELL"?"SELL":"BUY"}
 function features(a){
@@ -92,7 +92,7 @@ function independentOpportunity(ctx){
 function rrSafe(a){return n(a?.rr1,n(a?.rr,0))}
 function attach(a,ctx){if(!a)return a;if(["BUY","SELL"].includes(up(a.type))){const x=evaluate(a);return{...a,ai:x,aiScore:x.score,aiWinRate:x.pWin,aiOpinion:x.opinion,aiRecommendation:x.recommendation,aiFeatures:x.aiFeatures,aiModelVersion:MODEL_VERSION}}const opp=independentOpportunity(ctx);return{...a,aiOpportunity:opp,ai:opp?.ai||{mode:"OPINIÃO",score:0,pWin:null,samples:resolved().length,recommendation:"SEM OPORTUNIDADE",opinion:"A IA está a analisar o mercado independentemente dos filtros.",reasons:[]},aiModelVersion:MODEL_VERSION}}
 function auditHistory(){
- const trades=resolved(),groups={};
+ const raw=rawResolved(),trades=resolved(),unverifiedBes=raw.filter(t=>up(t.status)==="BE"&&!verifiedBE(t)).length,groups={};
  const add=(name,key,t)=>{const id=String(key??"indisponível");groups[name]??={};groups[name][id]??={samples:0,wins:0,losses:0,bes:0};const b=groups[name][id];b.samples++;if(up(t.status)==="WIN")b.wins++;else if(up(t.status)==="LOSS")b.losses++;else if(up(t.status)==="BE")b.bes++};
  for(const t of trades){
   const f=t.aiFeatures&&t.aiModelVersion===MODEL_VERSION?t.aiFeatures:features(t),ts=Date.parse(t.signalTimestamp||t.time||t.createdAt||"");
@@ -102,7 +102,7 @@ function auditHistory(){
  }
  const summarize=map=>Object.fromEntries(Object.entries(map).map(([k,v])=>{const decided=v.wins+v.losses;return[k,{...v,winRate:decided?Math.round(v.wins/decided*1000)/10:null,neutralRate:v.samples?Math.round(v.bes/v.samples*1000)/10:null}]}));
  const wins=trades.filter(t=>up(t.status)==="WIN").length,losses=trades.filter(t=>up(t.status)==="LOSS").length,bes=trades.filter(t=>up(t.status)==="BE").length,decided=wins+losses;
- return{samples:trades.length,wins,losses,bes,winRate:decided?Math.round(wins/decided*1000)/10:null,neutralRate:trades.length?Math.round(bes/trades.length*1000)/10:null,bySource:summarize(groups.source||{}),byDirection:summarize(groups.direction||{}),byConfidence:summarize(groups.confidenceBand||{}),byRsiBand:summarize(groups.rsiBand||{}),byAdxBand:summarize(groups.adxBand||{}),byVolume:summarize(groups.volume||{}),byAlignment:summarize(groups.alignment||{}),bySessionLisbon:summarize(groups.sessionLisbon||{}),note:"Análise descritiva; BE é neutro, não conta como vitória nem derrota. não é backtest fora da amostra nem probabilidade calibrada."};
+ return{samples:trades.length,wins,losses,bes,unverifiedBes,winRate:decided?Math.round(wins/decided*1000)/10:null,neutralRate:trades.length?Math.round(bes/trades.length*1000)/10:null,bySource:summarize(groups.source||{}),byDirection:summarize(groups.direction||{}),byConfidence:summarize(groups.confidenceBand||{}),byRsiBand:summarize(groups.rsiBand||{}),byAdxBand:summarize(groups.adxBand||{}),byVolume:summarize(groups.volume||{}),byAlignment:summarize(groups.alignment||{}),bySessionLisbon:summarize(groups.sessionLisbon||{}),note:"Análise descritiva; BE validado é neutro. BE legado sem prova de retorno à entrada é excluído da amostra. não é backtest fora da amostra nem probabilidade calibrada."};
 }
 function learn(){const rs=rows();return{samples:rs.length,baseWinRate:rs.length?Math.round(rs.reduce((s,r)=>s+r.y,0)/rs.length*100):null,trained:rs.length>0,modelVersion:MODEL_VERSION}}
 window.RBTraderProAI={evaluate,attach,independentOpportunity,learn,auditHistory,features,constants:{FILTER_PWIN,FILTER_SCORE,MAX_HISTORY,KEY,MODEL:MODEL_VERSION}};learn()})();
