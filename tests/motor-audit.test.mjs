@@ -208,3 +208,40 @@ test("render do filtro mostra os valores numéricos reais em três cartões sepa
   for (const value of ["EMA (valores reais)", "4011.20", "4012.40", "ATR (14)", "1.2345", "RSI (14)", "42.56", "44.30"]) assert.ok(html.includes(value), value);
   assert.equal((html.match(/filter-metric-values/g) || []).length, 3);
 });
+
+ 
+test("history archives closed OHLCV candles across polls and resolves BE from the archive", () => {
+  const initial = [{ type: "BUY", status: "ALERTA", signalTimestamp: "2026-01-01T00:00:00Z", price: 100, sl: 98, tp: 106, key: "BUY-2026-01-01T00:00:00Z" }];
+  const store = new Map([["rb_gold_sniper_signals_v1", JSON.stringify(initial)]]);
+  const context = {
+    localStorage: { getItem: k => store.get(k) ?? "[]", setItem: (k,v) => store.set(k,v) },
+    fetch: async () => new Response("{}", { status: 200 }),
+    addEventListener: () => {},
+    dispatchEvent: () => {},
+    CustomEvent: class { constructor(type, init) { this.type=type; this.detail=init?.detail; } },
+    console
+  };
+  context.window = context;
+  vm.runInNewContext(read("public/trade-outcome.js"), context);
+  vm.runInNewContext(read("public/history-v2.js"), context);
+  const first = [
+    { timestamp: "2026-01-01T00:01:00Z", open: 100, high: 104, low: 102, close: 103, volume: 12 },
+    { timestamp: "2026-01-01T00:02:00Z", open: 103, high: 103, low: 102, close: 102.5, volume: 10 }
+  ];
+  context.RBResolveTrades(first);
+  let trade = JSON.parse(store.get("rb_gold_sniper_signals_v1"))[0];
+  assert.equal(trade.status, "ALERTA");
+  assert.equal(trade.replayCandles.length, 1);
+  const second = [
+    ...first.slice(0,1),
+    { timestamp: "2026-01-01T00:02:00Z", open: 103, high: 103, low: 100, close: 100.5, volume: 15 },
+    { timestamp: "2026-01-01T00:03:00Z", open: 100.5, high: 101, low: 100.2, close: 100.8, volume: 8 }
+  ];
+  context.RBResolveTrades(second);
+  trade = JSON.parse(store.get("rb_gold_sniper_signals_v1"))[0];
+  assert.equal(trade.status, "BE");
+  assert.equal(trade.beExitPrice, 100);
+  assert.equal(trade.replayCandles.length, 2);
+  assert.equal(trade.replayCandles[0].volume, 12);
+  assert.equal(trade.replayCandles[1].low, 100);
+});
