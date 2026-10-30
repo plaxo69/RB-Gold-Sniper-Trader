@@ -12,10 +12,10 @@ function toNumber(value, fallback = null) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-function safeParseJson(str, fallback = null) {
-  if (typeof str !== 'string' || !str.trim()) return fallback;
+function safeParseJson(raw, fallback = null) {
+  if (typeof raw !== 'string' || !raw.trim()) return fallback;
   try {
-    return JSON.parse(str);
+    return JSON.parse(raw);
   } catch (error) {
     return fallback;
   }
@@ -24,7 +24,7 @@ function safeParseJson(str, fallback = null) {
 function normalizeTrade(trade) {
   if (!trade || typeof trade !== 'object') return null;
   const type = String(trade.type || '').toUpperCase();
-  const normalizedType = ['BUY', 'SELL'].includes(type) ? type : trade.type || 'UNKNOWN';
+  const normalizedType = ['BUY', 'SELL'].includes(type) ? type : 'WAIT';
   const status = String(trade.status || 'ALERTA').toUpperCase();
 
   return {
@@ -171,9 +171,15 @@ async function getTradesList(limit = 1000) {
 async function resolveTrades() {
   const history = await readHistoryFromGitHub();
   const trades = Array.isArray(history.trades) ? history.trades : [];
-  const market = await require('./market').getMarket('1m');
-  const currentPrice = Number(market?.price ?? market?.last?.close ?? market?.candles?.at(-1)?.close ?? NaN);
 
+  let market = null;
+  try {
+    market = await require('./market').getMarket('1m');
+  } catch (error) {
+    return { ok: true, resolved: 0, updated: false, price: null, trades };
+  }
+
+  const currentPrice = Number(market?.price ?? market?.last?.close ?? market?.candles?.at(-1)?.close ?? NaN);
   if (!Number.isFinite(currentPrice)) {
     return { ok: true, resolved: 0, updated: false, price: null, trades };
   }
