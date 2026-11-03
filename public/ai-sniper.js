@@ -93,7 +93,7 @@ function rrSafe(a){return n(a?.rr1,n(a?.rr,0))}
 function attach(a,ctx){if(!a)return a;if(["BUY","SELL"].includes(up(a.type))){const x=evaluate(a);return{...a,ai:x,aiScore:x.score,aiWinRate:x.pWin,aiOpinion:x.opinion,aiRecommendation:x.recommendation,aiFeatures:x.aiFeatures,aiModelVersion:MODEL_VERSION}}const opp=independentOpportunity(ctx);return{...a,aiOpportunity:opp,ai:opp?.ai||{mode:"OPINIÃO",score:0,pWin:null,samples:resolved().length,recommendation:"SEM OPORTUNIDADE",opinion:"A IA está a analisar o mercado independentemente dos filtros.",reasons:[]},aiModelVersion:MODEL_VERSION}}
 function auditHistory(){
  const trades=resolved(),groups={};
- const add=(name,key,t)=>{const id=String(key??"indisponível");groups[name]??={};groups[name][id]??={samples:0,wins:0,losses:0};const b=groups[name][id];b.samples++;if(up(t.status)==="WIN")b.wins++;else if(up(t.status)==="LOSS")b.losses++};
+ const add=(name,key,t)=>{const id=String(key??"indisponível");groups[name]??={};groups[name][id]??={samples:0,wins:0,losses:0,bes:0,outcomePoints:0};const b=groups[name][id];b.samples++;b.outcomePoints+=outcome(t.status);if(up(t.status)==="WIN")b.wins++;else if(up(t.status)==="LOSS")b.losses++;else if(up(t.status)==="BE")b.bes++}
  for(const t of trades){
   const f=t.aiFeatures&&t.aiModelVersion===MODEL_VERSION?t.aiFeatures:features(t),ts=Date.parse(t.signalTimestamp||t.time||t.createdAt||"");
   const rsi=n(t.rsi,NaN),adx=n(t.adx14,NaN),confidence=n(t.ai?.score??t.technicalScore??t.confidence,NaN),hour=Number.isFinite(ts)?Number(new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Lisbon",hour:"2-digit",hourCycle:"h23"}).format(new Date(ts))):NaN;
