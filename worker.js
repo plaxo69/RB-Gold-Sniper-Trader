@@ -1,5 +1,7 @@
 const REPO = "plaxo69/RB-Gold-Sniper-Trader";
 const HISTORY_PATH = "historico-trades.json";
+const MAX_HISTORY_RECORDS = 10000;
+const MAX_HISTORY_PAYLOAD_BYTES = 16 * 1024 * 1024;
 // Histórico em branch dedicada: evita commits de cada trade na branch de deploy/Vercel.
 function historyBranch(env) { return String(env.GITHUB_HISTORY_BRANCH || "rb-trader-history").trim() || "rb-trader-history"; }
 const GH_API = "https://api.github.com";
@@ -89,7 +91,7 @@ async function readStoredHistory(env) {
 }
 async function getHistory(env, limit=1000) {
   const stored = await readStoredHistory(env);
-  return { ok: true, trades: stored.trades.slice(-limit), total: stored.trades.length,
+  return { ok: true, trades: [...stored.trades].sort((a,b)=>timeOf(b)-timeOf(a)).slice(0,limit), total: stored.trades.length,
     source: "github", branch: stored.branch, exportedAt: stored.exportedAt || null };
 }
 function keyOf(t) { return tradeKey(t); }
@@ -102,8 +104,8 @@ function mergeHistory(remote, incoming) {
   if (!Array.isArray(remote) || remote.some(t => !validTrade(t))) {
     throw new Error("O histórico remoto contém registos inválidos; gravação cancelada para evitar perda de dados.");
   }
-  if (!Array.isArray(incoming) || incoming.length > 500 || incoming.some(t => !validTrade(t))) {
-    throw new Error("Pedido inválido: são aceites até 500 trades validadas.");
+  if (!Array.isArray(incoming) || incoming.length > MAX_HISTORY_RECORDS || incoming.some(t => !validTrade(t))) {
+    throw new Error("Pedido inválido: limite de histórico excedido ou registos inválidos.");
   }
   const map = new Map();
   for (const t of [...remote, ...incoming]) {
@@ -137,11 +139,11 @@ function mergeHistory(remote, incoming) {
       beAlertMessage:old.beAlertMessage||t.beAlertMessage
     });
   }
-  return [...map.values()].sort((a,b)=>timeOf(b)-timeOf(a)).slice(0,500);
+  return [...map.values()].sort((a,b)=>timeOf(b)-timeOf(a));
 }
 async function saveHistory(env, incoming) {
-  if (!Array.isArray(incoming) || incoming.length > 500 || incoming.some(t => !validTrade(t))) {
-    throw new Error("Pedido inválido: são aceites até 500 trades validadas.");
+  if (!Array.isArray(incoming) || incoming.length > MAX_HISTORY_RECORDS || incoming.some(t => !validTrade(t))) {
+    throw new Error("Pedido inválido: limite de histórico excedido ou registos inválidos.");
   }
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const existing = await readStoredHistory(env);
@@ -221,7 +223,7 @@ export default {
    if(path==="/api/market"&&request.method==="GET") return json(await market(url.searchParams.get("timeframe")||"1m"));
    if(path==="/api/oanda-reference"&&request.method==="GET") {try{return json({success:true,calibrated:false,offset:0,futures:await yahooQuote("GC=F"),spot:null,source:"Yahoo Finance GC=F — referência"});}catch(e){return json({success:false,calibrated:false,offset:0,error:e.message},502);}}
    if(path==="/api/ai/opinion"&&request.method==="POST") {try{return json({success:true,...await aiOpinion(await request.json(),env),model:env.OPENAI_MODEL||"gpt-6-luna"});}catch(e){return json({success:false,available:Boolean(env.OPENAI_API_KEY),confidence:null,opinion:"NEUTRO",note:e.message},502);}}
-   if(path==="/api/trades"&&request.method==="GET") {if(!env.GITHUB_TOKEN)return json({ok:false,error:"GITHUB_TOKEN não configurado nos Secrets do Cloudflare."},503);return json(await getHistory(env,Math.min(Math.max(parseInt(url.searchParams.get("limit")||"1000",10)||1000,1),5000)));}
+   if(path==="/api/trades"&&request.method==="GET") {if(!env.GITHUB_TOKEN)return json({ok:false,error:"GITHUB_TOKEN não configurado nos Secrets do Cloudflare."},503);return json(await getHistory(env,Math.min(Math.max(parseInt(url.searchParams.get("limit")||"1000",10)||1000,1),MAX_HISTORY_RECORDS)));}
    if(path==="/api/export-history"&&request.method==="POST") {
     const origin=request.headers.get("Origin")||"";
     const fetchSite=request.headers.get("Sec-Fetch-Site")||"";
