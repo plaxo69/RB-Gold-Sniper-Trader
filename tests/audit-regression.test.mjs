@@ -31,7 +31,7 @@ test('alerta BE não fecha a trade nem cria resultado final BE', async () => {
 test('conciliação do histórico preserva a fotografia e os metadados BE', async () => {
   const history = await read('../public/history-v2.js');
   assert.match(history, /indicatorSnapshot:chosen\.indicatorSnapshot\|\|prev\.indicatorSnapshot\|\|t\.indicatorSnapshot/);
-  assert.match(history, /indicatorSnapshotVersion:/);
+  assert.match(history, /indicatorSnapshotVersion:/);\n  assert.match(history, /function snapshotFromLegacy\\(t\\)/);\n  assert.match(history, /remoteTrade\\.indicatorSnapshot/);
   assert.match(history, /beAlerted:!!\(prev\.beAlerted\|\|t\.beAlerted\)/);
 });
 
