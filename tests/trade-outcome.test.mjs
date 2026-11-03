@@ -32,19 +32,36 @@ test('resolves LOSS on SL and conservatively resolves same-candle TP+SL as LOSS'
   assert.equal(resolve(base, [candle(1, 111, 94)]).result, 'LOSS');
 });
 
-test('arms BE at 50% and only closes BE after a later candle returns to entry', () => {
+test('50% do TP apenas arma o alerta; sem confirmação manual não fecha como BE', () => {
   const result = resolve(base, [candle(1, 105, 101), candle(2, 104, 100)]);
-  assert.equal(result.result, 'BE');
+  assert.equal(result.result, undefined);
+  assert.equal(result.beArmed, true);
   assert.equal(result.beArmedAt, '2026-11-03T10:01:00.000Z');
-  assert.equal(result.beExitPrice, 100);
 });
 
-test('keeps BE armed across polling windows', () => {
-  const armed = { ...base, beArmed: true, beArmedAt: '2026-11-03T10:01:00.000Z', beTriggerPrice: 105 };
+test('mantém BE confirmado entre janelas de consulta e fecha na entrada', () => {
+  const armed = {
+    ...base,
+    beArmed: true,
+    beConfirmed: true,
+    beArmedAt: '2026-11-03T10:01:00.000Z',
+    beConfirmedAt: '2026-11-03T10:01:30.000Z',
+    beTriggerPrice: 105
+  };
   assert.equal(resolve(armed, [candle(3, 104, 100)]).result, 'BE');
 });
 
-test('mirrors BE logic for SELL trades', () => {
-  const sell = { ...base, type: 'SELL', tp: 90, sl: 105 };
-  assert.equal(resolve(sell, [candle(1, 99, 95), candle(2, 100, 96)]).result, 'BE');
+test('aplica a mesma confirmação manual BE às operações SELL', () => {
+  const sell = {
+    ...base,
+    type: 'SELL',
+    tp: 90,
+    sl: 105,
+    beArmed: true,
+    beConfirmed: true,
+    beArmedAt: '2026-11-03T10:01:00.000Z',
+    beConfirmedAt: '2026-11-03T10:01:30.000Z',
+    beTriggerPrice: 95
+  };
+  assert.equal(resolve(sell, [candle(2, 100, 96)]).result, 'BE');
 });
