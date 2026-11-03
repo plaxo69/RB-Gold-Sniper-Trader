@@ -32,9 +32,10 @@ test('conciliação do histórico preserva a fotografia e os metadados BE', asyn
   const history = await read('../public/history-v2.js');
   assert.match(history, /indicatorSnapshot:chosen\.indicatorSnapshot\|\|prev\.indicatorSnapshot\|\|t\.indicatorSnapshot/);
   assert.match(history, /indicatorSnapshotVersion:/);
+  assert.match(history, /function snapshotFromLegacy\(t\)/);
+  assert.match(history, /remoteTrade\.indicatorSnapshot/);
   assert.match(history, /beAlerted:!!\(prev\.beAlerted\|\|t\.beAlerted\)/);
 });
-
 test('a interface escapa texto dinâmico do histórico e da IA', async () => {
   const ui = await read('../public/history-ui.js');
   assert.match(ui, /escapeHtml\(ai\.opinion\)/);
@@ -44,11 +45,11 @@ test('a interface escapa texto dinâmico do histórico e da IA', async () => {
 
 test('os scripts corrigidos usam versões de cache novas', async () => {
   const html = await read('../public/index.html');
-  assert.match(html, /history-v2\.js\?v=10/);
-  assert.match(html, /app-v4\.js\?v=16/);
-  assert.match(html, /history-ui\.js\?v=10/);
+  assert.match(html, /history-v2\.js\?v=12/);
+  assert.match(html, /app-v4\.js\?v=17/);
+  assert.match(html, /history-ui\.js\?v=11/);
   assert.match(html, /sniper-v2\.js\?v=23/);
-  assert.match(html, /ai-sniper\.js\?v=12/);
+  assert.match(html, /ai-sniper\.js\?v=13/);
 });
 
 test('o Worker preserva a fotografia ao gravar resultados no GitHub', async () => {
