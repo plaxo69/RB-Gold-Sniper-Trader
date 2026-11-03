@@ -219,7 +219,7 @@ export default {
   const url=new URL(request.url), path=url.pathname;
   try {
    if(path==="/api/health"&&request.method==="GET") {
-    try {const m=await market("1m");return json({status:"OK",marketConnected:true,source:m.source,symbol:m.symbol,history:"localStorage/GitHub",historyConfigured:Boolean(env.GITHUB_TOKEN),historyBranch:historyBranch(env),aiEnabled:Boolean(env.OPENAI_API_KEY),pushEnabled:false,mode:"ALERTAS",timestamp:new Date().toISOString()});}
+    try {const m=await market("1m");return json({status:"OK",marketConnected:true,source:m.source,symbol:m.symbol,history:"localStorage/GitHub",historyConfigured:Boolean(env.GITHUB_TOKEN),historyBranch:historyBranch(env),aiEnabled:Boolean(env.OPENAI_API_KEY),externalAIEnabled:Boolean(env.OPENAI_API_KEY),technicalScoringEnabled:true,historicalLearning:"DESCRIPTIVE_ONLY",pushEnabled:false,mode:"ALERTAS",timestamp:new Date().toISOString()});}
     catch(e){return json({status:"DEGRADED",marketConnected:false,history:"localStorage/GitHub",historyConfigured:Boolean(env.GITHUB_TOKEN),historyBranch:historyBranch(env),aiEnabled:Boolean(env.OPENAI_API_KEY),pushEnabled:false,mode:"ALERTAS",error:e.message},503);}
    }
    if(path==="/api/market"&&request.method==="GET") return json(await market(url.searchParams.get("timeframe")||"1m"));
