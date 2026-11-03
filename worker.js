@@ -28,51 +28,144 @@ async function github(path, env, init={}) {
   if (!env.GITHUB_TOKEN) throw new Error("GITHUB_TOKEN não configurado nos Secrets do Cloudflare.");
   return fetch(`${GH_API}/repos/${REPO}/contents/${path}`, { ...init, headers: { Authorization:`Bearer ${env.GITHUB_TOKEN}`, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28", "User-Agent":"RB-TRADER-PRO-CLOUDFLARE", ...(init.headers||{}) } });
 }
-async function getHistory(env, limit=1000) {
-  const branch = historyBranch(env);
-  const r = await github(`${HISTORY_PATH}?ref=${encodeURIComponent(branch)}`, env);
-  if(r.status===404) return {ok:true,trades:[],total:0,source:"github",branch};
-  const d=await r.json(); if(!r.ok) throw new Error(d.message||"Falha ao ler histórico do GitHub");
-  let p={}; try{p=JSON.parse(decodeBase64(d.content));}catch{}
-  const trades=Array.isArray(p)?p:(Array.isArray(p.trades)?p.trades:[]);
-  return {ok:true,trades:trades.slice(-limit),total:trades.length,source:"github",branch,exportedAt:p?.exportedAt||null};
+function tradeKey(t) {
+  const key = t?.signalKey || t?.key || ((t?.type || "") + "-" + (t?.signalTimestamp || t?.time || ""));
+  return typeof key === "string" && key.length > 0 && key.length <= 200 ? key : null;
 }
-function keyOf(t){return t?.signalKey||t?.key||((t?.type||"")+"-"+(t?.signalTimestamp||t?.time||""))}
-function timeOf(t){const n=Date.parse(t?.signalTimestamp??t?.time??0);return Number.isFinite(n)?n:0}
-async function saveHistory(env, incoming) {
-  const branch=historyBranch(env);
-  const path=`${HISTORY_PATH}?ref=${encodeURIComponent(branch)}`;
-  const existing=await github(path,env);
-  let sha=null, remote=[];
-  if(existing.ok){const d=await existing.json();sha=d.sha||null;try{const p=JSON.parse(decodeBase64(d.content));remote=Array.isArray(p.trades)?p.trades:Array.isArray(p)?p:[];}catch{}}
-  else if(existing.status!==404){const d=await existing.json().catch(()=>({}));throw new Error(d.message||"Não foi possível consultar o histórico");}
-  const map=new Map();
-  for(const t of [...remote,...incoming]) {
-    const k=keyOf(t); if(!k) continue;
-    const old=map.get(k);
-    if(!old) { map.set(k,t); continue; }
-    const oldStatus=String(old.status||"ALERTA"), nextStatus=String(t.status||"ALERTA");
+function validTrade(t) {
+  if (!t || typeof t !== "object" || Array.isArray(t)) return false;
+  if (!["BUY", "SELL"].includes(String(t.type || "").toUpperCase())) return false;
+  if (!["ALERTA", "WIN", "LOSS", "BE", "EXPIRADA"].includes(String(t.status || "ALERTA").toUpperCase())) return false;
+  if (!tradeKey(t)) return false;
+  const stamp = t.signalTimestamp ?? t.time;
+  const parsed = typeof stamp === "number" ? stamp : Date.parse(stamp || "");
+  if (!Number.isFinite(parsed)) return false;
+  for (const field of ["price", "tp", "sl"]) {
+    if (t[field] !== null && t[field] !== undefined && !Number.isFinite(Number(t[field]))) return false;
+  }
+  return true;
+}
+function decodeHistoryPayload(content) {
+  let payload;
+  try { payload = JSON.parse(decodeBase64(content)); }
+  catch { throw new Error("Histórico GitHub com JSON inválido; gravação cancelada para proteger os dados."); }
+  const trades = Array.isArray(payload) ? payload : payload?.trades;
+  if (!Array.isArray(trades)) throw new Error("Estrutura do histórico inválida; gravação cancelada.");
+  if (trades.some(t => !validTrade(t))) {
+    throw new Error("O histórico contém registos inválidos; nenhum registo será descartado automaticamente.");
+  }
+  return { payload, trades: trades.map(t => String(t.status || "").toUpperCase() === "EXPIRADA"
+    ? { ...t, status: "LOSS", outcomeReason: t.outcomeReason || "Resultado EXPIRADA legado convertido para LOSS" }
+    : t) };
+}
+async function readHistoryBlob(sha, env) {
+  const response = await fetch(`${GH_API}/repos/${REPO}/git/blobs/${encodeURIComponent(sha)}`, {
+    headers: {
+      Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "RB-TRADER-PRO-CLOUDFLARE"
+    }
+  });
+  const data = await response.json();
+  if (!response.ok || data.encoding !== "base64" || typeof data.content !== "string") {
+    throw new Error(data.message || "Não foi possível obter o conteúdo completo do histórico GitHub.");
+  }
+  return data.content;
+}
+async function historyContent(metadata, env) {
+  if (typeof metadata.content === "string" && metadata.content.trim()) return metadata.content;
+  if (metadata.sha) return readHistoryBlob(metadata.sha, env);
+  throw new Error("GitHub não devolveu o conteúdo nem o SHA do histórico; leitura cancelada.");
+}
+async function readStoredHistory(env) {
+  const branch = historyBranch(env);
+  const response = await github(`${HISTORY_PATH}?ref=${encodeURIComponent(branch)}`, env);
+  if (response.status === 404) return { sha: null, trades: [], branch };
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Falha ao ler histórico do GitHub.");
+  const decoded = decodeHistoryPayload(await historyContent(data, env));
+  return { sha: data.sha || null, trades: decoded.trades, branch, exportedAt: decoded.payload?.exportedAt || null };
+}
+async function getHistory(env, limit=1000) {
+  const stored = await readStoredHistory(env);
+  return { ok: true, trades: stored.trades.slice(-limit), total: stored.trades.length,
+    source: "github", branch: stored.branch, exportedAt: stored.exportedAt || null };
+}
+function keyOf(t) { return tradeKey(t); }
+function timeOf(t) {
+  const value = t?.signalTimestamp ?? t?.time ?? 0;
+  const n = typeof value === "number" ? (value < 1e12 ? value * 1000 : value) : Date.parse(value);
+  return Number.isFinite(n) ? n : 0;
+}
+function mergeHistory(remote, incoming) {
+  if (!Array.isArray(remote) || remote.some(t => !validTrade(t))) {
+    throw new Error("O histórico remoto contém registos inválidos; gravação cancelada para evitar perda de dados.");
+  }
+  if (!Array.isArray(incoming) || incoming.length > 500 || incoming.some(t => !validTrade(t))) {
+    throw new Error("Pedido inválido: são aceites até 500 trades validadas.");
+  }
+  const map = new Map();
+  for (const t of [...remote, ...incoming]) {
+    const k = keyOf(t);
+    const old = map.get(k);
+    if (!old) { map.set(k, t); continue; }
+    const oldStatus = String(old.status || "ALERTA").toUpperCase();
+    const nextStatus = String(t.status || "ALERTA").toUpperCase();
     let chosen;
-    if(oldStatus!=="ALERTA" && nextStatus==="ALERTA") chosen=old;
-    else if(oldStatus==="ALERTA" && nextStatus!=="ALERTA") chosen=t;
-    else {chosen={...old,...t};if(oldStatus!=="ALERTA"&&nextStatus!=="ALERTA"){chosen.status=old.status;chosen.resolvedAt=old.resolvedAt||t.resolvedAt;chosen.outcomeReason=old.outcomeReason||t.outcomeReason;}}
-    map.set(k,{
+    if (oldStatus !== "ALERTA" && nextStatus === "ALERTA") chosen = old;
+    else if (oldStatus === "ALERTA" && nextStatus !== "ALERTA") chosen = t;
+    else {
+      chosen = { ...old, ...t };
+      if (oldStatus !== "ALERTA" && nextStatus !== "ALERTA") {
+        chosen.status=old.status;
+        chosen.resolvedAt=old.resolvedAt||t.resolvedAt;
+        chosen.outcomeReason=old.outcomeReason||t.outcomeReason;
+      }
+    }
+    map.set(k, {
       ...chosen,
       indicatorSnapshot:chosen.indicatorSnapshot||old.indicatorSnapshot||t.indicatorSnapshot,
       indicatorSnapshotVersion:chosen.indicatorSnapshotVersion||old.indicatorSnapshotVersion||t.indicatorSnapshotVersion,
       beAlerted:!!(old.beAlerted||t.beAlerted),
       beArmed:!!(old.beArmed||t.beArmed),
+      beArmedAt:old.beArmedAt||t.beArmedAt,
       bePushSent:!!(old.bePushSent||t.bePushSent),
       beTriggeredAt:old.beTriggeredAt||t.beTriggeredAt,
       beTriggerPrice:old.beTriggerPrice!=null?old.beTriggerPrice:t.beTriggerPrice,
+      beExitPrice:old.beExitPrice!=null?old.beExitPrice:t.beExitPrice,
       beAlertMessage:old.beAlertMessage||t.beAlertMessage
     });
   }
-  const trades=[...map.values()].sort((a,b)=>timeOf(b)-timeOf(a)).slice(0,500);
-  const payload={exportedAt:new Date().toISOString(),source:"RB TRADER PRO",formatVersion:2,total:trades.length,trades};
-  const put=await github(HISTORY_PATH,env,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:"RB TRADER PRO — atualizar histórico de trades",content:encodeBase64(JSON.stringify(payload,null,2)),branch,...(sha?{sha}:{})})});
-  const d=await put.json();if(!put.ok)throw new Error(d.message||"Falha ao gravar histórico");
-  return {ok:true,branch,path:HISTORY_PATH,total:trades.length,commit:d.commit?.sha||null,url:d.content?.html_url||null};
+  return [...map.values()].sort((a,b)=>timeOf(b)-timeOf(a)).slice(0,500);
+}
+async function saveHistory(env, incoming) {
+  if (!Array.isArray(incoming) || incoming.length > 500 || incoming.some(t => !validTrade(t))) {
+    throw new Error("Pedido inválido: são aceites até 500 trades validadas.");
+  }
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const existing = await readStoredHistory(env);
+    const trades = mergeHistory(existing.trades, incoming);
+    const payload = { exportedAt: new Date().toISOString(), source: "RB TRADER PRO",
+      formatVersion: 2, total: trades.length, trades };
+    const put = await github(HISTORY_PATH, env, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "RB TRADER PRO — atualizar histórico de trades",
+        content: encodeBase64(JSON.stringify(payload, null, 2)),
+        branch: existing.branch,
+        ...(existing.sha ? { sha: existing.sha } : {})
+      })
+    });
+    const data = await put.json().catch(() => ({}));
+    if (put.ok) return { ok: true, branch: existing.branch, path: HISTORY_PATH,
+      total: trades.length, commit: data.commit?.sha || null, url: data.content?.html_url || null };
+    if (put.status !== 409 && put.status !== 422) {
+      throw new Error(data.message || "Falha ao gravar histórico no GitHub.");
+    }
+  }
+  throw new Error("O histórico foi alterado em simultâneo; limite de 3 tentativas atingido sem sobrescrever dados recentes.");
 }
 async function market(tf) {
   const cfg=tfConfig[tf]; if(!cfg) throw new Error("Timeframe inválido");
@@ -129,7 +222,26 @@ export default {
    if(path==="/api/oanda-reference"&&request.method==="GET") {try{return json({success:true,calibrated:false,offset:0,futures:await yahooQuote("GC=F"),spot:null,source:"Yahoo Finance GC=F — referência"});}catch(e){return json({success:false,calibrated:false,offset:0,error:e.message},502);}}
    if(path==="/api/ai/opinion"&&request.method==="POST") {try{return json({success:true,...await aiOpinion(await request.json(),env),model:env.OPENAI_MODEL||"gpt-6-luna"});}catch(e){return json({success:false,available:Boolean(env.OPENAI_API_KEY),confidence:null,opinion:"NEUTRO",note:e.message},502);}}
    if(path==="/api/trades"&&request.method==="GET") {if(!env.GITHUB_TOKEN)return json({ok:false,error:"GITHUB_TOKEN não configurado nos Secrets do Cloudflare."},503);return json(await getHistory(env,Math.min(Math.max(parseInt(url.searchParams.get("limit")||"1000",10)||1000,1),5000)));}
-   if(path==="/api/export-history"&&request.method==="POST") {const b=await request.json();if(!Array.isArray(b.trades))return json({ok:false,error:"Formato inválido: trades[] em falta."},400);return json(await saveHistory(env,b.trades));}
+   if(path==="/api/export-history"&&request.method==="POST") {
+    const origin=request.headers.get("Origin")||"";
+    const fetchSite=request.headers.get("Sec-Fetch-Site")||"";
+    if(origin!==url.origin||(fetchSite&&fetchSite!=="same-origin")) {
+      return json({ok:false,error:"Pedido de gravação recusado: origem não autorizada."},403);
+    }
+    if(!String(request.headers.get("Content-Type")||"").toLowerCase().includes("application/json")) {
+      return json({ok:false,error:"Content-Type application/json obrigatório."},415);
+    }
+    const raw=await request.text();
+    if(new TextEncoder().encode(raw).length>512*1024) {
+      return json({ok:false,error:"Histórico excede o limite de 512 KB."},413);
+    }
+    let body;
+    try { body=JSON.parse(raw); }
+    catch { return json({ok:false,error:"JSON inválido."},400); }
+    if(!Array.isArray(body?.trades)) return json({ok:false,error:"Formato inválido: trades[] em falta."},400);
+    try { return json(await saveHistory(env,body.trades)); }
+    catch(error) { return json({ok:false,error:error.message||"Falha ao gravar histórico."},409); }
+   }
    if(path==="/api/push-config"&&request.method==="GET") return json({ok:false,error:"Web Push ainda não foi migrado para Cloudflare; as notificações não estão ativas nesta pré-visualização."},503);
    if(path==="/api/push-subscribe"||path==="/api/push-send") return json({ok:false,error:"Web Push ainda não foi migrado para Cloudflare; não envia notificações nesta pré-visualização."},503);
    if(path==="/api/trades/resolve") return json({ok:true,mode:"client-side",note:"A resolução local da app é mantida; não existe monitorização server-side nesta pré-visualização."});
