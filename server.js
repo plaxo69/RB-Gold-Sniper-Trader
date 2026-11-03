@@ -121,11 +121,11 @@ async function aiOpinion(signal, marketData) {
   });
 
   const text = extractAIText(response.data);
-  const confidence = parseConfidence(response.data?.usage?.total_tokens ? 60 : null);
+  // Token usage is not a confidence score; never fabricate a percentage.
 
   return {
     available: true,
-    confidence: Number.isFinite(confidence) ? confidence : null,
+    confidence: null,
     opinion: text || 'NEUTRO',
     note: 'IA consultada com feedback técnico.'
   };
