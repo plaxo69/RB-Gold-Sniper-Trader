@@ -77,3 +77,32 @@ test("BE só é reconhecido depois da confirmação manual do SL na entrada", ()
   const result = resolve("BUY", 95, 110, candles, trade);
   assert.equal(result?.result, "BE");
 });
+
+test("IA ignora resultados cuja resolução ocorreu depois do instante do sinal", () => {
+  const futureTrade = {
+    type: "BUY",
+    status: "WIN",
+    signalTimestamp: "2026-11-03T10:01:00Z",
+    resolvedAt: "2026-11-03T10:02:00Z",
+    rsi: 65,
+    atr: 1.2,
+    price: 3900,
+    rr: 2,
+    trend1: "ALTA",
+    trend5: "ALTA",
+    trend15: "ALTA",
+    filters: {},
+    tactical: {}
+  };
+  const context = browserContext({
+    localStorage: { getItem: () => JSON.stringify([futureTrade]) }
+  });
+  vm.runInContext(fs.readFileSync(path.join(root, "public/ai-sniper.js"), "utf8"), context);
+  const result = context.window.RBTraderProAI.evaluate({
+    ...futureTrade,
+    signalTimestamp: "2026-11-03T10:00:00Z"
+  });
+  assert.equal(result.setupSamples, 0);
+  assert.equal(result.directionSamples, 0);
+  assert.equal(result.pWin, null);
+});
