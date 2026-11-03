@@ -61,5 +61,18 @@
 - Breakout/pullback/continuação: confirmar momentum na direção da rutura; não exigir automaticamente o RSI de reversão.
 - RSI nunca deve ser usado isoladamente para abrir uma operação.
 
+### Consistência com a estratégia operacional
+
+Os intervalos RSI são específicos do cenário e devem coincidir com o documento `ESTRATEGIA-PRINCIPAL.md`:
+- BUY reversão no suporte: 30–50.
+- BUY breakout/pullback/continuação: >50 e <75.
+- SELL rejeição na resistência: 67–72.
+- SELL breakdown/reteste/continuação: >25 e <50.
+
+A estratégia de continuação após recuo à zona dinâmica EMA9/EMA21, pedida em 22/10/2026, fica registada como **alteração proposta, ainda não ativa**. O motor atual usa sobretudo EMA20/EMA50/EMA200 e retestes estruturais. Não ativar nem apresentar um pullback à EMA como implementado antes de:
+1. implementar uma definição objetiva da zona EMA9/EMA21 e a confirmação por candle fechado;
+2. comparar a versão atual e a versão proposta num replay histórico sem data leakage;
+3. incluir spread, slippage e custos e validar resultados fora da amostra.
+
 ### Notas de implementação
 Os níveis são estimativas calculadas a partir dos candles disponíveis; a qualidade depende da profundidade dos dados e do feed. A estratégia não garante lucros. Sinais que não tenham RR mínimo de 1:2 devem ser bloqueados, não "forçados" para cumprir a regra.
