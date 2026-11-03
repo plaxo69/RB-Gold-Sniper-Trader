@@ -64,8 +64,9 @@
       const low = Number(candle?.low);
       if (!Number.isFinite(high) || !Number.isFinite(low) || high < low) continue;
 
+      const effectiveSL = trade.beConfirmed === true ? entry : Number(sl);
       const hitTP = type === 'BUY' ? high >= Number(tp) : low <= Number(tp);
-      const hitSL = type === 'BUY' ? low <= Number(sl) : high >= Number(sl);
+      const hitSL = type === 'BUY' ? low <= effectiveSL : high >= effectiveSL;
 
       if (hitTP && hitSL) {
         return { result: 'LOSS', when: candle.timestamp || null,
