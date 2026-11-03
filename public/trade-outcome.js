@@ -30,6 +30,7 @@
       .sort((a, b) => a.time - b.time);
 
     let beArmedAt = Number.isFinite(armedAt) ? trade.beArmedAt : null;
+    let armedTime = Number.isFinite(armedAt) ? armedAt : null;
     let beTriggerPrice = Number.isFinite(Number(trade.beTriggerPrice))
       ? Number(trade.beTriggerPrice)
       : null;
@@ -54,7 +55,7 @@
         reason: 'SL atingido', ...(beArmedAt ? { beArmedAt, beTriggerPrice } : {}) };
 
       if (beArmed) {
-        if (time > armedAt) {
+        if (Number.isFinite(armedTime) && time > armedTime) {
           const returnedToEntry = type === 'BUY' ? low <= entry : high >= entry;
           if (returnedToEntry) return {
             result: 'BE',
@@ -72,6 +73,7 @@
       if (beDistance > 0 && favorable >= beDistance) {
         beArmed = true;
         beArmedAt = candle.timestamp;
+        armedTime = time;
         beTriggerPrice = entry + (type === 'BUY' ? beDistance : -beDistance);
       }
     }
