@@ -1,33 +1,62 @@
 name: Deploy RB TRADER PRO to Cloudflare
 
 on:
+  pull_request:
+    branches:
+      - migration-cloudflare-2026-10-11
+    paths:
+      - 'worker.js'
+      - 'public/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'wrangler.jsonc'
+      - '.github/workflows/deploy-cloudflare-migration.yml'
   push:
     branches:
       - migration-cloudflare-2026-10-11
     paths:
       - 'worker.js'
       - 'public/**'
-      - 'wrangler.jsonc'
+      - 'tests/**'
       - 'package.json'
+      - 'wrangler.jsonc'
       - '.github/workflows/deploy-cloudflare-migration.yml'
 
 permissions:
   contents: read
 
 jobs:
-  deploy:
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout production branch
+      - name: Checkout source
         uses: actions/checkout@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Install dependencies
-        run: npm install --ignore-scripts
-      - name: Validate Cloudflare bundle
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Syntax and build checks
+        run: npm run build
+      - name: Regression tests
+        run: npm test
+      - name: Cloudflare dry-run
         run: npx --yes wrangler@4 deploy --dry-run
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout validated source
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
       - name: Deploy Cloudflare Worker
         run: npx --yes wrangler@4 deploy
         env:
