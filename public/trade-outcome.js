@@ -64,7 +64,8 @@
       const low = Number(candle?.low);
       if (!Number.isFinite(high) || !Number.isFinite(low) || high < low) continue;
 
-      const effectiveSL = trade.beConfirmed === true ? entry : Number(sl);
+      const manualBEActive = trade.beConfirmed === true && Number.isFinite(armedTime) && time > armedTime;
+      const effectiveSL = manualBEActive ? entry : Number(sl);
       const hitTP = type === 'BUY' ? high >= Number(tp) : low <= Number(tp);
       const hitSL = type === 'BUY' ? low <= effectiveSL : high >= effectiveSL;
 
@@ -75,8 +76,9 @@
       }
       if (hitTP) return { result: 'WIN', when: candle.timestamp || null,
         reason: 'TP atingido', ...(beArmedAt ? { beArmedAt, beTriggerPrice } : {}) };
-      if (hitSL) return { result: 'LOSS', when: candle.timestamp || null,
-        reason: 'SL atingido', ...(beArmedAt ? { beArmedAt, beTriggerPrice } : {}) };
+      if (hitSL) return manualBEActive
+        ? { result: 'BE', when: candle.timestamp || null, reason: 'SL na entrada confirmado manualmente', beArmedAt, beTriggerPrice, beExitPrice: entry }
+        : { result: 'LOSS', when: candle.timestamp || null, reason: 'SL atingido', ...(beArmedAt ? { beArmedAt, beTriggerPrice } : {}) };
 
       if (beArmed) {
         if (trade.beConfirmed === true && Number.isFinite(armedTime) && time > armedTime) {
