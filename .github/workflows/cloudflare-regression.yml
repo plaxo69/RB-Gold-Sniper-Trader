@@ -1,0 +1,30 @@
+name: Cloudflare worker regression checks
+
+on:
+  pull_request:
+    paths:
+      - 'worker.js'
+      - 'public/trade-outcome.js'
+      - 'public/history-v2.js'
+      - 'tests/**'
+      - 'package.json'
+      - '.github/workflows/**'
+  push:
+    branches:
+      - 'fix/cloudflare-history-be-audit-2026-11-03'
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build and syntax checks
+        run: npm run build
+      - name: History and BE regression tests
+        run: npm test
