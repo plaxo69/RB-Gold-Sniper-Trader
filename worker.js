@@ -202,7 +202,26 @@ export default {
    if(path==="/api/oanda-reference"&&request.method==="GET") {try{return json({success:true,calibrated:false,offset:0,futures:await yahooQuote("GC=F"),spot:null,source:"Yahoo Finance GC=F — referência"});}catch(e){return json({success:false,calibrated:false,offset:0,error:e.message},502);}}
    if(path==="/api/ai/opinion"&&request.method==="POST") {try{return json({success:true,...await aiOpinion(await request.json(),env),model:env.OPENAI_MODEL||"gpt-6-luna"});}catch(e){return json({success:false,available:Boolean(env.OPENAI_API_KEY),confidence:null,opinion:"NEUTRO",note:e.message},502);}}
    if(path==="/api/trades"&&request.method==="GET") {if(!env.GITHUB_TOKEN)return json({ok:false,error:"GITHUB_TOKEN não configurado nos Secrets do Cloudflare."},503);return json(await getHistory(env,Math.min(Math.max(parseInt(url.searchParams.get("limit")||"1000",10)||1000,1),5000)));}
-   if(path==="/api/export-history"&&request.method==="POST") {const b=await request.json();if(!Array.isArray(b.trades))return json({ok:false,error:"Formato inválido: trades[] em falta."},400);return json(await saveHistory(env,b.trades));}
+   if(path==="/api/export-history"&&request.method==="POST") {
+    const origin=request.headers.get("Origin")||"";
+    const fetchSite=request.headers.get("Sec-Fetch-Site")||"";
+    if(origin!==url.origin||(fetchSite&&fetchSite!=="same-origin")) {
+      return json({ok:false,error:"Pedido de gravação recusado: origem não autorizada."},403);
+    }
+    if(!String(request.headers.get("Content-Type")||"").toLowerCase().includes("application/json")) {
+      return json({ok:false,error:"Content-Type application/json obrigatório."},415);
+    }
+    const raw=await request.text();
+    if(new TextEncoder().encode(raw).length>512*1024) {
+      return json({ok:false,error:"Histórico excede o limite de 512 KB."},413);
+    }
+    let body;
+    try { body=JSON.parse(raw); }
+    catch { return json({ok:false,error:"JSON inválido."},400); }
+    if(!Array.isArray(body?.trades)) return json({ok:false,error:"Formato inválido: trades[] em falta."},400);
+    try { return json(await saveHistory(env,body.trades)); }
+    catch(error) { return json({ok:false,error:error.message||"Falha ao gravar histórico."},409); }
+   }
    if(path==="/api/push-config"&&request.method==="GET") return json({ok:false,error:"Web Push ainda não foi migrado para Cloudflare; as notificações não estão ativas nesta pré-visualização."},503);
    if(path==="/api/push-subscribe"||path==="/api/push-send") return json({ok:false,error:"Web Push ainda não foi migrado para Cloudflare; não envia notificações nesta pré-visualização."},503);
    if(path==="/api/trades/resolve") return json({ok:true,mode:"client-side",note:"A resolução local da app é mantida; não existe monitorização server-side nesta pré-visualização."});
