@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - migration-cloudflare-2026-10-11
+  push:
+    branches:
+      - fix/plano-correcao-integral-2026-11-03
   workflow_dispatch:
 
 permissions:
