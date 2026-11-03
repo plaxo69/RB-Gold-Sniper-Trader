@@ -14,6 +14,7 @@ on:
   push:
     branches:
       - migration-cloudflare-2026-10-11
+      - fix/production-hardening-2026-11-03
     paths:
       - 'worker.js'
       - 'public/**'
@@ -45,7 +46,7 @@ jobs:
         run: npx --yes wrangler@4 deploy --dry-run
 
   deploy:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/migration-cloudflare-2026-10-11'
     needs: validate
     runs-on: ubuntu-latest
     steps:
