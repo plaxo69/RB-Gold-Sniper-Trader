@@ -32,7 +32,11 @@ function normalizeTrade(trade) {
 function parseHistoryPayload(payload) {
   const trades = Array.isArray(payload) ? payload : payload?.trades;
   if (!Array.isArray(trades)) throw new Error('Stored history has an invalid schema; refusing to continue.');
-  return trades.map(normalizeTrade).filter(Boolean);
+  const normalized = trades.map(normalizeTrade);
+  if (normalized.some((trade) => !trade)) {
+    throw new Error('Stored history contains invalid trade records; refusing to silently discard data.');
+  }
+  return normalized;
 }
 
 /**
