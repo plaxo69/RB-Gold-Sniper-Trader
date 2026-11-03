@@ -1,5 +1,6 @@
 const webpush = require('web-push');
 const marketModule = require('./market');
+const { resolveTradeOutcomeFromCandles } = require('./trades');
 const {
   ts,
   keyOf,
@@ -10,7 +11,7 @@ const {
 } = require('./signal-engine');
 
 const REPO = 'plaxo69/RB-Gold-Sniper-Trader';
-const BRANCH = 'main';
+const BRANCH = process.env.HISTORY_BRANCH || 'main';
 const PATH = 'historico-trades.json';
 const API = 'https://api.github.com';
 const PROD_AUD = 'https://rb-gold-sniper-trader.vercel.app/api/monitor';
@@ -186,90 +187,48 @@ async function runMonitor() {
   if (active) {
     const created = ts(active.signalTimestamp || active.time);
     const live = await marketModule.getMarket('1m', 2000, Number.isFinite(created) ? new Date(created).toISOString() : null, new Date().toISOString());
-    const candles = (live.candles || []).filter((c) => ts(c.timestamp) > created);
-    activeCandles = candles;
+    activeCandles = (live.candles || []).filter((c) => ts(c.timestamp) > created);
+    const outcome = resolveTradeOutcomeFromCandles(active, activeCandles);
 
-    const entry = Number(active.price);
-    const sl = Number(active.sl);
-    const tp = Number(active.tp);
-    let outcome = null;
-    let when = null;
-    let reason = '';
-
-    for (const c of candles) {
-      const hi = Number(c.high);
-      const lo = Number(c.low);
-      const hitTP = active.type === 'BUY' ? hi >= tp : lo <= tp;
-      const hitSL = active.type === 'BUY' ? lo <= sl : hi >= sl;
-
-      if (hitTP && hitSL) {
-        outcome = 'LOSS';
-        reason = 'TP e SL alcançados na mesma vela';
-        when = c.timestamp;
-        break;
+    if (outcome.status === 'WIN' || outcome.status === 'LOSS' || outcome.status === 'BE') {
+      active.status = outcome.status;
+      active.resolvedAt = outcome.when || new Date().toISOString();
+      active.outcomeReason = outcome.reason;
+      active.resolutionSource = 'closed-candles';
+      if (outcome.beArmedAt) {
+        active.beArmedAt = outcome.beArmedAt;
+        active.beTriggerPrice = outcome.beTriggerPrice;
       }
-      if (hitTP) {
-        outcome = 'WIN';
-        reason = 'TP alcançado';
-        when = c.timestamp;
-        break;
-      }
-      if (hitSL) {
-        outcome = 'LOSS';
-        reason = 'SL alcançado';
-        when = c.timestamp;
-        break;
-      }
-    }
-
-    if (outcome) {
-      active.status = outcome;
-      active.resolvedAt = when;
-      active.outcomeReason = reason;
-      delete active.beAlerted;
       changed = true;
-      result.events.push(outcome === 'WIN' ? 'WIN' : 'LOSS');
+      result.events.push(outcome.status);
       await sendPush(
-        outcome === 'WIN' ? 'RB TRADER PRO — WIN' : 'RB TRADER PRO — LOSS',
-        'Operação resolvida',
+        `RB TRADER PRO — ${outcome.status}`,
+        outcome.status === 'BE' ? 'Operação fechada em Break Even' : 'Operação resolvida',
         'trade-resolve',
         gh
       );
-    }
-  }
-
-  if (active) {
-    const entry = Number(active.price);
-    const tp = Number(active.tp);
-    const dist = Math.abs(tp - entry);
-    let beWhen = null;
-    let bePrice = null;
-
-    if (dist > 0) {
-      for (const c of activeCandles) {
-        const hi = Number(c.high);
-        const lo = Number(c.low);
-        const fav = active.type === 'BUY' ? hi - entry : entry - lo;
-        if (Number.isFinite(fav) && fav >= dist * 0.5) {
-          beWhen = c.timestamp;
-          bePrice = Number(c.close);
-          break;
-        }
+    } else if (outcome.beArmedAt) {
+      const armChanged = active.beArmedAt !== outcome.beArmedAt ||
+        Number(active.beTriggerPrice) !== Number(outcome.beTriggerPrice);
+      if (armChanged) {
+        active.beArmed = true;
+        active.beArmedAt = outcome.beArmedAt;
+        active.beTriggerPrice = outcome.beTriggerPrice;
+        changed = true;
       }
-
-      if (!beWhen && m1.marketState === 'open' && Number.isFinite(m1.price)) {
-        const fav = active.type === 'BUY' ? m1.price - entry : entry - m1.price;
-        if (dist > 0 && fav >= dist * 0.5) {
-          beWhen = new Date().toISOString();
-          bePrice = m1.price;
-        }
-      }
-
-      if (beWhen && !active.bePushSent) {
+      if (!active.bePushSent) {
         active.beAlerted = true;
         active.bePushSent = true;
-        active.beTriggeredAt = active.beTriggeredAt || beWhen;
-        active.beTriggerPrice = active.beTriggerPrice || bePrice;
+        active.beTriggeredAt = active.beTriggeredAt || outcome.beArmedAt;
+        active.beTriggerPrice = outcome.beTriggerPrice;
+        changed = true;
+        await sendPush(
+          'RB TRADER PRO — BE ativado',
+          'Preço atingiu 50% do percurso até ao TP. Considerar proteger a entrada.',
+          'trade-break-even',
+          gh
+        );
+        result.events.push('BE_ARMED');
       }
     }
   }
