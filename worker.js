@@ -131,6 +131,8 @@ function mergeHistory(remote, incoming) {
       indicatorSnapshotVersion:chosen.indicatorSnapshotVersion||old.indicatorSnapshotVersion||t.indicatorSnapshotVersion,
       beAlerted:!!(old.beAlerted||t.beAlerted),
       beArmed:!!(old.beArmed||t.beArmed),
+      beConfirmed:!!(old.beConfirmed||t.beConfirmed),
+      beConfirmedAt:old.beConfirmedAt||t.beConfirmedAt,
       beArmedAt:old.beArmedAt||t.beArmedAt,
       bePushSent:!!(old.bePushSent||t.bePushSent),
       beTriggeredAt:old.beTriggeredAt||t.beTriggeredAt,
