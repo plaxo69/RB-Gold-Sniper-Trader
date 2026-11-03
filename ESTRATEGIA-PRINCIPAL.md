@@ -23,11 +23,15 @@ Melhorar a qualidade dos sinais e reduzir perdas com auditoria baseada em dados 
 - Ativo prioritário: XAUUSD (ouro).
 - Confirmar alinhamento de tendência em M1, M5 e M15.
 - Se os períodos não estiverem alinhados, só identificar uma oportunidade sniper através da análise IA; não apresentar o sinal como alinhado pelos três períodos.
-- BUY: RSI(14) > 60 e < 75.
-- SELL: RSI(14) > 35 e < 40.
-- ADX(14) > 22.
-- Volume acima da SMA(20) do volume.
-- Indicadores de referência: RSI(14), ATR(14), EMA(9), EMA(21), ADX(14) e volume/SMA(20).
+- **RSI(14) é contextual ao setup; não existe um único intervalo para todas as entradas.**
+  - BUY por reversão no suporte: RSI 30–50, com rejeição de alta confirmada.
+  - BUY por breakout/pullback/continuação: RSI acima de 50 e abaixo de 75, com confirmação de momentum.
+  - SELL por rejeição na resistência: RSI 67–72, com rejeição de baixa confirmada.
+  - SELL por breakdown/reteste/continuação: RSI acima de 25 e abaixo de 50, com confirmação de momentum.
+- ADX(14) > 22 quando o valor está disponível; ADX indisponível não pode ser apresentado como aprovado.
+- Volume atual acima da SMA(20) do volume quando existe volume válido. Volume indisponível deve ser identificado como N/D e nunca convertido em zero artificial nem tratado como filtro aprovado.
+- Indicadores de referência: RSI(14), ATR(14), EMA(9), EMA(21), ADX(14) e volume/SMA(20). O motor atual também calcula EMA(20), EMA(50) e EMA(200); EMA(9)/EMA(21) são registadas e apresentadas, mas não devem ser descritas como filtros ativos até existir confirmação no código e no replay.
+- A confirmação de tendência usa M1/M5/M15. A opinião IA pode identificar uma oportunidade separada, mas não altera nem bloqueia o sinal Sniper.
 - Manter os alertas e a execução manual no MT5. Não gerir automaticamente conta, capital ou ordens.
 - Uma trade de cada vez; permitir no máximo duas reentradas no mesmo movimento e apenas depois de uma WIN.
 - Cooldown de 5 minutos.
