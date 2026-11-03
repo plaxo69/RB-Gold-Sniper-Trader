@@ -13,7 +13,29 @@
         !Number.isFinite(Number(sl)) || !Number.isFinite(Number(tp))) return null;
 
     const entry = Number(trade.price);
-    if (!Number.isFinite(entry) || entry <= 0) return null;
+    if (!Number.isFinite(entry) || entry <= 0) {
+      const input = Array.isArray(candles) ? candles : [];
+      const parse = value => {
+        if (value == null) return NaN;
+        if (typeof value === 'number') return value < 1e12 ? value * 1000 : value;
+        const n = Number(value);
+        if (Number.isFinite(n)) return n < 1e12 ? n * 1000 : n;
+        return Date.parse(value);
+      };
+      const ordered = input.every(c => Number.isFinite(parse(c?.timestamp)))
+        ? [...input].sort((a, b) => parse(a.timestamp) - parse(b.timestamp))
+        : input;
+      for (const candle of ordered) {
+        const high = Number(candle?.high), low = Number(candle?.low);
+        if (!Number.isFinite(high) || !Number.isFinite(low)) continue;
+        const hitTP = type === 'BUY' ? high >= Number(tp) : low <= Number(tp);
+        const hitSL = type === 'BUY' ? low <= Number(sl) : high >= Number(sl);
+        if (hitTP && hitSL) return { result: 'LOSS', when: candle.timestamp || null, reason: 'TP e SL tocados no mesmo candle; resultado conservador = LOSS' };
+        if (hitTP) return { result: 'WIN', when: candle.timestamp || null, reason: 'TP atingido' };
+        if (hitSL) return { result: 'LOSS', when: candle.timestamp || null, reason: 'SL atingido' };
+      }
+      return null;
+    }
 
     const signalTime = parseTime(trade.signalTimestamp || trade.time);
     const armedAt = parseTime(trade.beArmedAt);
