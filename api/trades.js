@@ -1,7 +1,7 @@
 const crypto = require('node:crypto');
 
 const REPO = 'plaxo69/RB-Gold-Sniper-Trader';
-const BRANCH = 'main';
+const BRANCH = process.env.HISTORY_BRANCH || 'main';
 const PATH = 'historico-trades.json';
 const API = 'https://api.github.com';
 
