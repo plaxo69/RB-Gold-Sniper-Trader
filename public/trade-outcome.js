@@ -38,7 +38,7 @@
     }
 
     const signalTime = parseTime(trade.signalTimestamp || trade.time);
-    const armedAt = parseTime(trade.beArmedAt);
+    const armedAt = parseTime(trade.beConfirmedAt || trade.beArmedAt);
     const beDistance = Math.abs(Number(tp) - entry) * 0.5;
     const input = Array.isArray(candles) ? candles : [];
     const ordered = input
@@ -56,7 +56,7 @@
     let beTriggerPrice = Number.isFinite(Number(trade.beTriggerPrice))
       ? Number(trade.beTriggerPrice)
       : null;
-    let beArmed = Number.isFinite(armedAt);
+    let beArmed = trade.beConfirmed === true && Number.isFinite(armedAt);
 
     for (const { candle, time } of ordered) {
       const high = Number(candle?.high);
@@ -77,7 +77,7 @@
         reason: 'SL atingido', ...(beArmedAt ? { beArmedAt, beTriggerPrice } : {}) };
 
       if (beArmed) {
-        if (Number.isFinite(armedTime) && time > armedTime) {
+        if (trade.beConfirmed === true && Number.isFinite(armedTime) && time > armedTime) {
           const returnedToEntry = type === 'BUY' ? low <= entry : high >= entry;
           if (returnedToEntry) return {
             result: 'BE',
