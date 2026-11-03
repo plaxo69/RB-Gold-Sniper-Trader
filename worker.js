@@ -87,37 +87,37 @@ function mergeHistory(remote, incoming) {
   }
   const map = new Map();
   for (const t of [...remote, ...incoming]) {
-    const key = keyOf(t);
-    const previous = map.get(key);
-    if (!previous) { map.set(key, t); continue; }
-    const oldStatus = String(previous.status || "ALERTA").toUpperCase();
+    const k = keyOf(t);
+    const old = map.get(k);
+    if (!old) { map.set(k, t); continue; }
+    const oldStatus = String(old.status || "ALERTA").toUpperCase();
     const nextStatus = String(t.status || "ALERTA").toUpperCase();
     let chosen;
-    if (oldStatus !== "ALERTA" && nextStatus === "ALERTA") chosen = previous;
+    if (oldStatus !== "ALERTA" && nextStatus === "ALERTA") chosen = old;
     else if (oldStatus === "ALERTA" && nextStatus !== "ALERTA") chosen = t;
     else {
-      chosen = { ...previous, ...t };
+      chosen = { ...old, ...t };
       if (oldStatus !== "ALERTA" && nextStatus !== "ALERTA") {
-        chosen.status = previous.status;
-        chosen.resolvedAt = previous.resolvedAt || t.resolvedAt;
-        chosen.outcomeReason = previous.outcomeReason || t.outcomeReason;
+        chosen.status=old.status;
+        chosen.resolvedAt=old.resolvedAt||t.resolvedAt;
+        chosen.outcomeReason=old.outcomeReason||t.outcomeReason;
       }
     }
-    map.set(key, {
+    map.set(k, {
       ...chosen,
-      indicatorSnapshot: chosen.indicatorSnapshot || previous.indicatorSnapshot || t.indicatorSnapshot,
-      indicatorSnapshotVersion: chosen.indicatorSnapshotVersion || previous.indicatorSnapshotVersion || t.indicatorSnapshotVersion,
-      beAlerted: !!(previous.beAlerted || t.beAlerted),
-      beArmed: !!(previous.beArmed || t.beArmed),
-      beArmedAt: previous.beArmedAt || t.beArmedAt,
-      bePushSent: !!(previous.bePushSent || t.bePushSent),
-      beTriggeredAt: previous.beTriggeredAt || t.beTriggeredAt,
-      beTriggerPrice: previous.beTriggerPrice != null ? previous.beTriggerPrice : t.beTriggerPrice,
-      beExitPrice: previous.beExitPrice != null ? previous.beExitPrice : t.beExitPrice,
-      beAlertMessage: previous.beAlertMessage || t.beAlertMessage
+      indicatorSnapshot:chosen.indicatorSnapshot||old.indicatorSnapshot||t.indicatorSnapshot,
+      indicatorSnapshotVersion:chosen.indicatorSnapshotVersion||old.indicatorSnapshotVersion||t.indicatorSnapshotVersion,
+      beAlerted:!!(old.beAlerted||t.beAlerted),
+      beArmed:!!(old.beArmed||t.beArmed),
+      beArmedAt:old.beArmedAt||t.beArmedAt,
+      bePushSent:!!(old.bePushSent||t.bePushSent),
+      beTriggeredAt:old.beTriggeredAt||t.beTriggeredAt,
+      beTriggerPrice:old.beTriggerPrice!=null?old.beTriggerPrice:t.beTriggerPrice,
+      beExitPrice:old.beExitPrice!=null?old.beExitPrice:t.beExitPrice,
+      beAlertMessage:old.beAlertMessage||t.beAlertMessage
     });
   }
-  return [...map.values()].sort((a, b) => timeOf(b) - timeOf(a)).slice(0, 500);
+  return [...map.values()].sort((a,b)=>timeOf(b)-timeOf(a)).slice(0,500);
 }
 async function saveHistory(env, incoming) {
   if (!Array.isArray(incoming) || incoming.length > 500 || incoming.some(t => !validTrade(t))) {
