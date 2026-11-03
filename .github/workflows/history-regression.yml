@@ -1,0 +1,28 @@
+name: RB history regression checks
+
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'test/**'
+      - 'package.json'
+      - '.github/workflows/**'
+  push:
+    branches:
+      - 'fix/audit-hardening-complete-2026-11-03'
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax checks
+        run: npm run check
+      - name: History outcome regression tests
+        run: npm test
