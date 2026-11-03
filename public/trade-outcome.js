@@ -29,7 +29,8 @@
         const high = Number(candle?.high), low = Number(candle?.low);
         if (!Number.isFinite(high) || !Number.isFinite(low)) continue;
         const hitTP = type === 'BUY' ? high >= Number(tp) : low <= Number(tp);
-        const hitSL = type === 'BUY' ? low <= Number(sl) : high >= Number(sl);
+        const effectiveSL = trade.beConfirmed === true ? entry : Number(sl);
+      const hitSL = type === 'BUY' ? low <= effectiveSL : high >= effectiveSL;
         if (hitTP && hitSL) return { result: 'LOSS', when: candle.timestamp || null, reason: 'TP e SL tocados no mesmo candle; resultado conservador = LOSS' };
         if (hitTP) return { result: 'WIN', when: candle.timestamp || null, reason: 'TP atingido' };
         if (hitSL) return { result: 'LOSS', when: candle.timestamp || null, reason: 'SL atingido' };
@@ -51,7 +52,7 @@
       )
       .sort((a, b) => a.time - b.time);
 
-    let beArmedAt = Number.isFinite(armedAt) ? trade.beArmedAt : null;
+    let beArmedAt = Number.isFinite(armedAt) ? (trade.beArmedAt || trade.beConfirmedAt) : null;
     let armedTime = Number.isFinite(armedAt) ? armedAt : null;
     let beTriggerPrice = Number.isFinite(Number(trade.beTriggerPrice))
       ? Number(trade.beTriggerPrice)
