@@ -234,8 +234,8 @@ export default {
       return json({ok:false,error:"Content-Type application/json obrigatório."},415);
     }
     const raw=await request.text();
-    if(new TextEncoder().encode(raw).length>512*1024) {
-      return json({ok:false,error:"Histórico excede o limite de 512 KB."},413);
+    if(new TextEncoder().encode(raw).length>MAX_HISTORY_PAYLOAD_BYTES) {
+      return json({ok:false,error:"Histórico excede o limite de 16 MB."},413);
     }
     let body;
     try { body=JSON.parse(raw); }
@@ -251,3 +251,5 @@ export default {
   } catch(e) {return json({success:false,ok:false,error:e.message||"Erro interno no Worker"},500);}
  }
 };
+
+export { mergeHistory, getHistory, validTrade };
