@@ -58,13 +58,33 @@ function decodeHistoryPayload(content) {
     ? { ...t, status: "LOSS", outcomeReason: t.outcomeReason || "Resultado EXPIRADA legado convertido para LOSS" }
     : t) };
 }
+async function readHistoryBlob(sha, env) {
+  const response = await fetch(`${GH_API}/repos/${REPO}/git/blobs/${encodeURIComponent(sha)}`, {
+    headers: {
+      Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "RB-TRADER-PRO-CLOUDFLARE"
+    }
+  });
+  const data = await response.json();
+  if (!response.ok || data.encoding !== "base64" || typeof data.content !== "string") {
+    throw new Error(data.message || "Não foi possível obter o conteúdo completo do histórico GitHub.");
+  }
+  return data.content;
+}
+async function historyContent(metadata, env) {
+  if (typeof metadata.content === "string" && metadata.content.trim()) return metadata.content;
+  if (metadata.sha) return readHistoryBlob(metadata.sha, env);
+  throw new Error("GitHub não devolveu o conteúdo nem o SHA do histórico; leitura cancelada.");
+}
 async function readStoredHistory(env) {
   const branch = historyBranch(env);
   const response = await github(`${HISTORY_PATH}?ref=${encodeURIComponent(branch)}`, env);
   if (response.status === 404) return { sha: null, trades: [], branch };
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Falha ao ler histórico do GitHub.");
-  const decoded = decodeHistoryPayload(data.content || "");
+  const decoded = decodeHistoryPayload(await historyContent(data, env));
   return { sha: data.sha || null, trades: decoded.trades, branch, exportedAt: decoded.payload?.exportedAt || null };
 }
 async function getHistory(env, limit=1000) {
