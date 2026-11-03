@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "test": "node --test",
+    "check": "node --check server.js && node --check api/trades.js && node --check api/monitor.js && node --check api/export-history.js"
   },
   "dependencies": {
     "axios": "^1.12.2",
