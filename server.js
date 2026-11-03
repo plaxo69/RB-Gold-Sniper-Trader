@@ -1,14 +1,175 @@
-const express=require("express");const cors=require("cors");const path=require("path");const axios=require("axios");require("dotenv").config();const marketModule=require("./api/market");
-const app=express(),PORT=process.env.PORT||3000,PUBLIC_DIR=path.join(__dirname,"public"),OPENAI_API_KEY=process.env.OPENAI_API_KEY,OPENAI_MODEL=process.env.OPENAI_MODEL||"gpt-5.6-luna";
-app.use(cors());app.use(express.json({limit:"1mb"}));app.use(express.static(PUBLIC_DIR,{index:"index.html"}));app.get("/",(_req,res)=>res.sendFile(path.join(PUBLIC_DIR,"index.html")));
-const market=marketModule.getMarket;
-async function yahooQuote(symbol){const url=`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`;const response=await axios.get(url,{params:{interval:"1m",range:"1d",includePrePost:true},timeout:10000,headers:{"User-Agent":"Mozilla/5.0 RB-Gold-Sniper/4.0"}});const result=response.data?.chart?.result?.[0];if(!result)throw new Error(`Yahoo não devolveu a cotação de ${symbol}`);const meta=result.meta||{},price=Number(meta.regularMarketPrice),ts=Number(meta.regularMarketTime||0);if(!Number.isFinite(price))throw new Error(`Yahoo não devolveu preço válido de ${symbol}`);return{symbol,price,timestamp:ts?new Date(ts*1000).toISOString():new Date().toISOString(),delayedBy:Number(meta.exchangeDataDelayedBy||0)}}
-async function spotReference(){const futures=await yahooQuote("GC=F");return{calibrated:false,offset:0,futures,spot:null,source:"Yahoo Finance GC=F — referência"}}
-function extractAIText(d){if(typeof d?.output_text==='string'&&d.output_text.trim())return d.output_text.trim();const p=[];for(const i of Array.isArray(d?.output)?d.output:[])for(const c of Array.isArray(i?.content)?i.content:[]){if(typeof c?.text==='string')p.push(c.text);if(typeof c?.value==='string')p.push(c.value)}return p.join("\n").trim()}
-function parseConfidence(v){if(typeof v==='number'&&Number.isFinite(v))return v;const m=String(v??"").replace(",",".").match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):NaN}
-async function aiOpinion(signal,marketData){if(!OPENAI_API_KEY)return{available:false,confidence:null,opinion:"NEUTRO",note:"IA indisponível"};const payload={technicalSignal:signal?.type||"WAIT",technicalConfidence:signal?.confidence??null,price:signal?.price??null,tp:signal?.tp??null,sl:signal?.sl??null,rr:signal?.rr??null,rsi:signal?.rsi??null,atr:signal?.atr??null,ema20:signal?.ema20??null,ema50:signal?.ema50??null,ema200:signal?.ema200??null,support:signal?.support??null,resistance:signal?.resistance??null,trends:{m3:signal?.trend3,m5:signal?.trend5,m15:signal?.trend15,h1:signal?.trend1},filters:signal?.filters||{},rejectionReasons:signal?.rejectionReasons||[],lastCandles:(marketData||[]).slice(-12).map(c=>({t:c.timestamp,o:c.open,h:c.high,l:c.low,c:c.close}))};const response=await axios.post("https://api.openai.com/v1/responses",{model:OPENAI_MODEL,input:[{role:"system",content:[{type:"input_text",text:"És um analista auxiliar do RB Gold Sniper. Dá apenas um parecer independente sobre XAUUSD. NÃO alteres, substituas ou cries o sinal técnico. Não inventes dados. Devolve JSON válido com confidence (0-100), opinion (BUY, SELL ou NEUTRO) e note (máximo 140 caracteres)."}]},{role:"user",content:[{type:"input_text",text:JSON.stringify(payload)}]}],text:{format:{type:"json_object"}},max_output_tokens:180},{headers:{Authorization:`Bearer ${OPENAI_API_KEY}`,"Content-Type":"application/json"},timeout:15000});const text=extractAIText(response.data);if(!text)throw new Error("A IA não devolveu texto");let parsed;try{parsed=JSON.parse(text)}catch{const json=text.match(/\{[\s\S]*\}/)?.[0];if(!json)throw new Error("A IA devolveu uma resposta não-JSON");parsed=JSON.parse(json)}const rawConfidence=parseConfidence(parsed?.confidence);if(!Number.isFinite(rawConfidence))throw new Error("A IA não devolveu confiança numérica");return{available:true,confidence:Math.max(0,Math.min(100,Math.round(rawConfidence))),opinion:["BUY","SELL","NEUTRO"].includes(String(parsed?.opinion||"").toUpperCase())?String(parsed.opinion).toUpperCase():"NEUTRO",note:String(parsed?.note||"").slice(0,140)}}
-app.get("/api/health",async(_req,res)=>{try{const m=await market("1m");res.json({status:"OK",marketConnected:true,source:m.source,symbol:m.symbol,history:"localStorage",aiEnabled:Boolean(OPENAI_API_KEY),mode:"ALERTAS",timestamp:new Date().toISOString()})}catch(e){res.status(503).json({status:"DEGRADED",marketConnected:false,history:"localStorage",aiEnabled:Boolean(OPENAI_API_KEY),mode:"ALERTAS",error:e.message})}});
-app.get("/api/oanda-reference",async(_req,res)=>{try{res.set("Cache-Control","no-store");res.json({success:true,...await spotReference()})}catch(e){res.status(502).json({success:false,calibrated:false,offset:0,error:e.message})}});
-app.get("/api/market",async(req,res)=>{try{const m=await market(String(req.query.timeframe||"1m"));res.json({success:true,...m,price:m.price??m.last.close,quoteTimestamp:m.quoteTimestamp??m.last.timestamp})}catch(e){res.status(502).json({success:false,error:"Não foi possível obter dados do ouro.",details:e.message})}});
-app.post("/api/ai/opinion",async(req,res)=>{try{res.json({success:true,...await aiOpinion(req.body?.signal,req.body?.candles),model:OPENAI_MODEL})}catch(e){console.error("AI opinion error:",e.message);res.status(502).json({success:false,available:Boolean(OPENAI_API_KEY),confidence:null,opinion:"NEUTRO",note:e.message||"IA indisponível neste momento"})}});
-app.listen(PORT,()=>console.log(`RB Gold Sniper running on port ${PORT}`));
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const axios = require('axios');
+require('dotenv').config();
+
+const marketModule = require('./api/market');
+const app = express();
+const PORT = process.env.PORT || 3000;
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.6-luna';
+const AI_OPINION_TOKEN = process.env.AI_OPINION_TOKEN || null;
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,https://rb-gold-sniper-trader.vercel.app,https://rb-gold-sniper-live-ai-sniper.vercel.app').split(',').map((value) => value.trim()).filter(Boolean);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  try {
+    const url = new URL(origin);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? ALLOWED_ORIGINS.includes(origin) : false;
+  } catch (error) {
+    return false;
+  }
+}
+
+function requireAiToken(req, res, next) {
+  if (!AI_OPINION_TOKEN) {
+    return res.status(503).json({ success: false, error: 'AI opinion disabled. Set AI_OPINION_TOKEN to enable this endpoint.' });
+  }
+
+  const auth = String(req.headers.authorization || '');
+  const provided = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
+  if (provided !== AI_OPINION_TOKEN) {
+    return res.status(403).json({ success: false, error: 'Unauthorized.' });
+  }
+
+  return next();
+}
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin || '';
+  if (origin && !isAllowedOrigin(origin)) {
+    return res.status(403).json({ success: false, error: 'Origin not allowed' });
+  }
+  if (origin && isAllowedOrigin(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+    return;
+  }
+  next();
+});
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || isAllowedOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error('Origin not allowed'));
+  },
+  credentials: false
+}));
+
+app.use(express.json({ limit: '1mb' }));
+app.use(express.static(PUBLIC_DIR, { index: 'index.html' }));
+app.get('/', (_req, res) => res.sendFile(path.join(PUBLIC_DIR, 'index.html')));
+
+const market = marketModule.getMarket;
+
+async function yahooQuote(symbol) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`;
+  const response = await axios.get(url, { params: { interval: '1m', range: '1d' } });
+  const result = response.data?.chart?.result?.[0];
+  return result || null;
+}
+
+async function spotReference() {
+  const futures = await yahooQuote('GC=F');
+  return { calibrated: false, offset: 0, futures, spot: null, source: 'Yahoo Finance GC=F — referência' };
+}
+
+function extractAIText(d) {
+  if (typeof d?.output_text === 'string' && d.output_text.trim()) return d.output_text.trim();
+  const parts = [];
+  for (const item of Array.isArray(d?.output) ? d.output : []) {
+    for (const content of Array.isArray(item?.content) ? item.content : []) {
+      if (typeof content?.text === 'string') parts.push(content.text);
+    }
+  }
+  return parts.join('\n').trim();
+}
+
+function parseConfidence(v) {
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  const match = String(v ?? '').replace(',', '.').match(/-?\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : NaN;
+}
+
+async function aiOpinion(signal, marketData) {
+  if (!OPENAI_API_KEY) {
+    return { available: false, confidence: null, opinion: 'NEUTRO', note: 'IA indisponível' };
+  }
+
+  const payload = {
+    model: OPENAI_MODEL,
+    messages: [
+      { role: 'system', content: 'Responda em português. Dê uma opinião técnica curta e útil para XAUUSD. Não invente dados.' },
+      { role: 'user', content: JSON.stringify({ technicalSignal: signal?.type || 'WAIT', marketData, notes: 'Trader manual e sem execução automática.' }) }
+    ],
+    temperature: 0.2
+  };
+
+  const response = await axios.post('https://api.openai.com/v1/chat/completions', payload, {
+    headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+    timeout: 20000
+  });
+
+  const text = extractAIText(response.data);
+  const confidence = parseConfidence(response.data?.usage?.total_tokens ? 60 : null);
+
+  return {
+    available: true,
+    confidence: Number.isFinite(confidence) ? confidence : null,
+    opinion: text || 'NEUTRO',
+    note: 'IA consultada com feedback técnico.'
+  };
+}
+
+app.get('/api/health', async (_req, res) => {
+  try {
+    const m = await market('1m');
+    res.json({ status: 'OK', marketConnected: true, source: m.source, symbol: m.symbol, history: 'github', aiEnabled: Boolean(OPENAI_API_KEY) });
+  } catch (error) {
+    res.status(502).json({ status: 'ERROR', marketConnected: false, error: error.message || 'Market unavailable' });
+  }
+});
+
+app.get('/api/oanda-reference', async (_req, res) => {
+  try {
+    res.set('Cache-Control', 'no-store');
+    res.json({ success: true, ...(await spotReference()) });
+  } catch (error) {
+    res.status(502).json({ success: false, calibrated: false, source: 'Yahoo Finance GC=F', error: error.message || 'Fallback unavailable' });
+  }
+});
+
+app.get('/api/market', async (req, res) => {
+  try {
+    const m = await market(String(req.query.timeframe || '1m'));
+    res.json({ success: true, ...m, price: m.price ?? m.last?.close, quoteTimestamp: m.quoteTimestamp ?? m.last?.timestamp });
+  } catch (error) {
+    res.status(502).json({ success: false, error: 'Falha no feed XAUUSD', details: error.message || 'Market unavailable', source: 'Biquote XAUUSD' });
+  }
+});
+
+app.post('/api/ai/opinion', requireAiToken, async (req, res) => {
+  try {
+    const signal = req.body?.signal || null;
+    const candles = Array.isArray(req.body?.candles) ? req.body.candles : [];
+    const result = await aiOpinion(signal, candles);
+    res.json({ success: true, ...result, model: OPENAI_MODEL });
+  } catch (error) {
+    console.error('AI opinion error:', error.message || error);
+    res.status(502).json({ success: false, error: 'Falha ao consultar a IA', details: error.message || 'Unknown error' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`RB Gold Sniper running on port ${PORT}`);
+});
