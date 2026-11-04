@@ -39,8 +39,11 @@ test('motor limita breakouts tardios e aplica filtro de extensão', async () => 
   const source = await readFile(new URL('../public/sniper-v2.js', import.meta.url), 'utf8');
   assert.match(source, /maxBreakAtr:1\.25/);
   assert.match(source, /maxRetestExtensionAtr:1\.5/);
-  assert.match(source, /buySetup=atrOK&&adxOK&&volumeOK&&buyTF&&emaBuy&&extensionBuy/);
-  assert.match(source, /sellSetup=atrOK&&adxOK&&volumeOK&&sellTF&&emaSell&&extensionSell/);
+  assert.match(source, /srBuySetup=atrOK&&adxOK&&volumeOK&&buyTF&&emaBuy&&extensionBuy/);
+  assert.match(source, /emaBuySetup=atrOK&&adxOK&&volumeOK&&buyTF&&emaBuy&&extensionBuy&&emaBuyActive&&buyMomentumRSI/);
+  assert.match(source, /entryMode==='EMA_PULLBACK_ONLY'/);
+  assert.match(source, /srSellSetup=atrOK&&adxOK&&volumeOK&&sellTF&&emaSell&&extensionSell/);
+  assert.match(source, /emaSellSetup=atrOK&&adxOK&&volumeOK&&sellTF&&emaSell&&extensionSell&&emaSellActive&&sellMomentumRSI/);
   assert.match(source, /tb\.direct&&directBuyQuality&&closeQualityBuy/);
 });
 

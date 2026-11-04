@@ -131,6 +131,8 @@ function mergeHistory(remote, incoming) {
       indicatorSnapshotVersion:chosen.indicatorSnapshotVersion||old.indicatorSnapshotVersion||t.indicatorSnapshotVersion,
       beAlerted:!!(old.beAlerted||t.beAlerted),
       beArmed:!!(old.beArmed||t.beArmed),
+      beConfirmed:!!(old.beConfirmed||t.beConfirmed),
+      beConfirmedAt:old.beConfirmedAt||t.beConfirmedAt,
       beArmedAt:old.beArmedAt||t.beArmedAt,
       bePushSent:!!(old.bePushSent||t.bePushSent),
       beTriggeredAt:old.beTriggeredAt||t.beTriggeredAt,
@@ -178,7 +180,7 @@ async function market(tf) {
   if(!barsRes.ok) throw new Error(`Fornecedor Biquote: candles ${cfg.interval} HTTP ${barsRes.status}`);
   const bd=await barsRes.json();
   const bars=Array.isArray(bd?.bars)?bd.bars:[];
-  const candles=bars.map(b=>({timestamp:new Date(b.openTime).toISOString(),open:Number(b.open),high:Number(b.high),low:Number(b.low),close:Number(b.close),volume:Number(Number(b.volume)>0?b.volume:(Number.isFinite(Number(b.tickVolume))?b.tickVolume:0)),tickVolume:Number.isFinite(Number(b.tickVolume))?Number(b.tickVolume):0,realVolume:Number.isFinite(Number(b.volume))?Number(b.volume):0,volumeSource:Number(b.volume)>0?"REAL":(Number.isFinite(Number(b.tickVolume))?"TICK_VOLUME":"UNAVAILABLE"),complete:b.isOpen!==true,isOpen:b.isOpen===true}))
+  const candles=bars.map(b=>({timestamp:new Date(b.openTime).toISOString(),open:Number(b.open),high:Number(b.high),low:Number(b.low),close:Number(b.close),volume:(b.volume!==null&&b.volume!==undefined&&b.volume!==""&&Number.isFinite(Number(b.volume))&&Number(b.volume)>0)?Number(b.volume):(b.tickVolume!==null&&b.tickVolume!==undefined&&b.tickVolume!==""&&Number.isFinite(Number(b.tickVolume))&&Number(b.tickVolume)>0?Number(b.tickVolume):null),tickVolume:(b.tickVolume!==null&&b.tickVolume!==undefined&&b.tickVolume!==""&&Number.isFinite(Number(b.tickVolume))&&Number(b.tickVolume)>0)?Number(b.tickVolume):null,realVolume:(b.volume!==null&&b.volume!==undefined&&b.volume!==""&&Number.isFinite(Number(b.volume))&&Number(b.volume)>0)?Number(b.volume):null,volumeSource:(b.volume!==null&&b.volume!==undefined&&b.volume!==""&&Number.isFinite(Number(b.volume))&&Number(b.volume)>0)?"REAL":(b.tickVolume!==null&&b.tickVolume!==undefined&&b.tickVolume!==""&&Number.isFinite(Number(b.tickVolume))&&Number(b.tickVolume)>0?"TICK_VOLUME":"UNAVAILABLE"),complete:b.isOpen!==true,isOpen:b.isOpen===true}))
     .filter(c=>[c.open,c.high,c.low,c.close].every(Number.isFinite)&&c.open>0&&c.high>=Math.max(c.open,c.close)&&c.low<=Math.min(c.open,c.close)&&c.high>=c.low)
     .sort((a,b)=>Date.parse(a.timestamp)-Date.parse(b.timestamp))
     .filter((c,i,a)=>i===0||c.timestamp!==a[i-1].timestamp).slice(-500);
@@ -217,8 +219,8 @@ export default {
   const url=new URL(request.url), path=url.pathname;
   try {
    if(path==="/api/health"&&request.method==="GET") {
-    try {const m=await market("1m");return json({status:"OK",marketConnected:true,source:m.source,symbol:m.symbol,history:"localStorage/GitHub",historyConfigured:Boolean(env.GITHUB_TOKEN),historyBranch:historyBranch(env),aiEnabled:Boolean(env.OPENAI_API_KEY),pushEnabled:false,mode:"ALERTAS",timestamp:new Date().toISOString()});}
-    catch(e){return json({status:"DEGRADED",marketConnected:false,history:"localStorage/GitHub",historyConfigured:Boolean(env.GITHUB_TOKEN),historyBranch:historyBranch(env),aiEnabled:Boolean(env.OPENAI_API_KEY),pushEnabled:false,mode:"ALERTAS",error:e.message},503);}
+    try {const m=await market("1m");return json({status:"OK",marketConnected:true,source:m.source,symbol:m.symbol,history:"localStorage/GitHub",historyConfigured:Boolean(env.GITHUB_TOKEN),historyBranch:historyBranch(env),aiEnabled:Boolean(env.OPENAI_API_KEY),externalAIEnabled:Boolean(env.OPENAI_API_KEY),technicalScoringEnabled:true,historicalLearning:"DESCRIPTIVE_ONLY",pushEnabled:false,mode:"ALERTAS",timestamp:new Date().toISOString()});}
+    catch(e){return json({status:"DEGRADED",marketConnected:false,history:"localStorage/GitHub",historyConfigured:Boolean(env.GITHUB_TOKEN),historyBranch:historyBranch(env),aiEnabled:Boolean(env.OPENAI_API_KEY),externalAIEnabled:Boolean(env.OPENAI_API_KEY),technicalScoringEnabled:true,historicalLearning:"DESCRIPTIVE_ONLY",pushEnabled:false,mode:"ALERTAS",error:e.message},503);}
    }
    if(path==="/api/market"&&request.method==="GET") return json(await market(url.searchParams.get("timeframe")||"1m"));
    if(path==="/api/oanda-reference"&&request.method==="GET") {try{return json({success:true,calibrated:false,offset:0,futures:await yahooQuote("GC=F"),spot:null,source:"Yahoo Finance GC=F — referência"});}catch(e){return json({success:false,calibrated:false,offset:0,error:e.message},502);}}
