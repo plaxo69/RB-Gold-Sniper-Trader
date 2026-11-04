@@ -106,3 +106,27 @@ test("IA ignora resultados cuja resolução ocorreu depois do instante do sinal"
   assert.equal(result.directionSamples, 0);
   assert.equal(result.pWin, null);
 });
+
+test("EMA-pullback é reconhecido como método adicional após tendência, toque à zona e vela confirmada", () => {
+  const context = browserContext();
+  vm.runInContext(fs.readFileSync(path.join(root, "public/sniper-v2.js"), "utf8"), context);
+  const candles = Array.from({ length: 60 }, (_, i) => {
+    const close = 100 + i * 0.1;
+    return { open: close - 0.04, high: close + 0.12, low: close - 0.12, close, volume: 100 + i };
+  });
+  candles[58] = { ...candles[58], open: 105.65, high: 105.82, low: 105.08, close: 105.2 };
+  candles[59] = { ...candles[59], open: 105.7, high: 106.2, low: 105.0, close: 106.0 };
+  const closes = candles.map(c => c.close);
+  const result = context.RBGoldSniper.emaPullback(
+    candles, "BUY",
+    context.RBGoldSniper.ema(closes, 9),
+    context.RBGoldSniper.ema(closes, 21),
+    context.RBGoldSniper.ema(closes, 50),
+    context.RBGoldSniper.atr(candles),
+    candles.at(-1)
+  );
+  assert.equal(result.ok, true);
+  assert.equal(result.trend, true);
+  assert.equal(result.touched, true);
+  assert.equal(result.confirmed, true);
+});
