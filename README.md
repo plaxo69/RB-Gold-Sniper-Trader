@@ -1,25 +1,22 @@
-# RB Gold Sniper — LIVE corrigido
+# RB Gold Sniper Trader
 
-- Dados reais: OANDA XAU_USD se `OANDA_API_TOKEN` existir; caso contrário Yahoo Finance `GC=F`.
-- Timeframes: M1, M3 (agregado), M5, M15 e H1.
-- Sem `Math.random()` para preço, indicadores ou resultados.
-- Sem IA/API de IA.
-- Sem execução automática de ordens.
-- Execução das entradas é manual no MT5.
-- Sinais são calculados a partir de candles reais.
-- TP/SL usam estrutura + ATR e RR dinâmico.
-- Histórico de alertas é guardado no navegador via localStorage.
+Aplicação web para análise de XAU/USD. As entradas são sinais para execução manual no MT5; não envia ordens automaticamente.
 
-## Vercel
+## Alojamento
 
-Não é necessário manter um processo Node permanentemente ativo. A página consulta `/api/market` a cada 60 segundos.
+A configuração do projeto é Cloudflare Workers (`wrangler.jsonc`), não Vercel. Os pushes nesta branch executam build, testes, Wrangler dry-run e, se as validações passarem, deploy para Cloudflare.
 
-Para usar OANDA, adicionar em Vercel:
-`OANDA_API_TOKEN`
-`OANDA_INSTRUMENT=XAU_USD`
+O endereço público deve ser copiado do painel Cloudflare, em **Workers & Pages → rb-gold-sniper-trader → Settings/Triggers → Domains & Routes**. Não uses `https://github.com/` como endereço da aplicação. O endereço `https://rb-gold-sniper-trader.plaxo69.workers.dev` foi verificado e respondeu HTTP 404; até o Cloudflare confirmar/ativar o domínio correto, não é possível afirmar que a app está publicada num endereço funcional.
 
-Sem token, o fallback é `GC=F`; isto é ouro futuro, não spot XAU/USD.
+## Diagnóstico
 
-## Importante
+- `GET /api/health` deve devolver `status: OK` e `marketConnected: true`.
+- `GET /api/market?timeframe=1m` deve devolver candles recentes e feed não obsoleto.
+- Healthcheck só verifica serviço/feed; não cria sinais nem substitui gestão de operações.
+- Os sinais dependem dos filtros técnicos e podem não aparecer se os critérios não forem satisfeitos.
 
-A versão antiga simulava preços, MT5 e fechamentos. Esta versão remove essas simulações.
+## Deploy
+
+Confirma no GitHub os secrets `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`, e no painel Cloudflare que Workers.dev está ativado. Depois, o workflow desta branch valida e publica com `wrangler deploy`.
+
+Vercel não é necessário para este fluxo.
