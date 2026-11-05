@@ -1,6 +1,10 @@
 name: RB TRADER PRO — health check Cloudflare
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rb-trader-monitor.yml'
   schedule:
     - cron: "2-59/5 * * * 1-5"
   workflow_dispatch:
@@ -17,6 +21,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          RESPONSE="$(curl -fsS --retry 2 --retry-delay 3 --max-time 20 https://rb-gold-sniper-trader.plaxo69.workers.dev/api/health)"
-          printf '%s\n' "$RESPONSE"
-          printf '%s' "$RESPONSE" | python -c 'import json,sys; d=json.load(sys.stdin); sys.exit(0 if d.get("status") == "OK" and d.get("marketConnected") is True else 1)'
+          body_file="$(mktemp)"
+          status="$(curl -sS --retry 2 --retry-delay 3 --max-time 20 \
+            -o "$body_file" -w '%{http_code}' \
+            https://rb-gold-sniper-trader.plaxo69.workers.dev/api/health)"
+          echo "HTTP status: $status"
+          cat "$body_file"
+          if [[ "$status" != "200" ]]; then
+            echo "Health endpoint returned HTTP $status" >&2
+            exit 1
+          fi
+          python - "$body_file" <<'PY'
+          import json, sys
+          with open(sys.argv[1], encoding='utf-8') as f:
+              data = json.load(f)
+          if data.get('status') != 'OK' or data.get('marketConnected') is not True:
+              print('Health payload reports a degraded market feed.', file=sys.stderr)
+              sys.exit(1)
+          PY
