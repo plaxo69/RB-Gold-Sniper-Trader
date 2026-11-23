@@ -1,9 +1,116 @@
 {
-  "exportedAt": "2026-11-23T00:04:09.451Z",
+  "exportedAt": "2026-11-23T02:27:22.620Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
-  "total": 260,
+  "total": 261,
   "trades": [
+    {
+      "type": "SELL",
+      "source": "IA",
+      "signalKind": "IA",
+      "signalTimestamp": "2026-11-23T02:26:00.000Z",
+      "price": 3584.408,
+      "tp": 3579.9641417164626,
+      "sl": 3587.3705721890246,
+      "rr": 1.5,
+      "rr1": 1.5,
+      "atr": 2.863814593499993,
+      "rsi": 35.24478540825281,
+      "trend1": "BAIXA",
+      "trend5": "BAIXA",
+      "trend15": "NEUTRO",
+      "confidence": 60,
+      "score": 70,
+      "reasons": [
+        "2 de 3 timeframes M1/M5/M15 alinhados",
+        "rejeição de resistência",
+        "momentum SELL + EMA9/EMA21"
+      ],
+      "setupState": "IA_OPORTUNIDADE",
+      "ai": {
+        "mode": "OPORTUNIDADE IA",
+        "score": 70,
+        "pWin": 60,
+        "samples": 227,
+        "recommendation": "FAVORÁVEL",
+        "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+        "reasons": [
+          "2 de 3 timeframes M1/M5/M15 alinhados",
+          "rejeição de resistência",
+          "momentum SELL + EMA9/EMA21"
+        ],
+        "source": "IA"
+      },
+      "aiOpportunity": true,
+      "aiModelVersion": "RB-TRADER-PRO-HYBRID-v6",
+      "signalKey": "SELL-2026-11-23T02:26:00.000Z",
+      "key": "SELL-2026-11-23T02:26:00.000Z",
+      "indicatorSnapshot": {
+        "capturedAt": "2026-11-23T02:27:05.489Z",
+        "signalTimestamp": "2026-11-23T02:26:00.000Z",
+        "entryPrice": 3584.408,
+        "timeframes": {
+          "M1": "BAIXA",
+          "M5": "BAIXA",
+          "M15": "NEUTRO",
+          "H1": null
+        },
+        "indicators": {
+          "rsi": 35.24478540825281,
+          "formingRsi": null,
+          "atr": 2.863814593499993,
+          "ema9": null,
+          "ema20": null,
+          "ema21": null,
+          "ema50": null,
+          "ema200": null,
+          "adx14": null,
+          "volume": null,
+          "volumeSma20": null,
+          "volumeRatio": null,
+          "support": null,
+          "resistance": null
+        },
+        "filters": {},
+        "scores": {
+          "confidence": 60,
+          "buy": null,
+          "sell": null,
+          "score": 70
+        },
+        "setup": {
+          "type": "SELL",
+          "source": "IA",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "rejeição de resistência",
+            "momentum SELL + EMA9/EMA21"
+          ],
+          "rejectionReasons": [],
+          "tactical": null
+        },
+        "ai": {
+          "mode": "OPORTUNIDADE IA",
+          "score": 70,
+          "pWin": 60,
+          "samples": 227,
+          "recommendation": "FAVORÁVEL",
+          "opinion": "A IA detetou uma oportunidade Sniper forte, mesmo sem alinhamento completo dos filtros M1/M5/M15.",
+          "reasons": [
+            "2 de 3 timeframes M1/M5/M15 alinhados",
+            "rejeição de resistência",
+            "momentum SELL + EMA9/EMA21"
+          ],
+          "source": "IA"
+        },
+        "aiOpportunity": true
+      },
+      "indicatorSnapshotVersion": 1,
+      "movementKey": "SELL-STRUCT-0.00-0.00",
+      "status": "ALERTA",
+      "time": "2026-11-23T02:26:00.000Z",
+      "reentryCount": 8
+    },
     {
       "type": "SELL",
       "source": "IA",
