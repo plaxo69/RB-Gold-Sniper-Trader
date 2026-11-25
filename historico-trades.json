@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-25T19:50:22.870Z",
+  "exportedAt": "2026-11-25T19:51:22.600Z",
   "source": "RB TRADER PRO",
   "formatVersion": 2,
   "total": 262,
@@ -105,7 +105,9 @@
       "movementKey": "BUY-STRUCT-0.00-0.00",
       "status": "ALERTA",
       "time": "2026-11-25T19:49:00.000Z",
-      "reentryCount": 0
+      "reentryCount": 0,
+      "beAlerted": false,
+      "bePushSent": false
     },
     {
       "type": "SELL",
